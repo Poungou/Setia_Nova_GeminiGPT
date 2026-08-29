@@ -1,0 +1,13 @@
+.clan-detail {
+  padding: var(--space-4) 0 var(--space-5);
+}
+
+.clan-detail__lead {
+  color: var(--ivory-dim);
+  max-width: 60ch;
+}
+
+.clan-detail .character-section {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}

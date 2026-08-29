@@ -1,0 +1,9 @@
+.location-hero {
+  padding: var(--space-4) 0 var(--space-3);
+}
+
+.location-hero__lead {
+  color: var(--ivory-dim);
+  max-width: 60ch;
+  margin-top: var(--space-2);
+}

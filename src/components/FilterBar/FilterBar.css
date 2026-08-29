@@ -1,0 +1,29 @@
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.filter-bar__item {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ivory-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-s);
+  transition: all 0.2s ease;
+}
+
+.filter-bar__item:hover {
+  color: var(--ivory);
+  border-color: var(--ivory-dim);
+}
+
+.filter-bar__item.is-active {
+  color: var(--ivory);
+  background: var(--wine-soft);
+  border-color: var(--wine-bright);
+}

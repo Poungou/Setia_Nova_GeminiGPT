@@ -1,0 +1,37 @@
+.universe-page {
+  padding: var(--space-4) 0 var(--space-5);
+}
+
+.universe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.universe-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--gradient-card);
+  padding: var(--space-3);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.universe-card:not(.universe-card--static):hover {
+  border-color: var(--line-strong);
+  transform: translateY(-3px);
+}
+
+.universe-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.universe-card p {
+  margin: 0;
+  color: var(--ivory-dim);
+  font-size: 0.92rem;
+}
+
+.universe-card--static {
+  opacity: 0.85;
+}

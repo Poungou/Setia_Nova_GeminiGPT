@@ -1,0 +1,89 @@
+.character-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--bg-raised);
+  overflow: hidden;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.character-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-4px);
+}
+
+.character-card__portrait {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--gradient-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.character-card__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.character-card:hover .character-card__portrait img {
+  transform: scale(1.04);
+}
+
+.character-card__initials {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--ivory-dim);
+  letter-spacing: 0.05em;
+}
+
+.character-card__number {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ivory-faint);
+  border: 1px solid var(--line-strong);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-s);
+  background: rgba(12, 13, 22, 0.55);
+}
+
+.character-card__body {
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.character-card__clan {
+  color: var(--ivory-faint);
+}
+
+.character-card__name {
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+}
+
+.character-card__title {
+  margin: 0;
+  color: var(--ivory-dim);
+  font-size: 0.88rem;
+  flex: 1;
+}
+
+.character-card__cta {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wine-bright);
+}
