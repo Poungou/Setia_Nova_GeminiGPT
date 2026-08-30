@@ -67,13 +67,16 @@ Ce projet a été bootstrapé par Claude (Cowork) le 29/08/2026, sans accès she
   markdown, couverture, galerie lightbox, liens persos/lieux, brouillon vs publié
 - [x] Rendu **markdown** (`src/lib/markdown.js`, marked + DOMPurify) + composant `Lightbox`
 - [x] Champs `author` + `visibility` ajoutés (persos & billets) pour le futur multi-joueurs
-- [ ] **Galerie fan art** dédiée (rubrique + filtres par perso/tag)
-- [ ] Markdown aussi pour les bios/histoires perso (actuellement texte simple)
-- [ ] Pages par tag (clic mot-clé → tout le contenu lié)
-- [ ] Visualisation des relations / arbre du clan Nakamura
-- [ ] Chronologie illustrée (remplir `data/events.js` via l'admin)
+- [x] **Galerie fan art** dédiée (`/galerie`) : agrège billets + portraits + lieux, filtres, lightbox
+- [x] Markdown pour bios/histoires perso, descriptions/histoire de lieux et clans (`<Prose>`)
+- [x] Pages par tag (`/tag/:tag`) ; tags cliquables sur fiches perso et billets
+- [x] Arbre du clan (`<RelationGraph>` SVG) sur la fiche de clan
+- [x] Recadrage vignettes (point focal), mini-portraits ronds, décor de fond animé
+- [ ] Chronologie illustrée (remplir `data/events.json` via l'admin — page à enrichir visuellement)
 - [ ] Archives RP (remplir via l'admin, sans jamais réécrire les textes originaux)
 - [ ] Page Univers enrichie ; carte de Woltar / Sétia avec marqueurs
+- [ ] Nav qui commence à être longue (9 entrées) — regrouper ?
+- [ ] `bg-ambient` : la page hero garde son propre dégradé (le décor ne s'y voit pas)
 
 ### Palier 3 — multi-joueurs (après mise en ligne)
 - [ ] Comptes joueurs ; chaque joueur édite uniquement ses fiches
