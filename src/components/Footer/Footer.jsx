@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Reveal from '../Reveal/Reveal.jsx'
+import ThemeToggle from '../ThemeToggle/ThemeToggle.jsx'
 import './Footer.css'
 
 export default function Footer() {
@@ -14,6 +15,7 @@ export default function Footer() {
         <div className="site-footer__meta">
           <span>Vitrine RP privée · Univers en évolution</span>
           <span className="site-footer__links">
+            <ThemeToggle />
             {import.meta.env.DEV && (
               <Link to="/admin" className="site-footer__admin">
                 Connexion

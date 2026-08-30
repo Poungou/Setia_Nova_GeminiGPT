@@ -1,6 +1,9 @@
 /* ===================================================================
    THEME — palette "Archives Vivantes"
-   Bordeaux profond / bleu nuit / violet discret / ivoire.
+   Sombre par défaut (bordeaux / bleu nuit / violet / ivoire).
+   Clair en option (rose poudré / mauve / aubergine), via
+   <html data-theme="light">. Le choix est posé avant le premier
+   rendu par le petit script inline de index.html.
    =================================================================== */
 
 :root {
@@ -10,6 +13,8 @@
   --bg-raised: #191b2b;
   --bg-raised-2: #202339;
   --bg-glass: rgba(24, 26, 43, 0.6);
+  --bg-header: rgba(12, 13, 22, 0.72);
+  --overlay: rgba(12, 13, 22, 0.55);
 
   /* Accents */
   --wine: #5b1626;
@@ -29,19 +34,25 @@
   --line: rgba(239, 230, 218, 0.12);
   --line-strong: rgba(239, 230, 218, 0.24);
 
+  /* États */
+  --ok: #bfe6c8;
+  --ok-line: rgba(120, 200, 140, 0.4);
+  --danger: #f0c2cc;
+  --danger-line: var(--wine-bright);
+
   /* Dégradés */
   --gradient-hero: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(138, 36, 56, 0.35), transparent),
     radial-gradient(ellipse 60% 50% at 90% 10%, rgba(51, 64, 122, 0.25), transparent);
   --gradient-card: linear-gradient(160deg, rgba(139, 36, 56, 0.08), rgba(51, 64, 122, 0.06));
+
+  /* Halo au survol (cartes, liens) */
+  --glow-wine: 0 0 0 1px rgba(138, 36, 56, 0.4), 0 8px 28px -8px rgba(138, 36, 56, 0.45);
 
   /* Typo */
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-reading: 'Spectral', Georgia, 'Times New Roman', serif;
   --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-
-  /* Halo au survol (cartes, liens) */
-  --glow-wine: 0 0 0 1px rgba(138, 36, 56, 0.4), 0 8px 28px -8px rgba(138, 36, 56, 0.45);
 
   /* Rayon / rythme */
   --radius-s: 4px;
@@ -53,6 +64,44 @@
   --space-5: 4rem;
 
   color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg-void: #ece2ec;
+  --bg-base: #f6eef4;
+  --bg-raised: #fffbfe;
+  --bg-raised-2: #f4e7f0;
+  --bg-glass: rgba(255, 251, 254, 0.7);
+  --bg-header: rgba(246, 238, 244, 0.82);
+  --overlay: rgba(255, 251, 254, 0.72);
+
+  --wine: #7c1d31;
+  --wine-bright: #a12c44;
+  --wine-soft: rgba(161, 44, 68, 0.14);
+  --midnight: #2b335c;
+  --midnight-bright: #3b4a86;
+  --violet: #7a5aa0;
+  --violet-soft: rgba(122, 90, 160, 0.16);
+
+  --ivory: #2c2333;
+  --ivory-dim: #5f5570;
+  --ivory-faint: #8b8298;
+
+  --line: rgba(44, 35, 51, 0.12);
+  --line-strong: rgba(44, 35, 51, 0.22);
+
+  --ok: #2f7d4a;
+  --ok-line: rgba(47, 125, 74, 0.4);
+  --danger: #b02a4a;
+  --danger-line: var(--wine-bright);
+
+  --gradient-hero: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(161, 44, 68, 0.12), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(122, 90, 160, 0.16), transparent);
+  --gradient-card: linear-gradient(160deg, rgba(161, 44, 68, 0.05), rgba(122, 90, 160, 0.07));
+
+  --glow-wine: 0 0 0 1px rgba(161, 44, 68, 0.28), 0 10px 30px -10px rgba(122, 90, 160, 0.35);
+
+  color-scheme: light;
 }
 
 * {

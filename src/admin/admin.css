@@ -116,15 +116,15 @@
   border: 1px solid var(--line);
 }
 .adm-banner--ok {
-  border-color: rgba(120, 200, 140, 0.4);
-  color: #bfe6c8;
+  border-color: var(--ok-line);
+  color: var(--ok);
 }
 .adm-banner--warn {
   border-color: var(--violet-soft);
 }
 .adm-banner--error {
-  border-color: var(--wine-bright);
-  color: #f0c2cc;
+  border-color: var(--danger-line);
+  color: var(--danger);
 }
 .adm-banner code {
   font-family: var(--font-mono);
@@ -342,7 +342,7 @@ textarea.adm-input {
   border: none;
   border-radius: 999px;
   padding: 3px;
-  color: var(--ivory);
+  color: #efe6da;
 }
 .adm-relation {
   display: grid;
@@ -375,7 +375,7 @@ textarea.adm-input {
   background: var(--wine-bright);
 }
 .adm-btn--danger {
-  color: #f0c2cc;
+  color: var(--danger);
   border-color: var(--wine-bright);
 }
 .adm-btn--ghost {
@@ -398,7 +398,7 @@ textarea.adm-input {
   font-size: 0.85rem;
 }
 .adm-error {
-  color: #f0c2cc;
+  color: var(--danger);
   font-size: 0.82rem;
   margin: 0;
 }

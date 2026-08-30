@@ -52,7 +52,7 @@
   border: 1px solid var(--line-strong);
   padding: 0.15rem 0.4rem;
   border-radius: var(--radius-s);
-  background: rgba(12, 13, 22, 0.55);
+  background: var(--overlay);
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
