@@ -1,15 +1,16 @@
 import { archives } from '../../data/archives.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import '../Universe/Universe.css'
 
 export default function Archives() {
   return (
     <PageTransition>
       <section className="container universe-page">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <span className="eyebrow">Textes RP</span>
           <h1 className="section-title">Archives</h1>
-        </div>
+        </Reveal>
 
         {archives.length > 0 ? (
           <div className="universe-grid">

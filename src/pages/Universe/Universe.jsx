@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
+import { motion, useReducedMotion } from 'framer-motion'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './Universe.css'
+
+const MotionLink = motion(Link)
+const EASE = [0.22, 1, 0.36, 1]
 
 const CHAPTERS = [
   {
@@ -36,34 +41,55 @@ const CHAPTERS = [
 ]
 
 export default function Universe() {
+  const reduce = useReducedMotion()
+
   return (
     <PageTransition>
       <section className="container universe-page">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <span className="eyebrow">Encyclopédie</span>
           <h1 className="section-title">
             LES ARCHIVES
             <br />
             DE WOLTAR
           </h1>
-        </div>
+        </Reveal>
 
         <div className="universe-grid">
-          {CHAPTERS.map((chapter) => {
+          {CHAPTERS.map((chapter, i) => {
             const content = (
               <>
                 <h2>{chapter.title}</h2>
                 <p>{chapter.text}</p>
               </>
             )
+            const motionProps = reduce
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 20 },
+                  whileInView: { opacity: 1, y: 0 },
+                  viewport: { once: true, margin: '-40px' },
+                  transition: { duration: 0.5, delay: Math.min(i * 0.06, 0.3), ease: EASE },
+                  whileHover: chapter.to ? { y: -4 } : undefined,
+                }
+
             return chapter.to ? (
-              <Link key={chapter.title} to={chapter.to} className="universe-card">
+              <MotionLink
+                key={chapter.title}
+                to={chapter.to}
+                className="universe-card"
+                {...motionProps}
+              >
                 {content}
-              </Link>
+              </MotionLink>
             ) : (
-              <div key={chapter.title} className="universe-card universe-card--static">
+              <motion.div
+                key={chapter.title}
+                className="universe-card universe-card--static"
+                {...motionProps}
+              >
                 {content}
-              </div>
+              </motion.div>
             )
           })}
         </div>

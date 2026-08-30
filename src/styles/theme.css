@@ -36,8 +36,12 @@
 
   /* Typo */
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-reading: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Halo au survol (cartes, liens) */
+  --glow-wine: 0 0 0 1px rgba(138, 36, 56, 0.4), 0 8px 28px -8px rgba(138, 36, 56, 0.45);
 
   /* Rayon / rythme */
   --radius-s: 4px;
@@ -53,6 +57,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,

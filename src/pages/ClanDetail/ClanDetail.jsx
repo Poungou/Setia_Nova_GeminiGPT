@@ -3,6 +3,7 @@ import { getClanById } from '../../data/clans.js'
 import { characters } from '../../data/characters.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './ClanDetail.css'
 
 export default function ClanDetail() {
@@ -20,11 +21,11 @@ export default function ClanDetail() {
   return (
     <PageTransition>
       <article className="container clan-detail">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <span className="eyebrow">Clan</span>
           <h1 className="section-title">{clan.name}</h1>
           {clan.description && <p className="clan-detail__lead">{clan.description}</p>}
-        </div>
+        </Reveal>
 
         <section className="character-section">
           <h2 className="eyebrow">Résidence</h2>
@@ -39,8 +40,8 @@ export default function ClanDetail() {
           <h2 className="eyebrow">Membres</h2>
           {members.length > 0 ? (
             <div className="characters-page__grid">
-              {members.map((m) => (
-                <CharacterCard key={m.id} character={m} />
+              {members.map((m, i) => (
+                <CharacterCard key={m.id} character={m} index={i} />
               ))}
             </div>
           ) : (

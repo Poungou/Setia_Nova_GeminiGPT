@@ -48,6 +48,13 @@
   overflow: hidden;
 }
 
+/* Texte long (biographies, descriptions) : police de lecture plus chaleureuse */
+.character-section__prose {
+  font-family: var(--font-reading);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
 .section-title {
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   line-height: 1.1;

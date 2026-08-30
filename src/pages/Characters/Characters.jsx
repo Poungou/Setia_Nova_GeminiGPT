@@ -4,6 +4,7 @@ import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './Characters.css'
 
 const FILTERS = [
@@ -46,13 +47,13 @@ export default function Characters() {
   return (
     <PageTransition>
       <section className="container characters-page">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <span className="eyebrow">Personnages</span>
           <h1 className="section-title">Visages de Woltar</h1>
           <p className="characters-page__intro">
             Chaque visage conserve une histoire. Certaines sont encore en train de s&rsquo;écrire.
           </p>
-        </div>
+        </Reveal>
 
         <div className="characters-page__controls">
           <SearchBar value={query} onChange={setQuery} />
@@ -65,8 +66,8 @@ export default function Characters() {
 
         {filtered.length > 0 ? (
           <div className="characters-page__grid">
-            {filtered.map((c) => (
-              <CharacterCard key={c.id} character={c} />
+            {filtered.map((c, i) => (
+              <CharacterCard key={c.id} character={c} index={i} />
             ))}
           </div>
         ) : (

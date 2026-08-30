@@ -5,12 +5,12 @@
   border-radius: var(--radius-m);
   overflow: hidden;
   background: var(--bg-raised);
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .location-card:hover {
-  border-color: var(--line-strong);
-  transform: translateY(-4px);
+  border-color: var(--wine-bright);
+  box-shadow: var(--glow-wine);
 }
 
 .location-card__media {
@@ -23,6 +23,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.location-card:hover .location-card__media img {
+  transform: scale(1.04);
 }
 
 .location-card__glyph::before {

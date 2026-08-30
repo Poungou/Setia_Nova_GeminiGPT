@@ -6,11 +6,12 @@
   border-radius: var(--radius-m);
   padding: 0.75rem;
   background: var(--bg-raised);
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .relation-card:hover {
-  border-color: var(--line-strong);
+  border-color: var(--wine-bright);
+  box-shadow: var(--glow-wine);
   transform: translateY(-2px);
 }
 

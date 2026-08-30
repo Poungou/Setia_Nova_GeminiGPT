@@ -1,5 +1,6 @@
 import { events } from '../../data/events.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import '../Universe/Universe.css'
 import './Chronology.css'
 
@@ -7,10 +8,10 @@ export default function Chronology() {
   return (
     <PageTransition>
       <section className="container universe-page">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <span className="eyebrow">Récit</span>
           <h1 className="section-title">Chronologie</h1>
-        </div>
+        </Reveal>
 
         {events.length > 0 ? (
           <ol className="chronology-list">

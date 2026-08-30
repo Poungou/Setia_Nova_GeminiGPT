@@ -1,6 +1,7 @@
 import { locations } from '../../data/locations.js'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './Locations.css'
 
 export default function Locations() {
@@ -10,26 +11,26 @@ export default function Locations() {
   return (
     <PageTransition>
       <section className="container locations-page">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <span className="eyebrow">Cartographie narrative</span>
           <h1 className="section-title">Les lieux de Woltar</h1>
-        </div>
+        </Reveal>
 
         <div className="locations-page__grid">
-          {known.map((l) => (
-            <LocationCard key={l.id} location={l} />
+          {known.map((l, i) => (
+            <LocationCard key={l.id} location={l} index={i} />
           ))}
         </div>
 
         {upcoming.length > 0 && (
-          <div className="locations-page__upcoming">
+          <Reveal className="locations-page__upcoming">
             <span className="eyebrow">À venir</span>
             <ul>
               {upcoming.map((l) => (
                 <li key={l.id}>{l.name}</li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         )}
       </section>
     </PageTransition>

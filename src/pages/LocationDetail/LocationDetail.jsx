@@ -3,6 +3,7 @@ import { getLocationById } from '../../data/locations.js'
 import { characters } from '../../data/characters.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './LocationDetail.css'
 
 function Field({ label, value }) {
@@ -29,15 +30,15 @@ export default function LocationDetail() {
   return (
     <PageTransition>
       <article className="location-detail">
-        <section className="location-hero container">
+        <Reveal as="section" className="location-hero container" y={16}>
           {location.type && <span className="eyebrow">{location.type}</span>}
           <h1 className="section-title">{location.name}</h1>
           {location.shortDescription && (
             <p className="location-hero__lead">{location.shortDescription}</p>
           )}
-        </section>
+        </Reveal>
 
-        <section className="container character-section">
+        <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Informations</h2>
           <dl className="identity-grid">
             <Field label="Type" value={location.type} />
@@ -46,9 +47,9 @@ export default function LocationDetail() {
             <Field label="Faction" value={location.faction} />
             <Field label="Statut" value={location.status} />
           </dl>
-        </section>
+        </Reveal>
 
-        <section className="container character-section">
+        <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Description</h2>
           {location.description ? (
             <p className="character-section__prose">{location.description}</p>
@@ -58,9 +59,9 @@ export default function LocationDetail() {
               La description de ce lieu n&rsquo;a pas encore été renseignée.
             </div>
           )}
-        </section>
+        </Reveal>
 
-        <section className="container character-section">
+        <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Personnages associés</h2>
           {associatedCharacters.length > 0 ? (
             <div className="relations-grid">
@@ -73,14 +74,14 @@ export default function LocationDetail() {
               <strong>Aucun personnage associé pour l&rsquo;instant</strong>
             </div>
           )}
-        </section>
+        </Reveal>
 
-        <section className="container character-section">
+        <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Galerie</h2>
           <div className="empty-state">
             <strong>Aucune image pour l&rsquo;instant</strong>
           </div>
-        </section>
+        </Reveal>
 
         <p className="container">
           <Link to="/lieux" className="btn">

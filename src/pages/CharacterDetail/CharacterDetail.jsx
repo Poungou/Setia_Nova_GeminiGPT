@@ -1,9 +1,26 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
+import { motion, useReducedMotion } from 'framer-motion'
 import { getCharacterById, getRelationTargets } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './CharacterDetail.css'
+
+const EASE = [0.22, 1, 0.36, 1]
+
+const heroContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+}
+const heroItem = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+}
+const portraitVariant = {
+  hidden: { opacity: 0, scale: 0.96 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: EASE } },
+}
 
 const SECTIONS = [
   { id: 'identite', label: 'Identité' },
@@ -31,6 +48,7 @@ function getInitials(character) {
 export default function CharacterDetail() {
   const { id } = useParams()
   const character = getCharacterById(id)
+  const reduce = useReducedMotion()
 
   if (!character) {
     return <Navigate to="/personnages" replace />
@@ -42,45 +60,57 @@ export default function CharacterDetail() {
     .filter(Boolean)
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
 
+  const heroMotion = reduce ? {} : { variants: heroContainer, initial: 'hidden', animate: 'show' }
+  const itemMotion = reduce ? {} : { variants: heroItem }
+  const portraitMotion = reduce ? {} : { variants: portraitVariant }
+
   return (
     <PageTransition>
       <article className="character-detail">
         <section className="character-hero">
-          <div className="container character-hero__inner">
-            <div className="character-hero__portrait">
+          <motion.div className="container character-hero__inner" {...heroMotion}>
+            <motion.div className="character-hero__portrait" {...portraitMotion}>
               {character.portrait ? (
                 <img src={character.portrait} alt={fullName} />
               ) : (
                 <span>{getInitials(character)}</span>
               )}
-            </div>
+            </motion.div>
 
             <div className="character-hero__info">
-              <span className="character-hero__number">{character.number}</span>
-              <h1 className="character-hero__name">
+              <motion.span className="character-hero__number" {...itemMotion}>
+                {character.number}
+              </motion.span>
+              <motion.h1 className="character-hero__name" {...itemMotion}>
                 {character.firstName}
                 <br />
                 {character.lastName}
-              </h1>
-              {character.title && <p className="character-hero__title">{character.title}</p>}
+              </motion.h1>
+              {character.title && (
+                <motion.p className="character-hero__title" {...itemMotion}>
+                  {character.title}
+                </motion.p>
+              )}
               {character.clan && (
-                <Link to="/lieux" className="character-hero__clan eyebrow">
-                  Clan {character.clan}
-                </Link>
+                <motion.div {...itemMotion}>
+                  <Link to="/lieux" className="character-hero__clan eyebrow">
+                    Clan {character.clan}
+                  </Link>
+                </motion.div>
               )}
 
-              <nav className="character-hero__nav" aria-label="Sections de la fiche">
+              <motion.nav className="character-hero__nav" aria-label="Sections de la fiche" {...itemMotion}>
                 {SECTIONS.map((s) => (
                   <a key={s.id} href={`#${s.id}`}>
                     {s.label}
                   </a>
                 ))}
-              </nav>
+              </motion.nav>
             </div>
-          </div>
+          </motion.div>
         </section>
 
-        <section id="identite" className="container character-section">
+        <Reveal as="section" id="identite" className="container character-section">
           <h2 className="eyebrow">Identité</h2>
           <dl className="identity-grid">
             <Field label="Nom" value={character.lastName} />
@@ -105,10 +135,10 @@ export default function CharacterDetail() {
               ))}
             </div>
           )}
-        </section>
+        </Reveal>
 
         {(character.character || character.appearance) && (
-          <section className="container character-section character-section--split">
+          <Reveal as="section" className="container character-section character-section--split">
             {character.character && (
               <div>
                 <h2 className="eyebrow">Caractère</h2>
@@ -121,10 +151,10 @@ export default function CharacterDetail() {
                 <p>{character.appearance}</p>
               </div>
             )}
-          </section>
+          </Reveal>
         )}
 
-        <section id="histoire" className="container character-section">
+        <Reveal as="section" id="histoire" className="container character-section">
           <h2 className="eyebrow">Histoire</h2>
           {character.biography ? (
             <p className="character-section__prose">{character.biography}</p>
@@ -134,9 +164,9 @@ export default function CharacterDetail() {
               Cette section sera complétée au fil du RP.
             </div>
           )}
-        </section>
+        </Reveal>
 
-        <section id="relations" className="container character-section">
+        <Reveal as="section" id="relations" className="container character-section">
           <h2 className="eyebrow">Relations</h2>
           {relations.length > 0 ? (
             <div className="relations-grid">
@@ -150,10 +180,10 @@ export default function CharacterDetail() {
               À compléter dès qu&rsquo;un lien est confirmé.
             </div>
           )}
-        </section>
+        </Reveal>
 
         {associatedLocations.length > 0 && (
-          <section className="container character-section">
+          <Reveal as="section" className="container character-section">
             <h2 className="eyebrow">Lieux associés</h2>
             <ul className="character-locations">
               {associatedLocations.map((loc) => (
@@ -162,18 +192,18 @@ export default function CharacterDetail() {
                 </li>
               ))}
             </ul>
-          </section>
+          </Reveal>
         )}
 
-        <section id="chronologie" className="container character-section">
+        <Reveal as="section" id="chronologie" className="container character-section">
           <h2 className="eyebrow">Chronologie personnelle</h2>
           <div className="empty-state">
             <strong>Aucun événement pour l&rsquo;instant</strong>
             La chronologie de {character.firstName} apparaîtra ici.
           </div>
-        </section>
+        </Reveal>
 
-        <section id="galerie" className="container character-section">
+        <Reveal as="section" id="galerie" className="container character-section">
           <h2 className="eyebrow">Galerie</h2>
           {character.gallery?.length > 0 ? (
             <div className="character-gallery">
@@ -187,15 +217,15 @@ export default function CharacterDetail() {
               Les portraits et illustrations seront ajoutés progressivement.
             </div>
           )}
-        </section>
+        </Reveal>
 
-        <section className="container character-section">
+        <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Notes / Archives</h2>
           <div className="empty-state">
             <strong>—</strong>
             Espace réservé aux informations RP supplémentaires.
           </div>
-        </section>
+        </Reveal>
       </article>
     </PageTransition>
   )

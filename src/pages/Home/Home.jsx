@@ -1,42 +1,64 @@
 import { Link } from 'react-router-dom'
+import { motion, useReducedMotion } from 'framer-motion'
 import { characters } from '../../data/characters.js'
 import { locations } from '../../data/locations.js'
 import { getSiteStats } from '../../utils/stats.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
+import Reveal from '../../components/Reveal/Reveal.jsx'
 import './Home.css'
+
+const EASE = [0.22, 1, 0.36, 1]
+
+const heroContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+}
+
+const heroItem = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+}
 
 export default function Home() {
   const stats = getSiteStats()
   const featuredCharacters = characters.slice(0, 4)
   const featuredLocations = locations.filter((l) => l.canon === 'confirmed')
+  const reduce = useReducedMotion()
+
+  const heroMotion = reduce
+    ? {}
+    : { variants: heroContainer, initial: 'hidden', animate: 'show' }
+  const itemMotion = reduce ? {} : { variants: heroItem }
 
   return (
     <PageTransition>
       <div id="top">
         <section className="hero">
-          <div className="container hero__inner">
-            <span className="eyebrow hero__eyebrow">Woltar · Archives Vivantes</span>
-            <h1 className="hero__title">
+          <motion.div className="container hero__inner" {...heroMotion}>
+            <motion.span className="eyebrow hero__eyebrow" {...itemMotion}>
+              Woltar · Archives Vivantes
+            </motion.span>
+            <motion.h1 className="hero__title" {...itemMotion}>
               LES HISTOIRES
               <br />
               NE DISPARAISSENT JAMAIS.
-            </h1>
-            <p className="hero__subtitle">
+            </motion.h1>
+            <motion.p className="hero__subtitle" {...itemMotion}>
               Explore les visages, les liens et les lieux qui façonnent Woltar. Une vitrine
               vivante pour retrouver l&rsquo;essentiel de chaque récit.
-            </p>
-            <div className="hero__actions">
+            </motion.p>
+            <motion.div className="hero__actions" {...itemMotion}>
               <Link to="/personnages" className="btn btn-primary">
                 Découvrir le clan
               </Link>
               <Link to="/univers" className="btn">
                 Ouvrir les archives
               </Link>
-            </div>
+            </motion.div>
 
-            <dl className="hero__stats">
+            <motion.dl className="hero__stats" {...itemMotion}>
               <div>
                 <dt>Personnages</dt>
                 <dd>{String(stats.characterCount).padStart(2, '0')}+</dd>
@@ -49,26 +71,26 @@ export default function Home() {
                 <dt>Histoires à écrire</dt>
                 <dd>∞</dd>
               </div>
-            </dl>
-          </div>
+            </motion.dl>
+          </motion.div>
         </section>
 
-        <section className="container home-quote">
+        <Reveal as="section" className="container home-quote">
           <p>
             « On ne naît pas légende.
             <br />
             On le devient en refusant de disparaître. »
           </p>
-        </section>
+        </Reveal>
 
         <section className="container home-section">
-          <div className="section-heading">
+          <Reveal className="section-heading">
             <span className="eyebrow">Galerie</span>
             <h2 className="section-title">Visages de Woltar</h2>
-          </div>
+          </Reveal>
           <div className="home-grid">
-            {featuredCharacters.map((c) => (
-              <CharacterCard key={c.id} character={c} />
+            {featuredCharacters.map((c, i) => (
+              <CharacterCard key={c.id} character={c} index={i} />
             ))}
           </div>
           <Link to="/personnages" className="btn home-section__more">
@@ -77,13 +99,13 @@ export default function Home() {
         </section>
 
         <section className="container home-section">
-          <div className="section-heading">
+          <Reveal className="section-heading">
             <span className="eyebrow">Cartographie narrative</span>
             <h2 className="section-title">Les lieux de Woltar</h2>
-          </div>
+          </Reveal>
           <div className="home-grid home-grid--locations">
-            {featuredLocations.map((l) => (
-              <LocationCard key={l.id} location={l} />
+            {featuredLocations.map((l, i) => (
+              <LocationCard key={l.id} location={l} index={i} />
             ))}
           </div>
         </section>

@@ -5,12 +5,12 @@
   border-radius: var(--radius-m);
   background: var(--bg-raised);
   overflow: hidden;
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .character-card:hover {
-  border-color: var(--line-strong);
-  transform: translateY(-4px);
+  border-color: var(--wine-bright);
+  box-shadow: var(--glow-wine);
 }
 
 .character-card__portrait {
@@ -53,6 +53,12 @@
   padding: 0.15rem 0.4rem;
   border-radius: var(--radius-s);
   background: rgba(12, 13, 22, 0.55);
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.character-card:hover .character-card__number {
+  transform: translate(2px, -2px);
+  color: var(--ivory);
 }
 
 .character-card__body {
