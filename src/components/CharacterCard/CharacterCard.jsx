@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import './CharacterCard.css'
 
 const MotionLink = motion(Link)
@@ -28,8 +29,13 @@ export default function CharacterCard({ character, index = 0 }) {
   return (
     <MotionLink to={`/personnages/${character.id}`} className="character-card" {...motionProps}>
       <div className="character-card__portrait">
-        {character.portrait ? (
-          <img src={character.portrait} alt={fullName} loading="lazy" />
+        {imgSrc(character.portrait) ? (
+          <img
+            src={imgSrc(character.portrait)}
+            alt={fullName}
+            loading="lazy"
+            style={{ objectPosition: imgFocus(character.portrait) }}
+          />
         ) : (
           <span className="character-card__initials">{getInitials(character)}</span>
         )}

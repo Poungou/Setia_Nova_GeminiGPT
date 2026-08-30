@@ -4,6 +4,7 @@ import { getPostById, categoryLabel } from '../../data/posts.js'
 import { getCharacterById } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
 import { renderMarkdown } from '../../lib/markdown.js'
+import { imgSrc } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Lightbox from '../../components/Lightbox/Lightbox.jsx'
@@ -37,7 +38,7 @@ export default function PostDetail() {
       <article className={`container post ${hero ? 'post--spread' : ''}`}>
         {hero && (
           <Reveal className="post__illus" x={-24}>
-            <img src={hero} alt={post.title} />
+            <img src={imgSrc(hero)} alt={post.title} />
           </Reveal>
         )}
 

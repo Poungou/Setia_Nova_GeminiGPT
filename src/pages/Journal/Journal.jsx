@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { publishedPosts, categoryLabel, POST_CATEGORIES } from '../../data/posts.js'
 import { excerptFromMarkdown } from '../../lib/markdown.js'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
@@ -46,11 +47,16 @@ export default function Journal() {
               <Reveal key={post.id} as="article" className="journal-card" delay={Math.min(i * 0.05, 0.3)}>
                 <Link
                   to={`/journal/${post.id}`}
-                  className={`journal-card__link${post.cover ? '' : ' journal-card__link--nocover'}`}
+                  className={`journal-card__link${imgSrc(post.cover) ? '' : ' journal-card__link--nocover'}`}
                 >
-                  {post.cover && (
+                  {imgSrc(post.cover) && (
                     <div className="journal-card__cover">
-                      <img src={post.cover} alt="" loading="lazy" />
+                      <img
+                        src={imgSrc(post.cover)}
+                        alt=""
+                        loading="lazy"
+                        style={{ objectPosition: imgFocus(post.cover) }}
+                      />
                     </div>
                   )}
                   <div className="journal-card__body">

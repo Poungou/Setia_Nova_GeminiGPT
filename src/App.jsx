@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header.jsx'
 import Footer from './components/Footer/Footer.jsx'
+import Ambient from './components/Ambient/Ambient.jsx'
 import Home from './pages/Home/Home.jsx'
 import Journal from './pages/Journal/Journal.jsx'
 import PostDetail from './pages/Journal/PostDetail.jsx'
@@ -22,6 +23,7 @@ const AdminApp = lazy(() => import('./admin/AdminApp.jsx'))
 function SiteShell() {
   return (
     <div className="page">
+      <Ambient />
       <Header />
       <main className="page-main">
         <Routes>

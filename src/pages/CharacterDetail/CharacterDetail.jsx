@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { getCharacterById, getRelationTargets } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
@@ -70,8 +71,12 @@ export default function CharacterDetail() {
         <section className="character-hero">
           <motion.div className="container character-hero__inner" {...heroMotion}>
             <motion.div className="character-hero__portrait" {...portraitMotion}>
-              {character.portrait ? (
-                <img src={character.portrait} alt={fullName} />
+              {imgSrc(character.portrait) ? (
+                <img
+                  src={imgSrc(character.portrait)}
+                  alt={fullName}
+                  style={{ objectPosition: imgFocus(character.portrait) }}
+                />
               ) : (
                 <span>{getInitials(character)}</span>
               )}

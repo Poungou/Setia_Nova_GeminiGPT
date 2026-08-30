@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import './RelationCard.css'
 
 function getInitials(character) {
@@ -15,8 +16,13 @@ export default function RelationCard({ relation }) {
   return (
     <Link to={`/personnages/${character.id}`} className="relation-card">
       <div className="relation-card__portrait">
-        {character.portrait ? (
-          <img src={character.portrait} alt={fullName} loading="lazy" />
+        {imgSrc(character.portrait) ? (
+          <img
+            src={imgSrc(character.portrait)}
+            alt={fullName}
+            loading="lazy"
+            style={{ objectPosition: imgFocus(character.portrait) }}
+          />
         ) : (
           <span>{getInitials(character)}</span>
         )}

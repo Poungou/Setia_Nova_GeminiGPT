@@ -1,8 +1,9 @@
 // src/admin/Fields.jsx
-import { useState } from 'react'
-import { X, Plus, Upload } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { X, Plus, Upload, Move } from 'lucide-react'
 import { uploadImage, adminAvailable } from './adminApi.js'
 import { renderMarkdown } from '../lib/markdown.js'
+import { imgSrc, imgFocus, makeImageValue } from '../lib/image.js'
 import { SCHEMA } from './schema.js'
 
 export function Field({ field, value, onChange, allData }) {
@@ -146,9 +147,28 @@ function TagsInput({ value, onChange }) {
   )
 }
 
+function parseFocus(focus) {
+  const m = /(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%/.exec(focus || '')
+  return m ? { x: Number(m[1]), y: Number(m[2]) } : { x: 50, y: 50 }
+}
+
 function ImageInput({ value, onChange }) {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const frameRef = useRef(null)
+  const dragging = useRef(false)
+
+  const src = imgSrc(value)
+  const focus = imgFocus(value)
+  const { x: fx, y: fy } = parseFocus(focus)
+
+  const setSrc = (nextSrc) => onChange(makeImageValue(nextSrc, focus))
+  const setFocus = (x, y) => {
+    const cx = Math.min(100, Math.max(0, Math.round(x)))
+    const cy = Math.min(100, Math.max(0, Math.round(y)))
+    onChange(makeImageValue(src, `${cx}% ${cy}%`))
+  }
+
   const pick = async (e) => {
     const file = e.target.files?.[0]
     e.target.value = ''
@@ -156,35 +176,69 @@ function ImageInput({ value, onChange }) {
     setBusy(true)
     setErr('')
     try {
-      onChange(await uploadImage(file))
+      onChange(makeImageValue(await uploadImage(file), focus))
     } catch (e2) {
       setErr(String(e2.message || e2))
     } finally {
       setBusy(false)
     }
   }
+
+  const moveTo = (clientX, clientY) => {
+    const rect = frameRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setFocus(((clientX - rect.left) / rect.width) * 100, ((clientY - rect.top) / rect.height) * 100)
+  }
+
   return (
     <div className="adm-image">
-      {value ? (
-        <div className="adm-image__preview">
-          <img src={value} alt="" />
-          <button type="button" className="adm-btn adm-btn--ghost" onClick={() => onChange('')}>
-            Retirer
-          </button>
-        </div>
+      {src ? (
+        <>
+          <div
+            ref={frameRef}
+            className="adm-focus"
+            onPointerDown={(e) => {
+              if (!adminAvailable) return
+              dragging.current = true
+              e.currentTarget.setPointerCapture(e.pointerId)
+              moveTo(e.clientX, e.clientY)
+            }}
+            onPointerMove={(e) => dragging.current && moveTo(e.clientX, e.clientY)}
+            onPointerUp={(e) => {
+              dragging.current = false
+              e.currentTarget.releasePointerCapture?.(e.pointerId)
+            }}
+          >
+            <img src={src} alt="" style={{ objectPosition: `${fx}% ${fy}%` }} />
+            <span className="adm-focus__dot" style={{ left: `${fx}%`, top: `${fy}%` }}>
+              <Move size={12} />
+            </span>
+          </div>
+          <p className="adm-hint">
+            Glisse le point pour choisir la partie visible en vignette ({fx}% {fy}%).
+          </p>
+          <div className="adm-row">
+            <button type="button" className="adm-btn adm-btn--ghost" onClick={() => setFocus(50, 50)} disabled={!adminAvailable}>
+              Recentrer
+            </button>
+            <button type="button" className="adm-btn adm-btn--ghost" onClick={() => onChange('')}>
+              Retirer
+            </button>
+          </div>
+        </>
       ) : (
         <p className="adm-muted">Aucune image</p>
       )}
       <label className={`adm-btn ${adminAvailable ? '' : 'adm-btn--disabled'}`}>
-        <Upload size={14} /> {busy ? 'Envoi…' : 'Choisir un fichier'}
+        <Upload size={14} /> {busy ? 'Envoi…' : src ? 'Remplacer' : 'Choisir un fichier'}
         <input type="file" accept="image/*" hidden onChange={pick} disabled={!adminAvailable || busy} />
       </label>
       <input
         className="adm-input adm-input--mono"
-        value={value}
+        value={src}
         placeholder="/media/… ou URL"
         disabled={!adminAvailable}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => setSrc(e.target.value)}
       />
       {err && <p className="adm-error">{err}</p>}
     </div>
@@ -194,15 +248,15 @@ function ImageInput({ value, onChange }) {
 function GalleryInput({ value, onChange }) {
   return (
     <div className="adm-gallery">
-      {value.map((src, i) => (
-        <div key={`${src}-${i}`} className="adm-gallery__item">
-          <img src={src} alt="" />
+      {value.map((item, i) => (
+        <div key={`${imgSrc(item)}-${i}`} className="adm-gallery__item">
+          <img src={imgSrc(item)} alt="" />
           <button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))} aria-label="Retirer">
             <X size={12} />
           </button>
         </div>
       ))}
-      <ImageInput value="" onChange={(p) => p && onChange([...value, p])} />
+      <ImageInput value="" onChange={(p) => p && onChange([...value, imgSrc(p)])} />
     </div>
   )
 }

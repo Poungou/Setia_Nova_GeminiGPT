@@ -22,7 +22,10 @@
     "character": "",
     "appearance": "Pelage vert, yeux cyan.",
     "biography": "Blablablabla test ",
-    "portrait": "/media/kazuko-boule-mtfnqdr6.webp",
+    "portrait": {
+      "src": "/media/kazuko-boule-mtfnqdr6.webp",
+      "focus": "50% 15%"
+    },
     "gallery": [],
     "relations": [
       {
@@ -40,6 +43,8 @@
       "Famille",
       "Principal"
     ],
+    "author": "",
+    "visibility": "published",
     "id": "kazuko-nakamura"
   },
   {

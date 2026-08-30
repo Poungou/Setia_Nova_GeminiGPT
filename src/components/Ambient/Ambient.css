@@ -1,0 +1,92 @@
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ambient__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+:root[data-theme='light'] .ambient__blob {
+  opacity: 0.35;
+  filter: blur(90px);
+}
+
+.ambient__blob--wine {
+  width: 46vw;
+  height: 46vw;
+  top: -12vw;
+  left: -8vw;
+  background: radial-gradient(circle, var(--wine-bright), transparent 68%);
+  animation: ambient-drift-a 34s ease-in-out infinite alternate;
+}
+
+.ambient__blob--midnight {
+  width: 40vw;
+  height: 40vw;
+  bottom: -14vw;
+  right: -10vw;
+  background: radial-gradient(circle, var(--midnight-bright), transparent 68%);
+  animation: ambient-drift-b 42s ease-in-out infinite alternate;
+}
+
+.ambient__blob--violet {
+  width: 34vw;
+  height: 34vw;
+  top: 38%;
+  left: 55%;
+  background: radial-gradient(circle, var(--violet), transparent 70%);
+  opacity: 0.28;
+  animation: ambient-drift-c 50s ease-in-out infinite alternate;
+}
+
+/* Poussière d'étoiles : deux couches de points qui scintillent doucement. */
+.ambient__dust {
+  position: absolute;
+  inset: -40%;
+  background-image:
+    radial-gradient(1.4px 1.4px at 20% 30%, var(--ivory-faint) 50%, transparent),
+    radial-gradient(1.2px 1.2px at 70% 65%, var(--ivory-faint) 50%, transparent),
+    radial-gradient(1.1px 1.1px at 45% 85%, var(--ivory-faint) 50%, transparent),
+    radial-gradient(1.3px 1.3px at 85% 20%, var(--ivory-faint) 50%, transparent),
+    radial-gradient(1px 1px at 12% 72%, var(--ivory-faint) 50%, transparent);
+  background-repeat: repeat;
+  background-size: 340px 340px;
+  opacity: 0.35;
+  animation: ambient-twinkle 12s ease-in-out infinite, ambient-float 90s linear infinite;
+}
+
+@keyframes ambient-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(8vw, 6vw, 0) scale(1.12); }
+}
+@keyframes ambient-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05); }
+  to { transform: translate3d(-7vw, -5vw, 0) scale(1); }
+}
+@keyframes ambient-drift-c {
+  from { transform: translate3d(-4vw, 0, 0) scale(1); }
+  to { transform: translate3d(5vw, -6vw, 0) scale(1.15); }
+}
+@keyframes ambient-twinkle {
+  0%, 100% { opacity: 0.22; }
+  50% { opacity: 0.4; }
+}
+@keyframes ambient-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-340px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient__blob,
+  .ambient__dust {
+    animation: none;
+  }
+}
