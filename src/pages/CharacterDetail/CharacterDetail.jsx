@@ -6,6 +6,7 @@ import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import Prose from '../../components/Prose/Prose.jsx'
 import './CharacterDetail.css'
 
 const EASE = [0.22, 1, 0.36, 1]
@@ -140,6 +141,16 @@ export default function CharacterDetail() {
               ))}
             </div>
           )}
+
+          {character.tags?.length > 0 && (
+            <div className="character-tags">
+              {character.tags.map((t) => (
+                <Link key={t} to={`/tag/${encodeURIComponent(t)}`} className="character-tags__link">
+                  #{t}
+                </Link>
+              ))}
+            </div>
+          )}
         </Reveal>
 
         {(character.character || character.appearance) && (
@@ -162,7 +173,7 @@ export default function CharacterDetail() {
         <Reveal as="section" id="histoire" className="container character-section">
           <h2 className="eyebrow">Histoire</h2>
           {character.biography ? (
-            <p className="character-section__prose">{character.biography}</p>
+            <Prose markdown={character.biography} className="prose--tight" />
           ) : (
             <div className="empty-state">
               <strong>À écrire</strong>

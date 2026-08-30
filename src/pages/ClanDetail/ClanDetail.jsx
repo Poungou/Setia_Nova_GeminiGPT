@@ -4,6 +4,8 @@ import { characters } from '../../data/characters.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import Prose from '../../components/Prose/Prose.jsx'
+import RelationGraph from '../../components/RelationGraph/RelationGraph.jsx'
 import './ClanDetail.css'
 
 export default function ClanDetail() {
@@ -24,17 +26,25 @@ export default function ClanDetail() {
         <Reveal className="section-heading">
           <span className="eyebrow">Clan</span>
           <h1 className="section-title">{clan.name}</h1>
-          {clan.description && <p className="clan-detail__lead">{clan.description}</p>}
         </Reveal>
+
+        {clan.description && (
+          <Reveal as="section" className="character-section">
+            <Prose markdown={clan.description} className="prose--tight" />
+          </Reveal>
+        )}
 
         <section className="character-section">
           <h2 className="eyebrow">Résidence</h2>
-          {clan.residence ? (
-            <p>{clan.residence}</p>
-          ) : (
-            <span className="dash">—</span>
-          )}
+          {clan.residence ? <p>{clan.residence}</p> : <span className="dash">—</span>}
         </section>
+
+        {members.length > 1 && (
+          <Reveal as="section" className="character-section">
+            <h2 className="eyebrow">Liens du clan</h2>
+            <RelationGraph members={members} />
+          </Reveal>
+        )}
 
         <section className="character-section">
           <h2 className="eyebrow">Membres</h2>
@@ -50,6 +60,13 @@ export default function ClanDetail() {
             </div>
           )}
         </section>
+
+        {clan.history && (
+          <Reveal as="section" className="character-section">
+            <h2 className="eyebrow">Histoire</h2>
+            <Prose markdown={clan.history} className="prose--tight" />
+          </Reveal>
+        )}
 
         <p>
           <Link to="/univers" className="btn">

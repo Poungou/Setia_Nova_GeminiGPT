@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import './Lightbox.css'
 
 // Galerie cliquable + visionneuse plein écran.
-// images : [{ src, alt }] ou [string]
+// images : liste de chaînes, ou d'objets { src, alt, label, to }
 export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
-  const items = images.map((i) => (typeof i === 'string' ? { src: i, alt: '' } : i)).filter((i) => i.src)
+  const items = images
+    .map((i) => (typeof i === 'string' ? { src: i } : i))
+    .filter((i) => i && i.src)
   const [index, setIndex] = useState(null)
   const open = index !== null
 
@@ -31,12 +34,15 @@ export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
 
   if (!items.length) return null
 
+  const current = open ? items[index] : null
+
   return (
     <>
       <div className={className}>
         {items.map((img, i) => (
           <button key={`${img.src}-${i}`} type="button" className="lightbox-thumb" onClick={() => setIndex(i)}>
-            <img src={img.src} alt={img.alt} loading="lazy" />
+            <img src={img.src} alt={img.alt || img.label || ''} loading="lazy" />
+            {img.label && <span className="lightbox-thumb__cap">{img.label}</span>}
           </button>
         ))}
       </div>
@@ -60,8 +66,17 @@ export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
               </button>
             )}
             <figure className="lightbox-figure" onClick={(e) => e.stopPropagation()}>
-              <img src={items[index].src} alt={items[index].alt} />
-              {items[index].alt && <figcaption>{items[index].alt}</figcaption>}
+              <img src={current.src} alt={current.alt || current.label || ''} />
+              {(current.label || current.to) && (
+                <figcaption>
+                  {current.label}
+                  {current.to && (
+                    <Link to={current.to} className="lightbox-figure__link">
+                      voir la source →
+                    </Link>
+                  )}
+                </figcaption>
+              )}
             </figure>
             {items.length > 1 && (
               <button

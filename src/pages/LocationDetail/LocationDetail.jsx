@@ -1,9 +1,12 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { getLocationById } from '../../data/locations.js'
 import { characters } from '../../data/characters.js'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import Prose from '../../components/Prose/Prose.jsx'
+import Lightbox from '../../components/Lightbox/Lightbox.jsx'
 import './LocationDetail.css'
 
 function Field({ label, value }) {
@@ -26,10 +29,21 @@ export default function LocationDetail() {
   const associatedCharacters = (location.characters || [])
     .map((cid) => characters.find((c) => c.id === cid))
     .filter(Boolean)
+  const gallery = (location.gallery || []).filter((v) => imgSrc(v))
 
   return (
     <PageTransition>
       <article className="location-detail">
+        {imgSrc(location.image) && (
+          <Reveal className="location-detail__banner" y={0}>
+            <img
+              src={imgSrc(location.image)}
+              alt={location.name}
+              style={{ objectPosition: imgFocus(location.image) }}
+            />
+          </Reveal>
+        )}
+
         <Reveal as="section" className="location-hero container" y={16}>
           {location.type && <span className="eyebrow">{location.type}</span>}
           <h1 className="section-title">{location.name}</h1>
@@ -52,7 +66,7 @@ export default function LocationDetail() {
         <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Description</h2>
           {location.description ? (
-            <p className="character-section__prose">{location.description}</p>
+            <Prose markdown={location.description} className="prose--tight" />
           ) : (
             <div className="empty-state">
               <strong>À compléter</strong>
@@ -60,6 +74,13 @@ export default function LocationDetail() {
             </div>
           )}
         </Reveal>
+
+        {location.history && (
+          <Reveal as="section" className="container character-section">
+            <h2 className="eyebrow">Histoire</h2>
+            <Prose markdown={location.history} className="prose--tight" />
+          </Reveal>
+        )}
 
         <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Personnages associés</h2>
@@ -78,9 +99,13 @@ export default function LocationDetail() {
 
         <Reveal as="section" className="container character-section">
           <h2 className="eyebrow">Galerie</h2>
-          <div className="empty-state">
-            <strong>Aucune image pour l&rsquo;instant</strong>
-          </div>
+          {gallery.length > 0 ? (
+            <Lightbox images={gallery.map((v) => ({ src: imgSrc(v), alt: location.name }))} />
+          ) : (
+            <div className="empty-state">
+              <strong>Aucune image pour l&rsquo;instant</strong>
+            </div>
+          )}
         </Reveal>
 
         <p className="container">

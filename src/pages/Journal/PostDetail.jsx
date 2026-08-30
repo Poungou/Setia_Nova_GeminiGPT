@@ -1,13 +1,12 @@
-import { useMemo } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { getPostById, categoryLabel } from '../../data/posts.js'
 import { getCharacterById } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
-import { renderMarkdown } from '../../lib/markdown.js'
 import { imgSrc } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Lightbox from '../../components/Lightbox/Lightbox.jsx'
+import Prose from '../../components/Prose/Prose.jsx'
 import './Journal.css'
 
 function formatDate(iso) {
@@ -20,7 +19,6 @@ function formatDate(iso) {
 export default function PostDetail() {
   const { id } = useParams()
   const post = getPostById(id)
-  const html = useMemo(() => renderMarkdown(post?.body), [post])
 
   if (!post || post.visibility === 'draft') return <Navigate to="/journal" replace />
 
@@ -52,7 +50,7 @@ export default function PostDetail() {
           </span>
           <h1 className="post__title">{post.title}</h1>
 
-          {html && <div className="post__body" dangerouslySetInnerHTML={{ __html: html }} />}
+          <Prose markdown={post.body} />
 
           {hasLinks && (
             <div className="post__links">
@@ -80,9 +78,9 @@ export default function PostDetail() {
                 <p>
                   <span className="eyebrow">Mots-clés</span>
                   {post.tags.map((t) => (
-                    <span key={t} className="post__chip post__chip--tag">
+                    <Link key={t} to={`/tag/${encodeURIComponent(t)}`} className="post__chip post__chip--tag">
                       {t}
-                    </span>
+                    </Link>
                   ))}
                 </p>
               )}
@@ -93,7 +91,7 @@ export default function PostDetail() {
         {restGallery.length > 0 && (
           <Reveal className="post__gallery">
             <h2 className="eyebrow">Galerie</h2>
-            <Lightbox images={restGallery} />
+            <Lightbox images={restGallery.map((v) => ({ src: imgSrc(v), alt: post.title }))} />
           </Reveal>
         )}
       </article>

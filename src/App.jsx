@@ -6,6 +6,8 @@ import Ambient from './components/Ambient/Ambient.jsx'
 import Home from './pages/Home/Home.jsx'
 import Journal from './pages/Journal/Journal.jsx'
 import PostDetail from './pages/Journal/PostDetail.jsx'
+import Gallery from './pages/Gallery/Gallery.jsx'
+import Tag from './pages/Tag/Tag.jsx'
 import Characters from './pages/Characters/Characters.jsx'
 import CharacterDetail from './pages/CharacterDetail/CharacterDetail.jsx'
 import Universe from './pages/Universe/Universe.jsx'
@@ -30,6 +32,8 @@ function SiteShell() {
           <Route path="/" element={<Home />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/journal/:id" element={<PostDetail />} />
+          <Route path="/galerie" element={<Gallery />} />
+          <Route path="/tag/:tag" element={<Tag />} />
           <Route path="/personnages" element={<Characters />} />
           <Route path="/personnages/:id" element={<CharacterDetail />} />
           <Route path="/univers" element={<Universe />} />

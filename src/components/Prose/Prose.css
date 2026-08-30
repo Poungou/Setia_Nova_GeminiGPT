@@ -1,0 +1,74 @@
+.prose {
+  font-family: var(--font-reading);
+  font-size: 1.06rem;
+  line-height: 1.8;
+  color: var(--ivory);
+}
+.prose > :first-child {
+  margin-top: 0;
+}
+.prose > :last-child {
+  margin-bottom: 0;
+}
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: var(--font-display);
+  margin: var(--space-3) 0 var(--space-1);
+}
+.prose p {
+  margin: 0 0 var(--space-2);
+}
+.prose a {
+  color: var(--wine-bright);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose img {
+  max-width: 100%;
+  border-radius: var(--radius-s);
+  margin: var(--space-2) 0;
+}
+.prose blockquote {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--wine-bright);
+  color: var(--ivory-dim);
+  font-style: italic;
+}
+.prose ul,
+.prose ol {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.4rem;
+}
+.prose li {
+  margin-bottom: 0.25rem;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-raised-2);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-s);
+}
+.prose pre {
+  background: var(--bg-raised-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-s);
+  overflow-x: auto;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+}
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: var(--space-3) 0;
+}
+
+/* Variante compacte (fiches perso/lieu) */
+.prose--tight {
+  font-size: 1rem;
+  line-height: 1.7;
+}

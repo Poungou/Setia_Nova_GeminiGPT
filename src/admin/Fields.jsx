@@ -2,24 +2,26 @@
 import { useRef, useState } from 'react'
 import { X, Plus, Upload, Move } from 'lucide-react'
 import { uploadImage, adminAvailable } from './adminApi.js'
-import { renderMarkdown } from '../lib/markdown.js'
 import { imgSrc, imgFocus, makeImageValue } from '../lib/image.js'
+import Prose from '../components/Prose/Prose.jsx'
 import { SCHEMA } from './schema.js'
 
 export function Field({ field, value, onChange, allData }) {
   const common = { id: `f-${field.key}`, disabled: !adminAvailable }
   switch (field.type) {
     case 'textarea':
-    case 'prose':
       return (
         <textarea
           {...common}
-          className={field.type === 'prose' ? 'adm-input adm-prose' : 'adm-input'}
-          rows={field.type === 'prose' ? 8 : 3}
+          className="adm-input"
+          rows={3}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
         />
       )
+    case 'prose':
+    case 'markdown':
+      return <MarkdownInput id={common.id} value={value || ''} onChange={onChange} />
     case 'number':
       return (
         <input
@@ -40,8 +42,6 @@ export function Field({ field, value, onChange, allData }) {
           onChange={(e) => onChange(e.target.value)}
         />
       )
-    case 'markdown':
-      return <MarkdownInput id={common.id} value={value || ''} onChange={onChange} />
     case 'select':
       return (
         <select {...common} className="adm-input" value={value || ''} onChange={(e) => onChange(e.target.value)}>
@@ -88,10 +88,11 @@ function MarkdownInput({ id, value, onChange }) {
         </button>
       </div>
       {preview ? (
-        <div
-          className="adm-markdown__preview"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(value) || '<p class="adm-muted">(vide)</p>' }}
-        />
+        value ? (
+          <Prose markdown={value} className="adm-markdown__preview" />
+        ) : (
+          <p className="adm-markdown__preview adm-muted">(vide)</p>
+        )
       ) : (
         <textarea
           id={id}

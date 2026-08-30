@@ -1,0 +1,40 @@
+.tag-page {
+  padding: var(--space-4) 0 var(--space-5);
+}
+.tag-page__intro {
+  color: var(--ivory-dim);
+}
+.tag-group {
+  margin-bottom: var(--space-4);
+}
+.tag-group h2 {
+  margin-bottom: var(--space-2);
+}
+.tag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.tag-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--bg-raised);
+  transition: border-color 0.15s ease;
+}
+.tag-list a:hover {
+  border-color: var(--wine-bright);
+}
+.tag-list span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+}
