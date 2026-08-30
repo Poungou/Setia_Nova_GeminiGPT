@@ -1,5 +1,25 @@
 # TODO — Woltar Archives Vivantes
 
+## 🔄 Contexte pour reprise (si tu es une nouvelle session Claude Code)
+
+Ce projet a été bootstrapé par Claude (Cowork) le 29/08/2026, sans accès shell direct à la machine de l'utilisatrice — d'où des livraisons par zip. Si tu es Claude Code et que tu as un accès direct au dossier, tu n'as plus ce problème : tu peux éditer, lancer `npm run dev`, tester et committer directement.
+
+**Historique des commits** :
+- `feat: bootstrap Woltar Archives Vivantes (Vite+React, data-driven)` — structure, données, pages
+- `feat: typographie plus chaleureuse + animations (entrees, scroll-reveal, halos)` — polices Google Fonts (Cormorant Garamond / Spectral / Manrope), Reveal au scroll, halos au survol, hero en cascade
+
+**État confirmé par l'utilisatrice** :
+- `npm install` + `npm run dev` fonctionnent sur sa machine (Node v24.20.0, Windows, execution policy PowerShell mise en RemoteSigned)
+- Le site tourne et s'affiche correctement à `http://localhost:5173`
+- Elle a demandé plus d'animation + une police plus douce (§ "manque d'animation... police plus douce... donne envie de lire") → traité dans le commit ci-dessus, retour visuel de sa part **pas encore reçu** — à lui demander en priorité si tu reprends la main.
+
+**Questions ouvertes / à trancher avec elle** :
+1. Le cahier des charges original mentionne (§11, exemple illustratif) "Fudo = neveu de Kazuko" — ce n'est PAS confirmé dans les fiches individuelles (section 9 du cahier des charges), donc **pas ajouté** à `data/characters.js`. À confirmer avant de l'ajouter comme relation canon.
+2. Elle a mentionné avoir des clés API Anthropic/OpenAI/Google configurées dans VS Code — quand demandé, elle a répondu "rien pour l'instant" (pas de génération de portraits IA prévue immédiatement). Le dossier `Setia_Nova_Site` contenait un plugin WordPress `ai-provider-for-google` sans rapport avec le projet, laissé tel quel (jamais eu d'outil de suppression pour le retirer) — à supprimer si elle confirme ne pas en avoir besoin.
+3. Interface admin (fiches RP + upload images) demandée explicitement — planifiée en Phase 8, pas commencée.
+
+**Règle à ne jamais casser** : ne jamais inventer de lore. Un champ inconnu reste vide (`''`/`[]`), jamais une valeur inventée. Voir `CONTENT_GUIDE.md` pour la structure des données.
+
 ## Phase 0 — Bootstrap ✅
 - [x] Structure de dossiers propre (components / pages / data / assets / styles)
 - [x] Vite + React + React Router
