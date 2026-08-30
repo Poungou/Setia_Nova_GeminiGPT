@@ -5,6 +5,7 @@ import './Header.css'
 
 const NAV_LINKS = [
   { to: '/', label: 'Accueil', end: true },
+  { to: '/journal', label: 'Journal' },
   { to: '/personnages', label: 'Personnages' },
   { to: '/univers', label: 'Univers' },
   { to: '/clans', label: 'Clans' },

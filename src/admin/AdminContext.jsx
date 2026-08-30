@@ -10,6 +10,7 @@ import locationsJson from '../data/locations.json'
 import clansJson from '../data/clans.json'
 import eventsJson from '../data/events.json'
 import archivesJson from '../data/archives.json'
+import postsJson from '../data/posts.json'
 
 const BUNDLED = {
   characters: charactersJson,
@@ -17,6 +18,7 @@ const BUNDLED = {
   clans: clansJson,
   events: eventsJson,
   archives: archivesJson,
+  posts: postsJson,
 }
 
 export function AdminProvider({ children }) {

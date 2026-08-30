@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header.jsx'
 import Footer from './components/Footer/Footer.jsx'
 import Home from './pages/Home/Home.jsx'
+import Journal from './pages/Journal/Journal.jsx'
+import PostDetail from './pages/Journal/PostDetail.jsx'
 import Characters from './pages/Characters/Characters.jsx'
 import CharacterDetail from './pages/CharacterDetail/CharacterDetail.jsx'
 import Universe from './pages/Universe/Universe.jsx'
@@ -24,6 +26,8 @@ function SiteShell() {
       <main className="page-main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/journal/:id" element={<PostDetail />} />
           <Route path="/personnages" element={<Characters />} />
           <Route path="/personnages/:id" element={<CharacterDetail />} />
           <Route path="/univers" element={<Universe />} />

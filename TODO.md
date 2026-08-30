@@ -60,12 +60,26 @@ Ce projet a été bootstrapé par Claude (Cowork) le 29/08/2026, sans accès she
 - [ ] Vérifier les contrastes sur toutes les pages une fois les vraies images intégrées
 - [ ] Test complet clavier (tab, focus visible) sur toutes les pages
 
-## Phase 7 — À venir
-- [ ] Vraie chronologie (remplir `data/events.js`)
-- [ ] Archives RP (remplir `data/archives.js`, sans jamais réécrire les dialogues originaux)
-- [ ] Visualisation graphique des relations / arbre généalogique du clan Nakamura
-- [ ] Page Univers enrichie (histoire du monde, société, magie, technologie…) au fur et à mesure
-- [ ] Carte de Woltar / Sétia avec marqueurs interactifs
+## Phase 7 — Contenu & rubriques
+
+### Palier 1 — terrain de jeu (local, sans compte)
+- [x] **Journal / blog** : rubrique `/journal` — billets datés (fan art / chapitre / note / news),
+  markdown, couverture, galerie lightbox, liens persos/lieux, brouillon vs publié
+- [x] Rendu **markdown** (`src/lib/markdown.js`, marked + DOMPurify) + composant `Lightbox`
+- [x] Champs `author` + `visibility` ajoutés (persos & billets) pour le futur multi-joueurs
+- [ ] **Galerie fan art** dédiée (rubrique + filtres par perso/tag)
+- [ ] Markdown aussi pour les bios/histoires perso (actuellement texte simple)
+- [ ] Pages par tag (clic mot-clé → tout le contenu lié)
+- [ ] Visualisation des relations / arbre du clan Nakamura
+- [ ] Chronologie illustrée (remplir `data/events.js` via l'admin)
+- [ ] Archives RP (remplir via l'admin, sans jamais réécrire les textes originaux)
+- [ ] Page Univers enrichie ; carte de Woltar / Sétia avec marqueurs
+
+### Palier 3 — multi-joueurs (après mise en ligne)
+- [ ] Comptes joueurs ; chaque joueur édite uniquement ses fiches
+- [ ] Flux de validation (brouillon → en attente → publié) côté admin
+- [ ] Formulaire public « proposer mon perso »
+- [ ] (option) réactions / commentaires / livre d'or
 
 ## Phase 8 — Backend + Administration (EN COURS — branche `feat/admin`)
 

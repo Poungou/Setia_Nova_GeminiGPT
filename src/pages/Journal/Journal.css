@@ -1,0 +1,203 @@
+.journal-page {
+  padding: var(--space-4) 0 var(--space-5);
+}
+.journal-page__intro {
+  max-width: 52ch;
+  color: var(--ivory-dim);
+}
+.journal-page__controls {
+  margin-bottom: var(--space-3);
+}
+
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.journal-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--bg-raised);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.journal-card:hover {
+  border-color: var(--wine-bright);
+  box-shadow: var(--glow-wine);
+}
+.journal-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.journal-card__cover {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--gradient-card);
+}
+.journal-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.journal-card:hover .journal-card__cover img {
+  transform: scale(1.04);
+}
+.journal-card__body {
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+.journal-card__meta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+}
+.journal-card__body h2 {
+  font-size: 1.25rem;
+}
+.journal-card__body p {
+  margin: 0;
+  color: var(--ivory-dim);
+  font-size: 0.9rem;
+}
+
+/* --- billet ------------------------------------------------------------- */
+.post {
+  padding: var(--space-4) 0 var(--space-5);
+  max-width: 820px;
+}
+.post__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+.post__back {
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.post__back:hover {
+  color: var(--ivory);
+}
+.post__cover {
+  margin-bottom: var(--space-3);
+}
+.post__cover img {
+  width: 100%;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+}
+
+.post__body {
+  font-family: var(--font-reading);
+  font-size: 1.08rem;
+  line-height: 1.8;
+  color: var(--ivory);
+}
+.post__body > :first-child {
+  margin-top: 0;
+}
+.post__body h2,
+.post__body h3 {
+  font-family: var(--font-display);
+  margin: var(--space-3) 0 var(--space-1);
+}
+.post__body p {
+  margin: 0 0 var(--space-2);
+}
+.post__body a {
+  color: var(--wine-bright);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.post__body img {
+  max-width: 100%;
+  border-radius: var(--radius-s);
+  margin: var(--space-2) 0;
+}
+.post__body blockquote {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--wine-bright);
+  color: var(--ivory-dim);
+  font-style: italic;
+}
+.post__body ul,
+.post__body ol {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.4rem;
+}
+.post__body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-raised-2);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-s);
+}
+.post__body pre {
+  background: var(--bg-raised-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-s);
+  overflow-x: auto;
+}
+.post__body pre code {
+  background: none;
+  padding: 0;
+}
+.post__body hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: var(--space-3) 0;
+}
+
+.post__gallery {
+  margin-top: var(--space-4);
+}
+.post__gallery h2 {
+  margin-bottom: var(--space-2);
+}
+
+.post__links {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.post__links p {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.post__links .eyebrow {
+  margin-right: 0.3rem;
+}
+.post__chip {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+a.post__chip:hover {
+  border-color: var(--wine-bright);
+  color: var(--ivory);
+}
+.post__chip--tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}

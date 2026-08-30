@@ -50,7 +50,7 @@ export default function CharacterDetail() {
   const character = getCharacterById(id)
   const reduce = useReducedMotion()
 
-  if (!character) {
+  if (!character || character.visibility === 'draft') {
     return <Navigate to="/personnages" replace />
   }
 

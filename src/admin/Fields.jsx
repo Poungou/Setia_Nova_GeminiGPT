@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { X, Plus, Upload } from 'lucide-react'
 import { uploadImage, adminAvailable } from './adminApi.js'
+import { renderMarkdown } from '../lib/markdown.js'
 import { SCHEMA } from './schema.js'
 
 export function Field({ field, value, onChange, allData }) {
@@ -28,6 +29,18 @@ export function Field({ field, value, onChange, allData }) {
           onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
         />
       )
+    case 'date':
+      return (
+        <input
+          {...common}
+          type="date"
+          className="adm-input"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )
+    case 'markdown':
+      return <MarkdownInput id={common.id} value={value || ''} onChange={onChange} />
     case 'select':
       return (
         <select {...common} className="adm-input" value={value || ''} onChange={(e) => onChange(e.target.value)}>
@@ -59,6 +72,37 @@ export function Field({ field, value, onChange, allData }) {
         />
       )
   }
+}
+
+function MarkdownInput({ id, value, onChange }) {
+  const [preview, setPreview] = useState(false)
+  return (
+    <div className="adm-markdown">
+      <div className="adm-markdown__tabs">
+        <button type="button" className={!preview ? 'is-active' : ''} onClick={() => setPreview(false)}>
+          Écrire
+        </button>
+        <button type="button" className={preview ? 'is-active' : ''} onClick={() => setPreview(true)}>
+          Aperçu
+        </button>
+      </div>
+      {preview ? (
+        <div
+          className="adm-markdown__preview"
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(value) || '<p class="adm-muted">(vide)</p>' }}
+        />
+      ) : (
+        <textarea
+          id={id}
+          className="adm-input adm-prose"
+          rows={14}
+          value={value}
+          disabled={!adminAvailable}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    </div>
+  )
 }
 
 function TagsInput({ value, onChange }) {

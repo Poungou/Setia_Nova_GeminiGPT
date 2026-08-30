@@ -393,6 +393,45 @@ textarea.adm-input {
   pointer-events: none;
 }
 
+/* --- markdown ---------------------------------------------------- */
+.adm-markdown__tabs {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+.adm-markdown__tabs button {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--bg-raised);
+  color: var(--ivory-dim);
+}
+.adm-markdown__tabs button.is-active {
+  background: var(--wine);
+  border-color: var(--wine-bright);
+  color: var(--ivory);
+}
+.adm-markdown__preview {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: var(--space-2);
+  background: var(--bg-void);
+  font-family: var(--font-reading);
+  line-height: 1.7;
+}
+.adm-markdown__preview :first-child {
+  margin-top: 0;
+}
+.adm-markdown__preview img {
+  max-width: 100%;
+  border-radius: var(--radius-s);
+}
+.adm-markdown__preview a {
+  color: var(--wine-bright);
+  text-decoration: underline;
+}
+
 .adm-muted {
   color: var(--ivory-faint);
   font-size: 0.85rem;

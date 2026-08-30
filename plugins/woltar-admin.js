@@ -15,7 +15,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-const COLLECTIONS = ['characters', 'locations', 'clans', 'events', 'archives']
+const COLLECTIONS = ['characters', 'locations', 'clans', 'events', 'archives', 'posts']
 const MEDIA_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg' }
 
 function slugify(s) {

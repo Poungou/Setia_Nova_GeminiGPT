@@ -15,10 +15,14 @@
 
 import charactersData from './characters.json'
 
-export const characters = charactersData
+// Toutes les fiches (utile à l'admin / aux résolutions de liens internes).
+export const allCharacters = charactersData
+
+// Ce que le site public montre : les brouillons restent cachés.
+export const characters = charactersData.filter((c) => c.visibility !== 'draft')
 
 export function getCharacterById(id) {
-  return characters.find((c) => c.id === id)
+  return allCharacters.find((c) => c.id === id)
 }
 
 export function getCharactersByStatus(status) {

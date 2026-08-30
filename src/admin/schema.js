@@ -4,12 +4,13 @@
 // formulaires de l'admin. Les clés correspondent EXACTEMENT aux champs des
 // fichiers src/data/*.json.
 //
-// Types de champ : text | textarea | prose | number | select | tags | image
-//                  | gallery | refs | relations
+// Types de champ : text | textarea | prose | markdown | number | date | select
+//                  | tags | image | gallery | refs | relations
 //   refs      -> liste d'ids pointant vers une autre collection (`ref`)
 //   relations -> spécifique aux personnages : [{ characterId, type, description }]
 
 import { slug } from './slug.js'
+import { POST_CATEGORIES } from '../data/posts.js'
 
 const STATUS = [
   ['active', 'Actif'],
@@ -21,6 +22,11 @@ const CANON = [
   ['confirmed', 'Confirmé'],
   ['draft', 'Ébauche'],
 ]
+const VISIBILITY = [
+  ['published', 'Publié'],
+  ['draft', 'Brouillon (caché du site)'],
+]
+const POST_CAT_OPTIONS = POST_CATEGORIES.map((c) => [c.value, c.label])
 
 export const SCHEMA = {
   characters: {
@@ -36,9 +42,14 @@ export const SCHEMA = {
       status: 'to-develop', canon: 'draft', age: '', gender: '', species: '',
       origin: '', residence: '', occupation: '', traits: [], shortDescription: '',
       character: '', appearance: '', biography: '', portrait: '', gallery: [],
-      relations: [], locations: [], tags: [],
+      relations: [], locations: [], tags: [], author: '', visibility: 'published',
     },
     fields: [
+      { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
+      {
+        key: 'author', label: 'Auteur / joueur', type: 'text', group: 'Publication',
+        hint: 'Laisse vide si c’est une fiche canon. Servira quand d’autres joueurs pourront proposer leurs persos.',
+      },
       { key: 'number', label: 'Numéro', type: 'text', group: 'Identité' },
       { key: 'firstName', label: 'Prénom', type: 'text', group: 'Identité' },
       { key: 'lastName', label: 'Nom', type: 'text', group: 'Identité' },
@@ -166,6 +177,41 @@ export const SCHEMA = {
       },
       { key: 'characters', label: 'Personnages', type: 'refs', ref: 'characters', group: 'Liens' },
       { key: 'locations', label: 'Lieux', type: 'refs', ref: 'locations', group: 'Liens' },
+    ],
+  },
+
+  posts: {
+    label: 'Journal',
+    singular: 'billet',
+    icon: 'PenLine',
+    order: 0,
+    title: (r) => r.title || r.id,
+    subtitle: (r) => [r.category, r.date].filter(Boolean).join(' · '),
+    makeId: (r) => slug(`${r.date || ''} ${r.title || ''}`) || slug(r.title),
+    defaults: {
+      title: '', category: 'fan-art', date: new Date().toISOString().slice(0, 10),
+      excerpt: '', cover: '', body: '', gallery: [], characters: [], locations: [],
+      tags: [], author: '', visibility: 'published',
+    },
+    fields: [
+      { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
+      { key: 'author', label: 'Auteur', type: 'text', group: 'Publication' },
+      { key: 'title', label: 'Titre', type: 'text', group: 'Contenu' },
+      { key: 'category', label: 'Catégorie', type: 'select', options: POST_CAT_OPTIONS, group: 'Contenu' },
+      { key: 'date', label: 'Date', type: 'date', group: 'Contenu' },
+      {
+        key: 'excerpt', label: 'Accroche', type: 'textarea', group: 'Contenu',
+        hint: 'Résumé court affiché sur la carte. Si vide, un extrait du texte est utilisé.',
+      },
+      { key: 'cover', label: 'Image de couverture', type: 'image', group: 'Contenu' },
+      {
+        key: 'body', label: 'Texte', type: 'markdown', group: 'Contenu',
+        hint: 'Markdown : **gras**, *italique*, ## titre, - liste, [lien](url), ![image](url).',
+      },
+      { key: 'gallery', label: 'Galerie', type: 'gallery', group: 'Images' },
+      { key: 'characters', label: 'Personnages liés', type: 'refs', ref: 'characters', group: 'Liens' },
+      { key: 'locations', label: 'Lieux liés', type: 'refs', ref: 'locations', group: 'Liens' },
+      { key: 'tags', label: 'Mots-clés', type: 'tags', group: 'Liens' },
     ],
   },
 }
