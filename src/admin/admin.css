@@ -92,7 +92,7 @@
 }
 .adm-nav__link.active {
   background: var(--wine);
-  color: var(--ivory);
+  color: var(--on-accent);
 }
 .adm-side__foot {
   margin-top: auto;
@@ -406,6 +406,7 @@ textarea.adm-input {
 .adm-btn--primary {
   background: var(--wine);
   border-color: var(--wine-bright);
+  color: var(--on-accent);
 }
 .adm-btn--primary:hover {
   background: var(--wine-bright);
@@ -446,7 +447,7 @@ textarea.adm-input {
 .adm-markdown__tabs button.is-active {
   background: var(--wine);
   border-color: var(--wine-bright);
-  color: var(--ivory);
+  color: var(--on-accent);
 }
 .adm-markdown__preview {
   border: 1px solid var(--line);

@@ -30,6 +30,10 @@
   --ivory-dim: #b9b3ab;
   --ivory-faint: #7d7a80;
 
+  /* Texte posé sur un aplat d'accent (bordeaux / violet / nuit) :
+     toujours clair, dans les deux thèmes. */
+  --on-accent: #f3ece2;
+
   /* Lignes / bordures */
   --line: rgba(239, 230, 218, 0.12);
   --line-strong: rgba(239, 230, 218, 0.24);

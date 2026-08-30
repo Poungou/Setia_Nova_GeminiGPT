@@ -48,17 +48,17 @@
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
-  color: var(--ivory-faint);
-  border: 1px solid var(--line-strong);
+  color: rgba(243, 236, 226, 0.7);
+  border: 1px solid rgba(243, 236, 226, 0.25);
   padding: 0.15rem 0.4rem;
   border-radius: var(--radius-s);
-  background: var(--overlay);
+  background: rgba(12, 13, 22, 0.5);
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .character-card:hover .character-card__number {
   transform: translate(2px, -2px);
-  color: var(--ivory);
+  color: var(--on-accent);
 }
 
 .character-card__body {
