@@ -16,6 +16,10 @@ export default [
       globals: {
         window: 'readonly',
         document: 'readonly',
+        console: 'readonly',
+        localStorage: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
       },
     },
     plugins: {

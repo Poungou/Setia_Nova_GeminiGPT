@@ -67,11 +67,34 @@ Ce projet a été bootstrapé par Claude (Cowork) le 29/08/2026, sans accès she
 - [ ] Page Univers enrichie (histoire du monde, société, magie, technologie…) au fur et à mesure
 - [ ] Carte de Woltar / Sétia avec marqueurs interactifs
 
-## Phase 8 — Backend + Administration
-- [ ] Choisir et brancher Supabase (ou équivalent) pour stocker les données en base
-- [ ] Authentification (Supabase Auth) — jamais de mot de passe en clair côté front
-- [ ] Interface `/admin` : créer/modifier/supprimer un personnage, un lieu, une relation, un événement, une archive
-- [ ] Upload d'images depuis l'interface admin (remplacement des portraits)
+## Phase 8 — Backend + Administration (EN COURS — branche `feat/admin-supabase`)
+
+Décisions prises (30/08/2026) : site **public** déployé sur Vercel, backend **Supabase**,
+login **Google** restreint à `defosse.marion@gmail.com`. Voir `ADMIN_SETUP.md`.
+
+Phase 8a — préparation code (fait) :
+- [x] `@supabase/supabase-js` installé
+- [x] `supabase/schema.sql` — tables characters / character_relations / locations / clans / events / archives + RLS (lecture publique, écriture admin) + bucket `media`
+- [x] `src/lib/supabaseClient.js` (repli auto sur données statiques si non configuré)
+- [x] `src/lib/adminConfig.js` (ADMIN_EMAILS)
+- [x] `scripts/migrate.mjs` + `npm run migrate` (données statiques → Supabase)
+- [x] `.env.example`, `.gitignore` durci
+- [x] `ADMIN_SETUP.md` — checklist pas à pas pour l'utilisatrice
+
+Phase 8b — à faire par l'utilisatrice (voir ADMIN_SETUP.md) :
+- [ ] Créer projet Supabase + exécuter `schema.sql`
+- [ ] Transmettre Project URL + clé `anon`
+- [ ] Activer le provider Google (Google Cloud OAuth)
+- [ ] Déployer sur Vercel + transmettre l'URL
+- [ ] Transmettre la clé `service_role` pour la migration (puis la régénérer)
+
+Phase 8c — assemblage (moi, une fois 8b OK) :
+- [ ] Couche d'accès données asynchrone (Supabase + repli statique) + refacto des pages
+- [ ] Route `/admin` protégée (session Supabase + garde `isAdminEmail`)
+- [ ] Formulaires créer/modifier/supprimer : personnages, lieux, relations, clans, événements, archives
+- [ ] Upload d'images (bucket `media`) + remplacement portraits / galeries
+- [ ] Bouton « Connexion » discret en pied de page → OAuth Google → `/admin`
+- [ ] Vérifier RLS : écriture impossible sans être l'admin
 
 ## Contenu à intégrer dès que disponible
 - [ ] Portraits des 7 personnages (actuellement : initiales KN, HN, FN, CA, SN, IS, MN)

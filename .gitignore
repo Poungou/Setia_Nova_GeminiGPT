@@ -3,6 +3,11 @@ dist
 dist-ssr
 *.local
 
+# Variables d'environnement (secrets) — garder seulement .env.example
+.env
+.env.*
+!.env.example
+
 # Editor
 .vscode/*
 !.vscode/extensions.json
