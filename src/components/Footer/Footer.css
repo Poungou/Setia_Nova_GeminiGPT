@@ -30,11 +30,22 @@
   color: var(--ivory-faint);
 }
 
-.site-footer__top {
+.site-footer__links {
+  display: inline-flex;
+  gap: var(--space-3);
+}
+
+.site-footer__top,
+.site-footer__admin {
   color: var(--ivory-dim);
   transition: color 0.2s ease;
 }
 
-.site-footer__top:hover {
+.site-footer__admin {
+  color: var(--ivory-faint);
+}
+
+.site-footer__top:hover,
+.site-footer__admin:hover {
   color: var(--ivory);
 }

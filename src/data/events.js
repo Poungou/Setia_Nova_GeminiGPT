@@ -1,11 +1,12 @@
 // src/data/events.js
-// Chronologie RP. Volontairement vide pour l'instant (Phase 7) — la page Chronologie
-// affiche un état vide plutôt que d'inventer des événements.
+// Chronologie RP. Source de vérité : src/data/events.json (édité via /admin).
 //
-// Schéma attendu par event :
+// Schéma d'un événement :
 //   { id, title, dateRP, order, description, characters: [], locations: [], image, importance, tags: [] }
 
-export const events = []
+import eventsData from './events.json'
+
+export const events = [...eventsData].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
 export function getEventById(id) {
   return events.find((e) => e.id === id)

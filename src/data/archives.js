@@ -1,11 +1,16 @@
 // src/data/archives.js
-// Archives RP (Phase 7). Vide pour l'instant : la page Archives affiche un état vide.
+// Archives RP. Source de vérité : src/data/archives.json (édité via /admin).
 //
-// Schéma attendu par arc :
+// Schéma d'une archive :
 //   { id, arc, title, dateRP, characters: [], locations: [], text }
 //
-// IMPORTANT : les dialogues/texte RP fournis par la propriétaire ne doivent jamais être
-// réécrits sans demande explicite. Seules des corrections orthographiques légères sont
-// tolérées, et la version enregistrée doit rester la référence.
+// IMPORTANT : le texte RP fourni par la propriétaire ne doit jamais être réécrit
+// sans demande explicite. Seules des corrections orthographiques légères sont tolérées.
 
-export const archives = []
+import archivesData from './archives.json'
+
+export const archives = archivesData
+
+export function getArchiveById(id) {
+  return archives.find((a) => a.id === id)
+}

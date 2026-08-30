@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header.jsx'
 import Footer from './components/Footer/Footer.jsx'
@@ -13,7 +14,10 @@ import Chronology from './pages/Chronology/Chronology.jsx'
 import Archives from './pages/Archives/Archives.jsx'
 import NotFound from './pages/NotFound/NotFound.jsx'
 
-export default function App() {
+// L'admin est chargé à la demande : son code n'alourdit pas le site public.
+const AdminApp = lazy(() => import('./admin/AdminApp.jsx'))
+
+function SiteShell() {
   return (
     <div className="page">
       <Header />
@@ -34,5 +38,21 @@ export default function App() {
       </main>
       <Footer />
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route
+        path="/admin/*"
+        element={
+          <Suspense fallback={<div className="adm-loading">Chargement de l’administration…</div>}>
+            <AdminApp />
+          </Suspense>
+        }
+      />
+      <Route path="*" element={<SiteShell />} />
+    </Routes>
   )
 }

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Reveal from '../Reveal/Reveal.jsx'
 import './Footer.css'
 
@@ -12,9 +13,16 @@ export default function Footer() {
         </Reveal>
         <div className="site-footer__meta">
           <span>Vitrine RP privée · Univers en évolution</span>
-          <a href="#top" className="site-footer__top">
-            Haut de page ↑
-          </a>
+          <span className="site-footer__links">
+            {import.meta.env.DEV && (
+              <Link to="/admin" className="site-footer__admin">
+                Connexion
+              </Link>
+            )}
+            <a href="#top" className="site-footer__top">
+              Haut de page ↑
+            </a>
+          </span>
         </div>
       </div>
     </footer>

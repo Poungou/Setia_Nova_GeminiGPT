@@ -67,12 +67,25 @@ Ce projet a été bootstrapé par Claude (Cowork) le 29/08/2026, sans accès she
 - [ ] Page Univers enrichie (histoire du monde, société, magie, technologie…) au fur et à mesure
 - [ ] Carte de Woltar / Sétia avec marqueurs interactifs
 
-## Phase 8 — Backend + Administration (EN COURS — branche `feat/admin-supabase`)
+## Phase 8 — Backend + Administration (EN COURS — branche `feat/admin`)
 
-Décisions prises (30/08/2026) : site **public** déployé sur Vercel, backend **Supabase**,
-login **Google** restreint à `defosse.marion@gmail.com`. Voir `ADMIN_SETUP.md`.
+Décisions (30/08/2026) : site **public**, backend **Supabase** + login Google à terme.
+MAIS l'utilisatrice ne peut pas faire elle-même la création de comptes.
+→ **Piste B d'abord** : admin **100 % local**, zéro compte, livrable tout de suite.
+La Piste A (Supabase en ligne) reste préparée pour plus tard.
 
-Phase 8a — préparation code (fait) :
+Phase 8-B — admin local (FAIT, à tester par l'utilisatrice) :
+- [x] Données déplacées dans `src/data/*.json` (les `.js` deviennent de simples lecteurs)
+- [x] Plugin Vite `plugins/woltar-admin.js` (dev only) : lire/écrire les JSON + upload images → `public/media/`
+- [x] `/admin` : liste + formulaires créer / modifier / supprimer pour les 6 collections
+- [x] Champs : texte, zones longues, tags, sélecteurs, refs entre collections, relations perso, images + galeries
+- [x] Verrou local léger (phrase d'accès `woltar`, modifiable dans `src/admin/localAuth.js`)
+- [x] Bouton « Connexion » discret en pied de page (visible en dev uniquement)
+- [x] Chargé à la demande : n'alourdit pas le site public (chunk séparé ~24 ko)
+- [ ] Retour de l'utilisatrice après essai (`npm run dev` → pied de page → « Connexion »)
+- [ ] Intégrer les vrais portraits / images via l'admin
+
+Phase 8a — préparation Supabase (fait, en attente pour la Piste A) :
 - [x] `@supabase/supabase-js` installé
 - [x] `supabase/schema.sql` — tables characters / character_relations / locations / clans / events / archives + RLS (lecture publique, écriture admin) + bucket `media`
 - [x] `src/lib/supabaseClient.js` (repli auto sur données statiques si non configuré)
@@ -81,20 +94,12 @@ Phase 8a — préparation code (fait) :
 - [x] `.env.example`, `.gitignore` durci
 - [x] `ADMIN_SETUP.md` — checklist pas à pas pour l'utilisatrice
 
-Phase 8b — à faire par l'utilisatrice (voir ADMIN_SETUP.md) :
-- [ ] Créer projet Supabase + exécuter `schema.sql`
-- [ ] Transmettre Project URL + clé `anon`
-- [ ] Activer le provider Google (Google Cloud OAuth)
-- [ ] Déployer sur Vercel + transmettre l'URL
-- [ ] Transmettre la clé `service_role` pour la migration (puis la régénérer)
-
-Phase 8c — assemblage (moi, une fois 8b OK) :
-- [ ] Couche d'accès données asynchrone (Supabase + repli statique) + refacto des pages
-- [ ] Route `/admin` protégée (session Supabase + garde `isAdminEmail`)
-- [ ] Formulaires créer/modifier/supprimer : personnages, lieux, relations, clans, événements, archives
-- [ ] Upload d'images (bucket `media`) + remplacement portraits / galeries
-- [ ] Bouton « Connexion » discret en pied de page → OAuth Google → `/admin`
-- [ ] Vérifier RLS : écriture impossible sans être l'admin
+Phase 8a-bis — Piste A, quand quelqu'un peut aider ~15 min (voir ADMIN_SETUP.md) :
+- [ ] Créer projet Supabase + exécuter `schema.sql`, transmettre URL + clé `anon`
+- [ ] Auth : privilégier le **lien magique par e-mail** (plus simple que Google OAuth)
+- [ ] Pousser le dépôt sur GitHub → déployer sur Vercel
+- [ ] Migration `npm run migrate` (clé `service_role`, puis la régénérer)
+- [ ] Basculer l'admin local vers Supabase (le schéma de champs `src/admin/schema.js` est réutilisable tel quel)
 
 ## Contenu à intégrer dès que disponible
 - [ ] Portraits des 7 personnages (actuellement : initiales KN, HN, FN, CA, SN, IS, MN)

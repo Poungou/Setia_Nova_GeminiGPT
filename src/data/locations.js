@@ -1,109 +1,11 @@
 // src/data/locations.js
 //
-// Lieux de Woltar. Même principe que characters.js : rien en dur dans les composants.
-// canon: "confirmed" | "draft" — un lieu "draft" est prévu (nom connu) mais pas encore décrit.
+// Source de vérité : src/data/locations.json (édité via /admin en mode dev).
+// canon: "confirmed" | "draft" — un lieu "draft" est prévu mais pas encore décrit.
 
-export const locations = [
-  {
-    id: 'manoir-de-setia',
-    name: 'Manoir de Sétia',
-    type: 'Demeure',
-    canon: 'confirmed',
-    location: 'Forêt de Sétia',
-    owner: 'Clan Nakamura',
-    faction: 'Clan Nakamura',
-    status: '',
-    shortDescription:
-      'Manoir situé dans / près de la forêt de Sétia, fortement associé au clan Nakamura.',
-    description:
-      'Élément particulièrement remarquable : une bibliothèque monumentale sur trois niveaux.',
-    history: '',
-    characters: ['kazuko-nakamura', 'hachiro-nakamura', 'fudo-nakamura', 'shizuka-nakamura'],
-    events: [],
-    gallery: [],
-  },
-  {
-    id: 'joyeux-lutin',
-    name: 'Le Joyeux Lutin',
-    type: 'Pub',
-    canon: 'confirmed',
-    location: '',
-    owner: 'Fudo Nakamura',
-    faction: '',
-    status: '',
-    shortDescription: 'Pub appartenant à Fudo Nakamura, lieu social important.',
-    description:
-      'Ambiance chaleureuse et vivante : point de rencontre et point de départ possible de nombreuses intrigues.',
-    history: '',
-    characters: ['fudo-nakamura', 'myo-nakamura'],
-    events: [],
-    gallery: [],
-  },
-  {
-    id: 'palais-des-astres',
-    name: 'Palais des Astres',
-    type: 'Lieu majeur',
-    canon: 'confirmed',
-    location: 'Sétia',
-    owner: '',
-    faction: '',
-    status: '',
-    shortDescription: 'Lieu majeur de Woltar / Sétia, associé aux équilibres de la cité.',
-    description: '',
-    history: '',
-    characters: [],
-    events: [],
-    gallery: [],
-  },
-  {
-    id: 'foret-de-setia',
-    name: 'Forêt de Sétia',
-    type: 'Lieu naturel',
-    canon: 'draft',
-    location: 'Sétia',
-    owner: '',
-    faction: '',
-    status: '',
-    shortDescription: '',
-    description: '',
-    history: '',
-    characters: [],
-    events: [],
-    gallery: [],
-  },
-  {
-    id: 'groove-s',
-    name: "Groove's",
-    type: '',
-    canon: 'draft',
-    location: '',
-    owner: '',
-    faction: '',
-    status: '',
-    shortDescription: '',
-    description: '',
-    history: '',
-    characters: [],
-    events: [],
-    gallery: [],
-  },
-  {
-    id: 'planetarium',
-    name: 'Planétarium',
-    type: '',
-    canon: 'draft',
-    location: '',
-    owner: '',
-    faction: '',
-    status: '',
-    shortDescription: '',
-    description: '',
-    history: '',
-    characters: [],
-    events: [],
-    gallery: [],
-  },
-]
+import locationsData from './locations.json'
+
+export const locations = locationsData
 
 export function getLocationById(id) {
   return locations.find((l) => l.id === id)
