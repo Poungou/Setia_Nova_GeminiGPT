@@ -44,7 +44,10 @@ export default function Journal() {
           <div className="journal-grid">
             {list.map((post, i) => (
               <Reveal key={post.id} as="article" className="journal-card" delay={Math.min(i * 0.05, 0.3)}>
-                <Link to={`/journal/${post.id}`} className="journal-card__link">
+                <Link
+                  to={`/journal/${post.id}`}
+                  className={`journal-card__link${post.cover ? '' : ' journal-card__link--nocover'}`}
+                >
                   {post.cover && (
                     <div className="journal-card__cover">
                       <img src={post.cover} alt="" loading="lazy" />
