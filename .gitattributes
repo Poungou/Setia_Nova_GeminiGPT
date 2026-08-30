@@ -1,0 +1,14 @@
+# Fins de ligne normalisées (LF dans le dépôt) — stoppe les avertissements Git
+* text=auto eol=lf
+
+# Fichiers binaires : jamais de conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.svg text
+*.woff binary
+*.woff2 binary
+*.ico binary
+*.pdf binary

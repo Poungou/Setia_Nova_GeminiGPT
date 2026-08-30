@@ -11,6 +11,8 @@ const browserGlobals = {
   sessionStorage: 'readonly',
   fetch: 'readonly',
   FileReader: 'readonly',
+  Image: 'readonly',
+  matchMedia: 'readonly',
   setTimeout: 'readonly',
   clearTimeout: 'readonly',
 }
