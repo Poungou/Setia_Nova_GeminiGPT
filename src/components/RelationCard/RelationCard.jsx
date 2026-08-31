@@ -28,7 +28,7 @@ export default function RelationCard({ relation }) {
         )}
       </div>
       <div className="relation-card__body">
-        <span className="relation-card__type eyebrow">{type}</span>
+        {type && <span className="relation-card__type eyebrow">{type}</span>}
         <strong>{fullName}</strong>
       </div>
     </Link>

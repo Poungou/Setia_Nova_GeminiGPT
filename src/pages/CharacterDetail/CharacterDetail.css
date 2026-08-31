@@ -22,6 +22,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18), 0 10px 30px -14px rgba(0, 0, 0, 0.55);
 }
 
 .character-hero__portrait img {
@@ -55,15 +56,49 @@
   text-transform: uppercase;
 }
 
+.character-hero__nickname {
+  color: var(--ivory-dim);
+  font-family: var(--font-reading);
+  font-style: italic;
+  font-size: 1rem;
+  margin: 0.3rem 0 0;
+}
+
+.character-hero__eyebrow {
+  margin-top: 0.6rem;
+}
+
 .character-hero__title {
   color: var(--ivory-dim);
   font-size: 1.1rem;
-  margin: 0.4rem 0 0.2rem;
+  margin: 0.3rem 0 0.2rem;
 }
 
 .character-hero__clan {
   color: var(--wine-bright);
   width: fit-content;
+}
+
+.character-hero__clan--static {
+  color: var(--ivory-faint);
+  cursor: default;
+}
+
+.character-hero__quote {
+  margin: 0.6rem 0 0.2rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--line-strong);
+  max-width: 46ch;
+  font-family: var(--font-reading);
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ivory-dim);
+}
+
+.character-hero__chat-btn {
+  width: fit-content;
+  margin-top: 0.4rem;
 }
 
 .character-hero__nav {
@@ -76,57 +111,108 @@
 }
 
 .character-hero__nav a {
+  position: relative;
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ivory-dim);
-  transition: color 0.2s ease;
+  padding-left: 0.9em;
+  transition: color 0.2s ease, padding-left 0.2s ease;
 }
 
-.character-hero__nav a:hover {
+/* Petit curseur "▸" façon menu RPG 16-bit : invisible au repos, glisse
+   discrètement au survol/focus plutôt que de s'afficher en permanence. */
+.character-hero__nav a::before {
+  content: '▸';
+  position: absolute;
+  left: -0.3em;
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.character-hero__nav a:hover,
+.character-hero__nav a:focus-visible {
   color: var(--ivory);
 }
 
-.character-section {
-  padding: var(--space-4) 0;
+.character-hero__nav a:hover::before,
+.character-hero__nav a:focus-visible::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* --- Barre d'identité horizontale, sous le hero ------------------------
+   Présentée comme une vraie carte, même recette que .character-card
+   (bordure + fond légèrement teinté + relief). Les séparateurs verticaux
+   très fins sont obtenus via un fond `--line` + `gap: 1px` sur la grille :
+   chaque info a sa propre cellule opaque, le fond ne transparaît que dans
+   l'interstice d'1px. Colonnes fluides (auto-fit) → le nombre de colonnes
+   par ligne s'adapte tout seul à la largeur de l'écran, sans breakpoint
+   dédié : même mécanique en desktop et en mobile. */
+
+.character-identity {
+  /* Respiration entre la zone sombre du hero/nav et la carte d'identité :
+     séparée du padding-bottom (qui, lui, ne change pas) pour ne toucher
+     que l'espace au-dessus de la barre, pas sa propre taille. */
+  padding-top: calc(var(--space-4) + 12px);
+  padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--line);
 }
 
-.character-section h2.eyebrow {
-  margin-bottom: var(--space-2);
-}
-
-.character-section--split {
+.identity-bar {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  /* Léger décalage supplémentaire pour que la carte se détache clairement
+     de la fine ligne de séparation juste au-dessus (fin du hero), sans
+     toucher au padding du conteneur ni à la taille de la carte elle-même. */
+  margin: 10px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--line);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 20px -14px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 
-.character-section__prose {
-  max-width: 68ch;
-  color: var(--ivory-dim);
+.identity-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: var(--space-3);
+  background:
+    linear-gradient(160deg, rgba(139, 36, 56, 0.05), rgba(51, 64, 122, 0.04)),
+    var(--gradient-card);
 }
 
-.identity-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--space-2) var(--space-3);
-  margin: 0;
-}
-
-.identity-field dt {
+.identity-chip dt {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ivory-faint);
-  margin-bottom: 0.2rem;
 }
 
-.identity-field dd {
+/* Petit accent carré/pixel devant chaque label — clin d'œil rétro discret,
+   pas un sprite : un simple carré de 3px de la couleur du texte. */
+.identity-chip dt::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  flex: none;
+}
+
+.identity-chip dd {
   margin: 0;
   font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--ivory);
 }
 
 .character-traits {
@@ -165,9 +251,138 @@
   border-color: var(--wine-bright);
 }
 
+/* --- Corps de la fiche : colonne principale + colonne latérale --------- */
+
+.character-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+}
+
+.character-body__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.character-body__aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.character-section {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.character-section--nested {
+  padding: 0;
+  border-bottom: none;
+}
+
+/* --- Cartes Caractère/Apparence + Histoire ------------------------------
+   Même langage visuel que les blocs latéraux (.character-aside-block) :
+   fond légèrement teinté, fine bordure interne en plus de la bordure
+   normale, ombre douce. `--compact` pour Caractère/Apparence (juste sous la
+   barre d'identité), `--primary` pour Histoire (bloc principal, plus large,
+   plus aéré). */
+.character-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background:
+    linear-gradient(160deg, rgba(139, 36, 56, 0.05), rgba(51, 64, 122, 0.04)),
+    var(--gradient-card);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 20px -14px rgba(0, 0, 0, 0.6);
+}
+
+.character-card--compact {
+  padding: var(--space-2) var(--space-3);
+}
+
+.character-card--primary {
+  padding: var(--space-3) var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .character-card--primary {
+    padding: var(--space-4);
+  }
+}
+
+.character-section h2.eyebrow {
+  margin-bottom: var(--space-2);
+}
+
+/* Titre de carte avec petit accent carré/pixel — même détail que les labels
+   de la barre d'identité, pour garder un langage visuel cohérent. */
+.section-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.section-card-title::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  flex: none;
+}
+
+.character-section--split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.aside-block,
+.character-aside-block {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background:
+    linear-gradient(160deg, rgba(139, 36, 56, 0.05), rgba(51, 64, 122, 0.04)),
+    var(--gradient-card);
+  padding: var(--space-2);
+  /* Relief léger : fine bordure interne + ombre discrète, en plus de la
+     bordure existante — pas de style "carte MMORPG", juste un peu de
+     profondeur. */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 20px -14px rgba(0, 0, 0, 0.6);
+}
+
+.character-aside-block h2.eyebrow {
+  margin-bottom: var(--space-2);
+}
+
+.aside-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.aside-heading .pixel-glyph {
+  color: var(--ivory-faint);
+  flex: none;
+}
+
+/* Séparateur 1px discret entre l'intitulé et le contenu de chaque bloc
+   latéral — accent technique/rétro, pas décoratif. */
+.character-aside-block > .aside-heading {
+  padding-bottom: 0.6rem;
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+.character-aside-block h2.aside-heading {
+  margin-bottom: 0;
+}
+
 .relations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-2);
 }
 
@@ -181,17 +396,90 @@
 }
 
 .character-locations a {
+  position: relative;
+  display: inline-block;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-s);
-  padding: 0.5rem 0.9rem;
+  padding: 0.5rem 0.9rem 0.5rem 1.4rem;
   color: var(--ivory-dim);
   font-size: 0.9rem;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.character-locations a:hover {
+.character-locations a::before {
+  content: '▸';
+  position: absolute;
+  left: 0.55rem;
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.character-locations a:hover,
+.character-locations a:focus-visible {
   color: var(--ivory);
   border-color: var(--ivory-dim);
+  transform: translateY(-1px);
+}
+
+.character-locations a:hover::before,
+.character-locations a:focus-visible::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.character-chronology {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.character-chronology__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 0.65rem 0.9rem;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.character-chronology__link strong {
+  position: relative;
+  padding-left: 0.9em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ivory-dim);
+  transition: color 0.2s ease;
+}
+
+.character-chronology__link strong::before {
+  content: '▸';
+  position: absolute;
+  left: -0.15em;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.character-chronology__link:hover {
+  border-color: var(--wine-bright);
+  transform: translateY(-1px);
+}
+
+.character-chronology__link:hover strong {
+  color: var(--ivory);
+}
+
+.character-chronology__link:hover strong::before {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .character-gallery {
@@ -216,7 +504,30 @@
     max-width: none;
   }
 
+  .character-identity {
+    /* +28px par rapport au mobile : plus de respiration desktop entre le
+       hero sombre et la barre d'identité, comme demandé. */
+    padding-top: calc(var(--space-4) + 28px);
+  }
+
   .character-section--split {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .character-body {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .character-body__main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .character-body__aside {
+    flex: 0 0 320px;
+    max-width: 320px;
+    position: sticky;
+    top: calc(var(--space-3) + 64px);
   }
 }

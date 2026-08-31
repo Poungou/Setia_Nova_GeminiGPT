@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header.jsx'
 import Footer from './components/Footer/Footer.jsx'
 import Ambient from './components/Ambient/Ambient.jsx'
+import AmbientAudio from './components/AmbientAudio/AmbientAudio.jsx'
 import Home from './pages/Home/Home.jsx'
 import Journal from './pages/Journal/Journal.jsx'
 import PostDetail from './pages/Journal/PostDetail.jsx'
@@ -21,11 +22,13 @@ import NotFound from './pages/NotFound/NotFound.jsx'
 
 // L'admin est chargé à la demande : son code n'alourdit pas le site public.
 const AdminApp = lazy(() => import('./admin/AdminApp.jsx'))
+const AccountApp = lazy(() => import('./account/AccountApp.jsx'))
 
 function SiteShell() {
   return (
     <div className="page">
       <Ambient />
+      <AmbientAudio />
       <Header />
       <main className="page-main">
         <Routes>
@@ -59,6 +62,14 @@ export default function App() {
         element={
           <Suspense fallback={<div className="adm-loading">Chargement de l’administration…</div>}>
             <AdminApp />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/compte/*"
+        element={
+          <Suspense fallback={<div className="adm-loading">Chargement de l’espace compte…</div>}>
+            <AccountApp />
           </Suspense>
         }
       />

@@ -1,18 +1,38 @@
 .relation-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.9rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
-  padding: 0.75rem;
+  padding: 0.75rem 0.75rem 0.75rem 1.35rem;
   background: var(--bg-raised);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.relation-card:hover {
+.relation-card::before {
+  content: '▸';
+  position: absolute;
+  left: 0.45rem;
+  top: 50%;
+  transform: translate(-3px, -50%);
+  color: var(--wine-bright);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.relation-card:hover,
+.relation-card:focus-visible {
   border-color: var(--wine-bright);
-  box-shadow: var(--glow-wine);
+  box-shadow: var(--glow-wine), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+.relation-card:hover::before,
+.relation-card:focus-visible::before {
+  opacity: 1;
+  transform: translate(0, -50%);
 }
 
 .relation-card__portrait {

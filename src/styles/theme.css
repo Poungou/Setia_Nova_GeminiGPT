@@ -2,8 +2,11 @@
    THEME — palette "Archives Vivantes"
    Sombre par défaut (bordeaux / bleu nuit / violet / ivoire).
    Clair en option (rose poudré / mauve / aubergine), via
-   <html data-theme="light">. Le choix est posé avant le premier
-   rendu par le petit script inline de index.html.
+   <html data-theme="light">. Un 3e thème "woltar" (hommage aux
+   couleurs du site historique woltar.net — rouge bordeaux, bleu,
+   fond à pois discret) est sélectionnable via <html data-theme="woltar">.
+   Le choix est posé avant le premier rendu par le petit script inline
+   de index.html.
    =================================================================== */
 
 :root {
@@ -106,6 +109,79 @@
   --glow-wine: 0 0 0 1px rgba(161, 44, 68, 0.28), 0 10px 30px -10px rgba(122, 90, 160, 0.35);
 
   color-scheme: light;
+}
+
+/* --- Thème "woltar" ---------------------------------------------------
+   Palette reprise directement du site historique woltar.net (échantillonnée
+   en direct sur le site, puis affinée sur retour de l'utilisatrice avec
+   captures d'écran + code source du jeu à l'appui — 1er jet jugé "pas assez
+   fidèle"). --bg-void/--bg-base reprennent maintenant le rouge saturé réel
+   (#980000) plutôt qu'un bordeaux assourdi, avec des pois de fond bien
+   visibles (cf. règle body plus bas). Les cartes/panneaux (--bg-raised,
+   --bg-raised-2) restent en revanche sombres façon "Archives Vivantes" —
+   choix explicite de l'utilisatrice de ne PAS reprendre le panneau
+   bleu/blanc du jeu, pour rester cohérente avec le reste du site. Pas de
+   violet dans la source : --violet est ici aliasé sur la famille bleue
+   plutôt que d'inventer une teinte hors palette. */
+:root[data-theme='woltar'] {
+  --bg-void: #5c0000;
+  --bg-base: #8a0000;
+  --bg-raised: #2c0a0a;
+  --bg-raised-2: #391010;
+  --bg-glass: rgba(44, 10, 10, 0.72);
+  --bg-header: rgba(60, 0, 0, 0.8);
+  --overlay: rgba(30, 0, 0, 0.6);
+
+  --wine: #980000;
+  --wine-bright: #c81f1f;
+  --wine-soft: rgba(168, 24, 24, 0.35);
+  --midnight: #00599c;
+  --midnight-bright: #279fd3;
+  --violet: #1c6fa8;
+  --violet-soft: rgba(39, 159, 211, 0.25);
+
+  --ivory: #f2e8df;
+  --ivory-dim: #cbb9ae;
+  --ivory-faint: #9c8b83;
+
+  --on-accent: #fdf6f0;
+
+  --line: rgba(242, 232, 223, 0.14);
+  --line-strong: rgba(242, 232, 223, 0.26);
+
+  --ok: #bfe6c8;
+  --ok-line: rgba(120, 200, 140, 0.4);
+  --danger: #f0c2cc;
+  --danger-line: var(--wine-bright);
+
+  --gradient-hero: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(168, 24, 24, 0.4), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(39, 159, 211, 0.22), transparent);
+  --gradient-card: linear-gradient(160deg, rgba(152, 0, 0, 0.1), rgba(0, 89, 156, 0.08));
+
+  --glow-wine: 0 0 0 1px rgba(168, 24, 24, 0.4), 0 8px 28px -8px rgba(168, 24, 24, 0.45);
+
+  color-scheme: dark;
+}
+
+/* Fond à pois — repris fidèlement du fond historique de woltar.net (motif
+   à pois rouges sur fond rouge, tuile 140×140 sur le vrai site — mesurée en
+   direct sur le fichier `wo_fond.jpg`). Un seul pois doux/dégradé par tuile,
+   assez large et contrasté pour se voir nettement (1er jet en filigrane
+   jugé pas assez fidèle par l'utilisatrice, corrigé sur retour explicite
+   avec captures + code source du jeu à l'appui). Fixe au scroll pour ne
+   pas distraire. */
+:root[data-theme='woltar'] body {
+  background-image: radial-gradient(
+    circle at center,
+    rgba(216, 48, 48, 0.85) 0%,
+    rgba(200, 40, 40, 0.6) 28%,
+    rgba(184, 32, 32, 0.28) 45%,
+    rgba(168, 24, 24, 0.08) 60%,
+    transparent 72%
+  );
+  background-size: 140px 140px;
+  background-position: 0 0;
+  background-attachment: fixed;
 }
 
 * {

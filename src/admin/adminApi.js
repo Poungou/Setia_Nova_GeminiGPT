@@ -15,7 +15,7 @@ async function json(res) {
 }
 
 export async function getCollection(name) {
-  const body = await json(await fetch(`${BASE}/collections/${name}`))
+  const body = await json(await fetch(`${BASE}/collections/${name}`, { credentials: 'same-origin' }))
   return body.data
 }
 
@@ -23,6 +23,7 @@ export async function saveCollection(name, rows) {
   const body = await json(
     await fetch(`${BASE}/collections/${name}`, {
       method: 'PUT',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(rows),
     }),
@@ -74,6 +75,7 @@ export async function uploadImage(file) {
   const body = await json(
     await fetch(`${BASE}/upload`, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }),

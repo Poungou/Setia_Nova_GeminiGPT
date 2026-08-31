@@ -1,30 +1,48 @@
 // src/admin/AdminApp.jsx
-import { useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Routes, Route, Navigate, Link } from 'react-router-dom'
 import { AdminProvider } from './AdminContext.jsx'
 import { useAdmin } from './useAdmin.js'
 import AdminLayout from './AdminLayout.jsx'
 import CollectionListPage from './CollectionListPage.jsx'
 import CollectionEditPage from './CollectionEditPage.jsx'
+import AdminUsersPage from './AdminUsersPage.jsx'
 import { COLLECTION_NAMES } from './schema.js'
-import { isUnlocked, unlock, lock } from './localAuth.js'
+import { getSession, loginLocalAdmin, logoutAccount } from '../lib/authApi.js'
 import './admin.css'
 
 function Gate({ onOpen }) {
   const [pass, setPass] = useState('')
-  const [err, setErr] = useState(false)
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const submit = async () => {
+    setBusy(true)
+    setErr('')
+    try {
+      const body = await loginLocalAdmin(pass)
+      if (body.user?.role !== 'admin') throw new Error('Compte non admin.')
+      onOpen(body.user)
+    } catch (e) {
+      setErr(String(e.message || e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="adm-gate">
       <form
         className="adm-gate__card"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault()
-          if (unlock(pass)) onOpen()
-          else setErr(true)
+          await submit()
         }}
       >
         <h1>Administration Woltar</h1>
-        <p className="adm-muted">Accès local. La connexion Google arrivera avec la mise en ligne.</p>
+        <p className="adm-muted">
+          Accès local protégé côté serveur. Les comptes joueurs se gèrent dans l&apos;espace compte.
+        </p>
         <input
           className="adm-input"
           type="password"
@@ -33,11 +51,16 @@ function Gate({ onOpen }) {
           value={pass}
           onChange={(e) => {
             setPass(e.target.value)
-            setErr(false)
+            setErr('')
           }}
         />
-        {err && <p className="adm-error">Phrase incorrecte.</p>}
-        <button className="adm-btn adm-btn--primary" type="submit">Entrer</button>
+        {err && <p className="adm-error">{err}</p>}
+        <button className="adm-btn adm-btn--primary" type="submit" disabled={busy}>
+          {busy ? 'Connexion...' : 'Entrer'}
+        </button>
+        <Link to="/compte" className="adm-btn adm-btn--ghost">
+          Espace utilisateur
+        </Link>
       </form>
     </div>
   )
@@ -46,29 +69,49 @@ function Gate({ onOpen }) {
 function Loading() {
   const { loading } = useAdmin()
   if (!loading) return null
-  return <div className="adm-loading">Chargement des données…</div>
+  return <div className="adm-loading">Chargement des données...</div>
 }
 
 export default function AdminApp() {
-  const [open, setOpen] = useState(isUnlocked())
+  const [session, setSession] = useState(null)
+  const [checking, setChecking] = useState(true)
 
-  if (!open) return <Gate onOpen={() => setOpen(true)} />
+  useEffect(() => {
+    let alive = true
+    getSession()
+      .then((body) => {
+        if (alive && body.user?.role === 'admin') setSession(body.user)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setChecking(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  if (checking) return <div className="adm-loading">Vérification de la session...</div>
+
+  if (!session) return <Gate onOpen={setSession} />
 
   return (
-    <AdminProvider>
+    <AdminProvider currentUser={session}>
       <Loading />
       <Routes>
         <Route
           element={
             <AdminLayout
-              onLock={() => {
-                lock()
-                setOpen(false)
+              currentUser={session}
+              onLock={async () => {
+                await logoutAccount().catch(() => {})
+                setSession(null)
               }}
             />
           }
         >
           <Route index element={<Navigate to={COLLECTION_NAMES[0]} replace />} />
+          <Route path="users" element={<AdminUsersPage />} />
           <Route path=":collection" element={<CollectionListPage />} />
           <Route path=":collection/:id" element={<CollectionEditPage />} />
         </Route>

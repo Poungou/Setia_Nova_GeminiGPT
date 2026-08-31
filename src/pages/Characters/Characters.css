@@ -16,6 +16,37 @@
   margin-bottom: var(--space-2);
 }
 
+.characters-page__secondary-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.characters-page__select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.characters-page__select select {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ivory-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-s);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.characters-page__select select:hover,
+.characters-page__select select:focus-visible {
+  color: var(--ivory);
+  border-color: var(--ivory-dim);
+}
+
 .characters-page__count {
   font-family: var(--font-mono);
   font-size: 0.75rem;

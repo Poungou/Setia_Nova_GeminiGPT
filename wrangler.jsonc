@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "nova-setia",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-30",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "WOLTAR_DB",
+      "database_name": "woltar-db",
+      "database_id": "ca4609da-c89b-42a8-a3ce-2d7fcf8cc931"
+    }
+  ],
+  "vars": {
+    "ALLOW_PUBLIC_REGISTRATION": "true"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

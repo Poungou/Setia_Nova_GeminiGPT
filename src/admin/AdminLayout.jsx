@@ -1,13 +1,13 @@
 // src/admin/AdminLayout.jsx
 import { NavLink, Outlet, Link } from 'react-router-dom'
-import { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, Circle } from 'lucide-react'
+import { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, Circle, UserCog } from 'lucide-react'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 
-const ICONS = { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine }
+const ICONS = { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle }
 
-export default function AdminLayout({ onLock }) {
+export default function AdminLayout({ onLock, currentUser }) {
   const { readOnly, error, reload } = useAdmin()
   return (
     <div className="adm">
@@ -17,6 +17,10 @@ export default function AdminLayout({ onLock }) {
           <span className="adm-side__tag">Administration</span>
         </div>
         <nav className="adm-nav">
+          <NavLink to="/admin/users" className="adm-nav__link">
+            <UserCog size={16} />
+            Utilisateurs
+          </NavLink>
           {COLLECTION_NAMES.map((name) => {
             const s = SCHEMA[name]
             const Icon = ICONS[s.icon] || Circle
@@ -29,6 +33,7 @@ export default function AdminLayout({ onLock }) {
           })}
         </nav>
         <div className="adm-side__foot">
+          {currentUser && <span className="adm-muted">{currentUser.name || currentUser.email}</span>}
           <ThemeToggle />
           <button type="button" className="adm-btn adm-btn--ghost" onClick={reload}>
             Recharger

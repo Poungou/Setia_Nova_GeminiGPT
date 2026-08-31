@@ -23,20 +23,55 @@
   overflow: hidden;
 }
 
-.character-card__portrait img {
+/* Vignette + cadre : illustration fournie par l'utilisatrice (pack
+   "cadre_grand_[couleur]", public/frames/), plus le rendu SVG dessiné à la
+   main du 1er jet. Le cadre (PixelFrame) est un FRÈRE du disque, pas un
+   enfant : le disque a son propre `overflow: hidden` pour rogner la photo
+   en cercle, et le cadre a besoin de rester non rogné pour que sa couronne
+   et ses plumes décoratives restent visibles en entier. Le cadre remplit
+   tout le wrapper (chaque illustration inclut déjà sa propre marge pour la
+   couronne/les plumes) ; le disque est positionné DANS ce même wrapper via
+   un `inset` calculé par personnage (src/lib/frames.js → getFrameMeta),
+   propre à chaque teinte de cadre puisque ce sont 4 illustrations
+   distinctes, pas des variantes recolorées d'un même tracé. */
+.character-card__disc-wrap {
+  position: relative;
+  width: 70%;
+  aspect-ratio: 1;
+}
+
+.character-card__disc {
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-raised-2);
+}
+
+.character-card__disc img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
 }
 
-.character-card:hover .character-card__portrait img {
-  transform: scale(1.04);
+.character-card:hover .character-card__disc img {
+  transform: scale(1.06);
+}
+
+.character-card__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(12, 13, 22, 0.55));
 }
 
 .character-card__initials {
   font-family: var(--font-display);
-  font-size: 3rem;
+  font-size: 1.7rem;
   color: var(--ivory-dim);
   letter-spacing: 0.05em;
 }
@@ -45,6 +80,7 @@
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
+  z-index: 2;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
@@ -59,6 +95,14 @@
 .character-card:hover .character-card__number {
   transform: translate(2px, -2px);
   color: var(--on-accent);
+}
+
+.character-card__heart {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(12, 13, 22, 0.6));
 }
 
 .character-card__body {
@@ -87,6 +131,9 @@
 
 .character-card__cta {
   margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;

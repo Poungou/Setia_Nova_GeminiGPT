@@ -1,8 +1,8 @@
 // src/admin/localAuth.js
 //
-// Verrou local léger pour /admin en attendant la connexion Google (Piste A).
-// Ce n'est PAS de la sécurité : l'admin ne tourne qu'en local sur ta machine.
-// Change la phrase ci-dessous si tu veux.
+// Ancien verrou local côté navigateur, conservé pour compatibilité avec les
+// notes historiques. /admin utilise maintenant la session serveur créée par
+// plugins/woltar-auth.js ; cette phrase ne protège plus l'API admin.
 
 export const LOCAL_PASSPHRASE = 'woltar'
 

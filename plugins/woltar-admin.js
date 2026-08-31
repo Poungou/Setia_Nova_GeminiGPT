@@ -2,7 +2,8 @@
 //
 // Plugin Vite — actif UNIQUEMENT en développement (`npm run dev`).
 // Donne à l'interface /admin de quoi lire/écrire les fichiers de données et
-// enregistrer des images, en local, sans backend ni compte.
+// enregistrer des images, en local. Les écritures admin sont protégées côté
+// serveur par la session créée via plugins/woltar-auth.js.
 //
 // Endpoints (préfixe /__admin/api) :
 //   GET  /collections/:name        -> contenu de src/data/:name.json
@@ -14,8 +15,9 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
+import { getRequestUser, httpError, isAdmin } from './lib/authStore.js'
 
-const COLLECTIONS = ['characters', 'locations', 'clans', 'events', 'archives', 'posts']
+const COLLECTIONS = ['characters', 'locations', 'clans', 'events', 'archives', 'posts', 'personas']
 const MEDIA_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg' }
 
 function slugify(s) {
@@ -63,6 +65,10 @@ export default function woltarAdmin() {
 
           // --- collections ------------------------------------------------
           if (parts[0] === 'collections') {
+            const user = await getRequestUser(root, req)
+            if (!user) throw httpError(401, 'Connexion requise.')
+            if (!isAdmin(user)) throw httpError(403, 'Réservé admin.')
+
             const name = parts[1]
             if (!COLLECTIONS.includes(name)) return send(404, { error: 'Collection inconnue' })
             const file = path.join(dataDir, `${name}.json`)
@@ -83,6 +89,9 @@ export default function woltarAdmin() {
 
           // --- upload image --------------------------------------------
           if (parts[0] === 'upload' && req.method === 'POST') {
+            const user = await getRequestUser(root, req)
+            if (!user) throw httpError(401, 'Connexion requise.')
+
             const { filename, dataUrl } = JSON.parse(await readBody(req))
             const m = /^data:([^;]+);base64,(.+)$/s.exec(dataUrl || '')
             if (!m) return send(400, { error: 'dataUrl invalide' })
@@ -97,7 +106,7 @@ export default function woltarAdmin() {
 
           return send(404, { error: 'Route inconnue' })
         } catch (err) {
-          res.statusCode = 500
+          res.statusCode = err?.status || 500
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           res.end(JSON.stringify({ error: String(err && err.message ? err.message : err) }))
         }

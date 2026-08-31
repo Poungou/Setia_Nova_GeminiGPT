@@ -176,6 +176,11 @@
   flex: 1;
   min-width: 0;
 }
+.adm-card__body strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
 .adm-card__body span {
   font-size: 0.85rem;
 }
@@ -430,6 +435,22 @@ textarea.adm-input {
   pointer-events: none;
 }
 
+.adm-card--static:hover {
+  border-color: var(--line);
+}
+
+.adm-user-control {
+  max-width: 130px;
+}
+
+.adm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ivory-dim);
+  font-size: 0.85rem;
+}
+
 /* --- markdown ---------------------------------------------------- */
 .adm-markdown__tabs {
   display: flex;
@@ -482,26 +503,112 @@ textarea.adm-input {
 @media (max-width: 780px) {
   .adm {
     grid-template-columns: 1fr;
+    min-width: 0;
   }
+
+  /* Barre du haut sticky au lieu de la colonne latérale : logo, puis deux
+     rangées qui défilent horizontalement (nav, puis outils) — rien ne
+     déborde ni ne se compresse en colonnes de texte illisibles. */
   .adm-side {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 30;
     height: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: var(--space-2) 0;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-void);
   }
-  .adm-nav {
+  .adm-side__head {
     flex-direction: row;
-    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0 var(--space-2);
+  }
+  .adm-side__tag {
+    display: none;
+  }
+
+  .adm-nav,
+  .adm-side__foot {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.35rem;
+    padding: 0.1rem var(--space-2);
+    margin: 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .adm-nav::-webkit-scrollbar,
+  .adm-side__foot::-webkit-scrollbar {
+    display: none;
+  }
+  .adm-nav__link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.82rem;
   }
   .adm-side__foot {
-    margin: 0;
-    flex-direction: row;
+    margin-top: 0;
   }
+  .adm-side__foot > * {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   .adm-main {
     padding: var(--space-2);
+    overflow-x: hidden;
   }
+
+  /* Liste : le titre passe au-dessus du bouton "Nouveau…" au lieu de le
+     pousser hors champ. */
+  .adm-list__head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+  .adm-list__head .adm-btn {
+    align-self: flex-start;
+  }
+
+  /* Éditeur de fiche : retour / titre / actions s'empilent proprement —
+     c'est ce qui débordait le plus (bouton Enregistrer coupé à l'écran). */
+  .adm-edit__head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+  .adm-edit__head > a:first-child {
+    align-self: flex-start;
+  }
+  .adm-edit__title {
+    text-align: left;
+  }
+  .adm-edit__title h1 {
+    font-size: 1.4rem;
+  }
+  .adm-edit__actions {
+    justify-content: stretch;
+  }
+  .adm-edit__actions .adm-btn {
+    flex: 1;
+  }
+
   .adm-relation {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .adm-side__head .adm-side__logo {
+    font-size: 1.2rem;
   }
 }

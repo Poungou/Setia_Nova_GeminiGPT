@@ -62,6 +62,8 @@ export function Field({ field, value, onChange, allData }) {
       return <RefsInput field={field} value={value || []} onChange={onChange} allData={allData} />
     case 'relations':
       return <RelationsInput value={value || []} onChange={onChange} allData={allData} />
+    case 'characterSelect':
+      return <CharacterSelectInput value={value || ''} onChange={onChange} allData={allData} />
     default:
       return (
         <input
@@ -299,6 +301,28 @@ function RefsInput({ field, value, onChange, allData }) {
           ))}
       </select>
     </div>
+  )
+}
+
+// Sélecteur simple (un seul personnage) — utilisé par exemple pour lier une
+// Persona IA à sa fiche personnage (`characterId`). Contrairement à `refs`
+// (liste), il ne stocke qu'un seul id sous forme de chaîne.
+function CharacterSelectInput({ value, onChange, allData }) {
+  const chars = allData?.characters || []
+  return (
+    <select
+      className="adm-input"
+      value={value}
+      disabled={!adminAvailable}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">— personnage —</option>
+      {chars.map((c) => (
+        <option key={c.id} value={c.id}>
+          {SCHEMA.characters.title(c)}
+        </option>
+      ))}
+    </select>
   )
 }
 

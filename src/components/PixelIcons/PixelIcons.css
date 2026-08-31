@@ -1,0 +1,20 @@
+/* Icônes pixel-art partagées (cœur, paopu, cadre). Le cœur reste un SVG
+   généré (grille de rectangles, crispEdges garde les bords nets) ; paopu
+   et cadre sont désormais des illustrations fournies par l'utilisatrice
+   (bitmaps PNG), pas du SVG dessiné. */
+
+.pixel-icon {
+  shape-rendering: crispEdges;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+/* .pixel-icon--paopu et .pixel-icon--frame sont des images bitmap : pas de
+   currentColor, juste un cadrage plein bloc (dimensions posées en attributs
+   width/height sur le <img> lui-même pour paopu, en % pour le cadre). */
+.pixel-icon--frame {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

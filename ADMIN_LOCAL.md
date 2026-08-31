@@ -1,8 +1,8 @@
 # Admin local — mode d'emploi
 
 L'administration tourne **sur ta machine**, pendant que le serveur de dev est lancé.
-Aucun compte, aucune connexion internet requise. Tes modifications sont écrites
-directement dans `src/data/*.json` et le site se recharge tout seul.
+Elle utilise maintenant une session locale côté serveur. Tes modifications sont
+écrites directement dans `src/data/*.json` et le site se recharge tout seul.
 
 ## Y accéder
 
@@ -15,7 +15,10 @@ npm run dev
 2. Ouvre `http://localhost:5173`.
 3. Tout en bas de page (pied de page), clique le lien discret **« Connexion »**.
 4. Phrase d'accès : `woltar`
-   *(modifiable dans `src/admin/localAuth.js` si tu veux)*
+   *(modifiable avec `WOLTAR_ADMIN_PASSPHRASE` dans `.env.local` si tu veux)*
+
+Les comptes joueurs passent par `http://localhost:5173/compte`. Le premier
+compte inscrit devient admin ; les suivants deviennent `user`.
 
 ## Ce que tu peux faire
 
@@ -49,5 +52,6 @@ sera en place).
 ## Limites (levées avec la mise en ligne — Piste A)
 
 - Fonctionne uniquement en local, avec `npm run dev`.
-- Le verrou par phrase d'accès n'est pas de la vraie sécurité (inutile en local).
+- La phrase d'accès locale sert à créer une session admin côté serveur pour le
+  dev. Pour une mise en ligne publique, il faudra brancher l'auth définitive.
 - Pas d'historique des versions autre que git.

@@ -1,13 +1,57 @@
 .ambient {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
 
+:root[data-theme='dark'] .ambient--dark-media {
+  z-index: 0;
+}
+
+:root[data-theme='dark'] .ambient--dark-media ~ .page-main,
+:root[data-theme='dark'] .ambient--dark-media ~ .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.ambient__dark-fallback,
+.ambient__dark-video,
+.ambient__dark-veil {
+  display: none;
+  position: absolute;
+  inset: 0;
+}
+
+:root[data-theme='dark'] .ambient--dark-media .ambient__dark-fallback {
+  display: block;
+  z-index: 0;
+  background-image: url('/media/fond_sombre.jfif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+:root[data-theme='dark'] .ambient--dark-media .ambient__dark-video {
+  display: block;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:root[data-theme='dark'] .ambient--dark-media .ambient__dark-veil {
+  display: block;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 80% 58% at 50% 24%, rgba(12, 13, 22, 0.18), rgba(12, 13, 22, 0.52)),
+    rgba(5, 7, 14, 0.34);
+}
+
 .ambient__blob {
   position: absolute;
+  z-index: 3;
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.5;
@@ -50,6 +94,7 @@
 /* Poussière d'étoiles : deux couches de points qui scintillent doucement. */
 .ambient__dust {
   position: absolute;
+  z-index: 3;
   inset: -40%;
   background-image:
     radial-gradient(1.4px 1.4px at 20% 30%, var(--ivory-faint) 50%, transparent),
@@ -85,8 +130,18 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ambient__dark-video {
+    display: none;
+  }
+
   .ambient__blob,
   .ambient__dust {
     animation: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .ambient__dark-video {
+    display: none;
   }
 }

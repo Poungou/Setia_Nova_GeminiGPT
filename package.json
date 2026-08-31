@@ -7,8 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "cloudflare:preview": "npm run build && wrangler dev",
     "lint": "eslint .",
-    "migrate": "node scripts/migrate.mjs"
+    "migrate": "node scripts/migrate.mjs",
+    "d1:seed:generate": "node scripts/generate-d1-seed.mjs",
+    "d1:migrate:local": "wrangler d1 execute woltar-db --local --file=./migrations/0001_init.sql",
+    "d1:migrate:remote": "wrangler d1 execute woltar-db --remote --file=./migrations/0001_init.sql"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
@@ -16,6 +20,7 @@
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.462.0",
     "marked": "^18.0.11",
+    "openai": "^6.49.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"
@@ -27,6 +32,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "wrangler": "^4.127.1"
   }
 }

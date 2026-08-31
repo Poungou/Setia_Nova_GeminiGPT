@@ -12,7 +12,9 @@
       (function () {
         try {
           var t = localStorage.getItem('woltar-theme')
-          if (t !== 'light' && t !== 'dark') {
+          if (t !== 'light' && t !== 'dark' && t !== 'woltar') {
+            // 'woltar' n'est jamais déduit des préférences système : seulement
+            // choisi via le sélecteur, puis mémorisé (voir src/theme.js).
             t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
           }
           document.documentElement.dataset.theme = t

@@ -8,6 +8,19 @@ dist-ssr
 .env.*
 !.env.example
 
+# Comptes et secrets locaux du serveur Vite
+plugins/data/
+
+# Cloudflare Wrangler local state and local Worker secrets
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Export genere depuis les donnees locales pour peupler D1 (contient les
+# fiches personnages/Personas telles quelles — pas un secret, mais un
+# fichier genere, pas a versionner)
+d1-seed.sql
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

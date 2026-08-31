@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { imgSrc, imgFocus } from '../../lib/image.js'
+import { resolveFrameColor, getFrameMeta } from '../../lib/frames.js'
+import PixelFrame from '../PixelIcons/PixelFrame.jsx'
+import PixelHeart from '../PixelIcons/PixelHeart.jsx'
+import PixelPaopu from '../PixelIcons/PixelPaopu.jsx'
 import './CharacterCard.css'
 
 const MotionLink = motion(Link)
@@ -15,6 +19,8 @@ function getInitials(character) {
 export default function CharacterCard({ character, index = 0 }) {
   const reduce = useReducedMotion()
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
+  const frameColor = resolveFrameColor(character)
+  const frameMeta = getFrameMeta(frameColor)
 
   const motionProps = reduce
     ? {}
@@ -29,24 +35,38 @@ export default function CharacterCard({ character, index = 0 }) {
   return (
     <MotionLink to={`/personnages/${character.id}`} className="character-card" {...motionProps}>
       <div className="character-card__portrait">
-        {imgSrc(character.portrait) ? (
-          <img
-            src={imgSrc(character.portrait)}
-            alt={fullName}
-            loading="lazy"
-            style={{ objectPosition: imgFocus(character.portrait) }}
-          />
-        ) : (
-          <span className="character-card__initials">{getInitials(character)}</span>
-        )}
         <span className="character-card__number">{character.number}</span>
+        <PixelHeart color={character.color} size={17} className="character-card__heart" title={`Couleur de ${character.firstName || 'ce personnage'}`} />
+
+        <span className="character-card__disc-wrap">
+          <span
+            className="character-card__disc"
+            style={{
+              inset: `${frameMeta.inset.top}% ${frameMeta.inset.right}% ${frameMeta.inset.bottom}% ${frameMeta.inset.left}%`,
+            }}
+          >
+            {imgSrc(character.portrait) ? (
+              <img
+                src={imgSrc(character.portrait)}
+                alt={fullName}
+                loading="lazy"
+                style={{ objectPosition: imgFocus(character.portrait) }}
+              />
+            ) : (
+              <span className="character-card__initials">{getInitials(character)}</span>
+            )}
+          </span>
+          <PixelFrame frameColor={frameColor} className="character-card__frame" />
+        </span>
       </div>
 
       <div className="character-card__body">
         {character.clan && <span className="character-card__clan eyebrow">Clan {character.clan}</span>}
         <h3 className="character-card__name">{fullName}</h3>
         <p className="character-card__title">{character.title}</p>
-        <span className="character-card__cta">Voir la fiche →</span>
+        <span className="character-card__cta">
+          Voir la fiche <PixelPaopu size={18} />
+        </span>
       </div>
     </MotionLink>
   )

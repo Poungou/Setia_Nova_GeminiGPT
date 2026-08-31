@@ -11,6 +11,7 @@ import clansJson from '../data/clans.json'
 import eventsJson from '../data/events.json'
 import archivesJson from '../data/archives.json'
 import postsJson from '../data/posts.json'
+import personasJson from '../data/personas.json'
 
 const BUNDLED = {
   characters: charactersJson,
@@ -19,9 +20,10 @@ const BUNDLED = {
   events: eventsJson,
   archives: archivesJson,
   posts: postsJson,
+  personas: personasJson,
 }
 
-export function AdminProvider({ children }) {
+export function AdminProvider({ children, currentUser = null }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -56,8 +58,8 @@ export function AdminProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ data, loading, error, reload: load, save, readOnly: !adminAvailable }),
-    [data, loading, error, load, save],
+    () => ({ data, loading, error, reload: load, save, readOnly: !adminAvailable, currentUser }),
+    [data, loading, error, load, save, currentUser],
   )
 
   return <AdminCtx.Provider value={value}>{children}</AdminCtx.Provider>

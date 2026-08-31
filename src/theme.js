@@ -4,12 +4,18 @@
 
 export const THEME_KEY = 'woltar-theme'
 
+// Ordre de cycle du sélecteur. 'woltar' n'est jamais choisi automatiquement
+// (pas de prefers-color-scheme correspondant) : uniquement via ce toggle,
+// puis mémorisé.
+export const THEMES = ['dark', 'light', 'woltar']
+
 export function getTheme() {
-  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
+  const t = document.documentElement.dataset.theme
+  return THEMES.includes(t) ? t : 'dark'
 }
 
 export function setTheme(theme) {
-  const t = theme === 'light' ? 'light' : 'dark'
+  const t = THEMES.includes(theme) ? theme : 'dark'
   document.documentElement.dataset.theme = t
   try {
     localStorage.setItem(THEME_KEY, t)
@@ -20,5 +26,7 @@ export function setTheme(theme) {
 }
 
 export function toggleTheme() {
-  return setTheme(getTheme() === 'light' ? 'dark' : 'light')
+  const current = getTheme()
+  const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]
+  return setTheme(next)
 }

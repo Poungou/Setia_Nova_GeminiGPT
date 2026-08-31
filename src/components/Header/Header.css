@@ -52,6 +52,7 @@
 
 .site-header__nav--desktop {
   display: none;
+  align-items: center;
   gap: var(--space-3);
 }
 
@@ -102,6 +103,116 @@
   padding: var(--space-2) var(--space-3) var(--space-3);
   gap: var(--space-2);
   border-top: 1px solid var(--line);
+}
+
+/* --- Regroupement « Univers » (Clans / Lieux / Chronologie) --- */
+
+.site-header__group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.site-header__group-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.site-header__caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--ivory-faint);
+  padding: 0.3rem;
+  margin: 0 -0.3rem 0 -0.1rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.site-header__group:hover .site-header__caret,
+.site-header__group:focus-within .site-header__caret,
+.site-header__caret[aria-expanded='true'] {
+  color: var(--ivory);
+}
+
+.site-header__group:hover .site-header__caret,
+.site-header__group:focus-within .site-header__caret {
+  transform: rotate(180deg);
+}
+
+.site-header__submenu {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translate(-50%, -6px);
+  display: flex;
+  flex-direction: column;
+  min-width: 172px;
+  padding: 0.4rem;
+  background: var(--bg-header);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 60;
+}
+
+.site-header__group:hover .site-header__submenu,
+.site-header__group:focus-within .site-header__submenu,
+.site-header__submenu.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.site-header__submenu-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ivory-dim);
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--radius-s);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.site-header__submenu-link:hover,
+.site-header__submenu-link.is-active {
+  color: var(--ivory);
+  background: var(--wine-soft);
+}
+
+.site-header__mobile-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header__mobile-group-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-header__mobile-group-row .site-header__caret {
+  color: var(--ivory-dim);
+  transition: transform 0.2s ease;
+}
+
+.site-header__mobile-group-row .site-header__caret[aria-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+.site-header__mobile-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0.25rem 0 0.25rem var(--space-3);
+  margin-top: -0.25rem;
+  border-left: 1px solid var(--line);
 }
 
 @media (min-width: 900px) {

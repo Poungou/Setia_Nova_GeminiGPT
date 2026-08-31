@@ -16,9 +16,12 @@ export default function Footer() {
           <span>Vitrine RP privée · Univers en évolution</span>
           <span className="site-footer__links">
             <ThemeToggle />
+            <Link to="/compte" className="site-footer__admin">
+              Compte
+            </Link>
             {import.meta.env.DEV && (
               <Link to="/admin" className="site-footer__admin">
-                Connexion
+                Admin
               </Link>
             )}
             <a href="#top" className="site-footer__top">
