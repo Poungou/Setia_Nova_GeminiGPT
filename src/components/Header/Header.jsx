@@ -22,6 +22,7 @@ const NAV_LINKS = [
   { to: '/journal', label: 'Journal' },
   { to: '/galerie', label: 'Galerie' },
   { to: '/archives', label: 'Archives' },
+  { to: '/aether', label: 'Aether' },
 ]
 
 export default function Header() {

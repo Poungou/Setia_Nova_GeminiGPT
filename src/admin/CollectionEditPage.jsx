@@ -5,7 +5,6 @@ import { Save, Trash2, ArrowLeft } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import { Field } from './Fields.jsx'
-import PersonaTester from './PersonaTester.jsx'
 
 export default function CollectionEditPage() {
   const { collection, id } = useParams()
@@ -159,8 +158,6 @@ export default function CollectionEditPage() {
           </fieldset>
         ))}
       </form>
-
-      {collection === 'personas' && !isNew && <PersonaTester personaId={existing.id} />}
     </div>
   )
 }

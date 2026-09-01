@@ -2,11 +2,14 @@
 //
 // API publique, sans authentification : ce que le site public consomme en
 // direct pour /personnages et /personnages/:id, plutôt que de dépendre
-// uniquement du JSON figé au build. Ne touche jamais aux champs privés
-// d'une Persona (voir worker/lib/publicStore.js) — /__ai/api/chat reste le
-// seul endroit qui lit la fiche Persona complète.
+// uniquement du JSON figé au build.
+//
+// Historique — tâche « Aether » : la route /personas/:characterId (Persona
+// RP publique d'un personnage) a été retirée — le système de Personas est
+// supprimé au profit d'AETHER, l'assistant IA central unique du site (voir
+// worker/routes/aether.js, branché sur /__aether, pas /__public).
 
-import { getPublicCharacter, getPublicPersonaForCharacter, listPublicCharacters } from '../lib/publicStore.js'
+import { getPublicCharacter, listPublicCharacters } from '../lib/publicStore.js'
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -32,11 +35,6 @@ export async function handlePublic(request, env, parts) {
       const character = await getPublicCharacter(env, decodeURIComponent(parts[1]))
       if (!character) return json({ error: 'Personnage introuvable.' }, { status: 404 })
       return json({ data: character })
-    }
-
-    if (parts[0] === 'personas' && parts[1]) {
-      const persona = await getPublicPersonaForCharacter(env, decodeURIComponent(parts[1]))
-      return json({ data: persona })
     }
 
     return json({ error: 'Route inconnue' }, { status: 404 })

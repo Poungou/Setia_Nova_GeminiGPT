@@ -17,7 +17,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { getRequestUser, httpError, isAdmin } from './lib/authStore.js'
 
-const COLLECTIONS = ['characters', 'locations', 'clans', 'events', 'archives', 'posts', 'personas']
+const COLLECTIONS = ['characters', 'locations', 'clans', 'events', 'archives', 'posts', 'aether']
 const MEDIA_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg' }
 
 function slugify(s) {

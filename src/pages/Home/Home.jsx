@@ -3,11 +3,15 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { characters } from '../../data/characters.js'
 import { locations } from '../../data/locations.js'
 import { getSiteStats } from '../../utils/stats.js'
+import aetherData from '../../data/aether.json'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import './Home.css'
+
+const aetherConfig = aetherData[0] || null
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -55,6 +59,20 @@ export default function Home() {
               </Link>
               <Link to="/univers" className="btn">
                 Ouvrir les archives
+              </Link>
+              <Link to="/aether" className="hero__aether-cta">
+                <span className="hero__aether-avatar" aria-hidden="true">
+                  {imgSrc(aetherConfig?.avatar) ? (
+                    <img
+                      src={imgSrc(aetherConfig?.avatar)}
+                      alt=""
+                      style={{ objectPosition: imgFocus(aetherConfig?.avatar) }}
+                    />
+                  ) : (
+                    <span>A</span>
+                  )}
+                </span>
+                Parler à Aether
               </Link>
             </motion.div>
 

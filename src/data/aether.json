@@ -1,0 +1,11 @@
+[
+  {
+    "id": "aether",
+    "name": "Aether",
+    "enabled": "true",
+    "avatar": "",
+    "greeting": "Suis ton cœur. Pour le reste, demande-moi.",
+    "system_prompt": "",
+    "character_context": ""
+  }
+]

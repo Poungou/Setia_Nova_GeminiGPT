@@ -5,6 +5,7 @@ import Footer from './components/Footer/Footer.jsx'
 import Ambient from './components/Ambient/Ambient.jsx'
 import AmbientAudio from './components/AmbientAudio/AmbientAudio.jsx'
 import Home from './pages/Home/Home.jsx'
+import Aether from './pages/Aether/Aether.jsx'
 import Journal from './pages/Journal/Journal.jsx'
 import PostDetail from './pages/Journal/PostDetail.jsx'
 import Gallery from './pages/Gallery/Gallery.jsx'
@@ -33,6 +34,7 @@ function SiteShell() {
       <main className="page-main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/aether" element={<Aether />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/journal/:id" element={<PostDetail />} />
           <Route path="/galerie" element={<Gallery />} />

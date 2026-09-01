@@ -96,11 +96,6 @@
   color: var(--ivory-dim);
 }
 
-.character-hero__chat-btn {
-  width: fit-content;
-  margin-top: 0.4rem;
-}
-
 .character-hero__nav {
   display: flex;
   flex-wrap: wrap;

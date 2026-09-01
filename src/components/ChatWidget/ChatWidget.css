@@ -24,6 +24,14 @@
   max-height: 460px;
 }
 
+.chat-widget--page {
+  width: 100%;
+  max-width: 640px;
+  height: min(560px, 70vh);
+  margin: 0 auto;
+  box-shadow: var(--glow-wine);
+}
+
 .chat-widget__head {
   display: flex;
   align-items: center;

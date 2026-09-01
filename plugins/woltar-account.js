@@ -1,7 +1,12 @@
 // plugins/woltar-account.js
 //
 // API serveur pour l'espace utilisateur /compte. Elle est volontairement
-// limitee aux personnages et Personas IA appartenant a l'utilisateur connecte.
+// limitee aux personnages appartenant a l'utilisateur connecte.
+//
+// Historique — tache « Aether » : la collection `personas` (Personas RP
+// liees a un personnage, gerables depuis /compte) a ete retiree d'ici. Le
+// site n'a plus qu'un seul assistant IA central, AETHER (config statique,
+// non liee a un compte) — voir plugins/woltar-aether.js.
 
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -13,7 +18,6 @@ import {
 } from './lib/authStore.js'
 
 const MAX_BODY_BYTES = 1024 * 1024
-const OWNED_COLLECTIONS = new Set(['characters', 'personas'])
 const REFERENCE_COLLECTIONS = ['locations', 'clans', 'events', 'archives', 'posts']
 
 function readBody(req) {
@@ -46,7 +50,7 @@ function ownRows(rows, user) {
 }
 
 function assertOwnedCollection(name) {
-  if (!OWNED_COLLECTIONS.has(name)) {
+  if (name !== 'characters') {
     throw httpError(403, 'Cette collection est reservee a l’administration.')
   }
 }
@@ -59,7 +63,7 @@ function assertId(row) {
   if (!row?.id || typeof row.id !== 'string') throw httpError(400, 'Identifiant manquant.')
 }
 
-async function sanitizeOwnedRow(dataDir, name, row, user, existing = null) {
+function sanitizeOwnedRow(row, user, existing = null) {
   const clean = { ...row, ownerUserId: user.id }
   const now = new Date().toISOString()
   clean.updatedAt = now
@@ -70,32 +74,9 @@ async function sanitizeOwnedRow(dataDir, name, row, user, existing = null) {
     clean.ownerUserId = getOwnerUserId(existing)
   }
 
-  if (name === 'characters') {
-    assertId(clean)
-    if (!clean.author) clean.author = user.name || user.email
-    return clean
-  }
-
-  if (name === 'personas') {
-    const characterId = String(clean.characterId || '').trim()
-    if (!characterId) throw httpError(400, 'Choisis un personnage associe.')
-    if (existing && characterId !== existing.characterId) {
-      throw httpError(400, 'Pour changer de personnage associe, cree une nouvelle Persona.')
-    }
-
-    const characters = await readCollection(dataDir, 'characters')
-    const character = characters.find((c) => c.id === characterId)
-    if (!character) throw httpError(404, 'Fiche personnage associee introuvable.')
-    if (getOwnerUserId(character) !== user.id) {
-      throw httpError(403, 'Tu peux creer une Persona uniquement pour tes propres personnages.')
-    }
-
-    clean.characterId = characterId
-    clean.id = existing?.id || characterId
-    return clean
-  }
-
-  throw httpError(403, 'Collection non autorisee.')
+  assertId(clean)
+  if (!clean.author) clean.author = user.name || user.email
+  return clean
 }
 
 export default function woltarAccount() {
@@ -122,11 +103,7 @@ export default function woltarAccount() {
 
           if (parts[0] === 'bootstrap' && req.method === 'GET') {
             const characters = await readCollection(dataDir, 'characters')
-            const personas = await readCollection(dataDir, 'personas')
-            const data = {
-              characters: ownRows(characters, user),
-              personas: ownRows(personas, user),
-            }
+            const data = { characters: ownRows(characters, user) }
             for (const name of REFERENCE_COLLECTIONS) data[name] = await readCollection(dataDir, name)
             return send(200, { user, data })
           }
@@ -141,7 +118,7 @@ export default function woltarAccount() {
             }
 
             if (req.method === 'POST' && parts.length === 2) {
-              const clean = await sanitizeOwnedRow(dataDir, name, await readJson(req), user)
+              const clean = sanitizeOwnedRow(await readJson(req), user)
               if (rows.some((row) => row.id === clean.id)) {
                 throw httpError(409, 'Cet identifiant existe deja.')
               }
@@ -156,7 +133,7 @@ export default function woltarAccount() {
               assertCanEdit(user, existing)
 
               if (req.method === 'PUT') {
-                const clean = await sanitizeOwnedRow(dataDir, name, await readJson(req), user, existing)
+                const clean = sanitizeOwnedRow(await readJson(req), user, existing)
                 await writeCollection(
                   dataDir,
                   name,
@@ -170,16 +147,6 @@ export default function woltarAccount() {
                 name,
                 rows.filter((row) => row.id !== id),
               )
-
-              if (name === 'characters') {
-                const personas = await readCollection(dataDir, 'personas')
-                const nextPersonas = personas.filter(
-                  (persona) => !(persona.characterId === id && getOwnerUserId(persona) === user.id),
-                )
-                if (nextPersonas.length !== personas.length) {
-                  await writeCollection(dataDir, 'personas', nextPersonas)
-                }
-              }
 
               return send(200, { ok: true })
             }

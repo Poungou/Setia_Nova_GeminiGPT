@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, LogOut, MessageCircle, Plus, Save, Trash2, UserRound } from 'lucide-react'
+import { ArrowLeft, LogOut, Plus, Save, Trash2, UserRound } from 'lucide-react'
 import { accountBackendAvailable, loginAccount, logoutAccount, registerAccount } from '../lib/authApi.js'
 import {
   createAccountRow,
@@ -10,13 +10,11 @@ import {
 } from '../lib/accountApi.js'
 import { SCHEMA } from '../admin/schema.js'
 import { Field } from '../admin/Fields.jsx'
-import ChatWidget from '../components/ChatWidget/ChatWidget.jsx'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 import '../admin/admin.css'
 
 const SECTIONS = {
   personnages: { collection: 'characters', label: 'Mes personnages', singular: 'personnage' },
-  personas: { collection: 'personas', label: 'Mes Personas IA', singular: 'persona IA' },
 }
 
 function AccountBackendUnavailable() {
@@ -123,13 +121,12 @@ function AuthGate({ onSession }) {
 
 function Dashboard({ data }) {
   const characters = data?.characters || []
-  const personas = data?.personas || []
   return (
     <div className="adm-list">
       <header className="adm-list__head">
         <div>
           <h1>Mon espace</h1>
-          <p className="adm-muted">Tes personnages et Personas IA.</p>
+          <p className="adm-muted">Tes personnages.</p>
         </div>
       </header>
       <ul className="adm-cards">
@@ -140,15 +137,6 @@ function Dashboard({ data }) {
               <span className="adm-muted">{characters.length} fiche(s)</span>
             </div>
             <Plus size={16} />
-          </Link>
-        </li>
-        <li>
-          <Link to="/compte/personas" className="adm-card">
-            <div className="adm-card__body">
-              <strong>Mes Personas IA</strong>
-              <span className="adm-muted">{personas.length} fiche(s)</span>
-            </div>
-            <MessageCircle size={16} />
           </Link>
         </li>
       </ul>
@@ -236,10 +224,6 @@ function AccountEdit({ data, reload }) {
   }
 
   const computedId = isNew ? schema.makeId(form) : existing.id
-  const linkedCharacter =
-    collection === 'personas'
-      ? (data?.characters || []).find((character) => character.id === (existing?.characterId || form.characterId))
-      : null
 
   const setField = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
@@ -253,7 +237,6 @@ function AccountEdit({ data, reload }) {
     setFlash('')
     try {
       const row = { ...schema.defaults, ...form, id: computedId }
-      if (!isNew && collection === 'personas') row.characterId = existing.characterId
       const saved = isNew
         ? await createAccountRow(collection, row)
         : await updateAccountRow(collection, existing.id, row)
@@ -323,30 +306,12 @@ function AccountEdit({ data, reload }) {
               <div key={field.key} className={`adm-field adm-field--${field.type}`}>
                 <label htmlFor={`f-${field.key}`}>{field.label}</label>
                 {field.hint && <p className="adm-hint">{field.hint}</p>}
-                {!isNew && collection === 'personas' && field.key === 'characterId' ? (
-                  <input
-                    id={`f-${field.key}`}
-                    className="adm-input"
-                    value={linkedCharacter ? SCHEMA.characters.title(linkedCharacter) : form.characterId || ''}
-                    disabled
-                    readOnly
-                  />
-                ) : (
-                  <Field field={field} value={form[field.key]} onChange={(value) => setField(field.key, value)} allData={data} />
-                )}
+                <Field field={field} value={form[field.key]} onChange={(value) => setField(field.key, value)} allData={data} />
               </div>
             ))}
           </fieldset>
         ))}
       </form>
-
-      {!isNew && collection === 'personas' && linkedCharacter && (
-        <section className="adm-fieldset">
-          <h2 className="eyebrow">Tester la Persona</h2>
-          <p className="adm-hint">Ce test utilise ta fiche enregistrée et la clé OpenAI du serveur.</p>
-          <ChatWidget persona={existing} character={linkedCharacter} testMode variant="inline" />
-        </section>
-      )}
     </div>
   )
 }
@@ -386,9 +351,6 @@ function Workspace({ user, onLogout }) {
           </NavLink>
           <NavLink to="/compte/personnages" className="adm-nav__link">
             <UserRound size={16} /> Mes personnages
-          </NavLink>
-          <NavLink to="/compte/personas" className="adm-nav__link">
-            <MessageCircle size={16} /> Mes Personas IA
           </NavLink>
           {user.role === 'admin' && (
             <NavLink to="/admin" className="adm-nav__link">

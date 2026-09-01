@@ -1,22 +1,26 @@
 [
   {
-    "title": "Testt Yaya",
-    "category": "fan-art",
-    "date": "2026-08-30",
-    "excerpt": "Blablabla",
-    "cover": {
-      "src": "/media/shizukanagala2025-mtfo8rrj.webp",
-      "focus": "50% 14%"
-    },
-    "body": "Blablablalbal test",
-    "gallery": [],
-    "characters": [
-      "shizuka-nakamura"
+    "title": "Archive_#01",
+    "category": "chapitre",
+    "date": "2026-08-31",
+    "excerpt": "",
+    "cover": "/media/1342-mthr8ijg.gif",
+    "body": "",
+    "gallery": [
+      "/media/641-mthr96g6.webp",
+      "/media/671-mthr9m21.webp"
     ],
-    "locations": [],
-    "tags": [],
-    "author": "Test Kazu",
+    "characters": [
+      "kazuko-nakamura"
+    ],
+    "locations": [
+      "manoir-de-setia"
+    ],
+    "tags": [
+      "BD"
+    ],
+    "author": "",
     "visibility": "published",
-    "id": "2026-08-30-testt-yaya"
+    "id": "2026-08-31-archive-01"
   }
 ]

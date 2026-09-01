@@ -19,15 +19,20 @@
       "Pelage vert",
       "Yeux cyan"
     ],
-    "shortDescription": "Matriarche du clan Nakamura.",
+    "shortDescription": "Ancienne, puissante et profondément liée à l’histoire sombre de sa famille, elle donne souvent l’impression d’observer le monde. \nSon caractère est froid, sarcastique, calculateur et extrêmement pragmatique. Kazuko accorde difficilement sa confiance et supporte très mal qu’on cherche à la contrôler. Elle peut se montrer cruelle ou impitoyable lorsque la situation l’exige, mais reste farouchement attachée à son clan.",
     "character": "",
     "appearance": "Pelage vert, yeux cyan.",
-    "biography": "Blablablabla test ",
+    "biography": "Faut venir RP pour connaître l'histoire ✨ ",
+    "quote": "🪄 Et hop ! Un p'tit coup et c'est fini ✨ ",
     "portrait": {
       "src": "/media/9620-mtfukxw9.webp",
-      "focus": "53% 0%"
+      "focus": "66% 0%"
     },
-    "gallery": [],
+    "gallery": [
+      "/media/9091-mthrn7q3.webp",
+      "/media/3020-mthrnzl6.webp",
+      "/media/3005-mthrohrv.webp"
+    ],
     "color": "#4dd8d0",
     "frameColor": "gris",
     "relations": [
@@ -58,8 +63,8 @@
     ],
     "author": "",
     "visibility": "published",
-    "id": "kazuko-nakamura",
-    "ownerUserId": "system"
+    "ownerUserId": "system",
+    "id": "kazuko-nakamura"
   },
   {
     "number": "02",
@@ -133,23 +138,22 @@
     "traits": [
       "Esthétique rouge feu"
     ],
-    "shortDescription": "Patron du Joyeux Lutin.",
+    "shortDescription": "🫪 ",
     "character": "",
     "appearance": "Esthétique rouge feu.",
-    "color": "#e2492b",
     "biography": "",
+    "quote": "",
     "portrait": {
       "src": "/media/11204-mtfuo4zc.webp",
       "focus": "26% 0%"
     },
-    "gallery": [],
-    "relations": [
-      {
-        "characterId": "myo-nakamura",
-        "type": "Fils",
-        "description": ""
-      }
+    "gallery": [
+      "/media/3028-mthsff1a.webp",
+      "/media/725-mthsinel.webp"
     ],
+    "color": "#e2492b",
+    "frameColor": "",
+    "relations": [],
     "locations": [
       "manoir-de-setia",
       "joyeux-lutin"
@@ -161,8 +165,8 @@
     ],
     "author": "",
     "visibility": "published",
-    "id": "fudo-nakamura",
-    "ownerUserId": "system"
+    "ownerUserId": "system",
+    "id": "fudo-nakamura"
   },
   {
     "number": "04",
@@ -199,108 +203,6 @@
     "author": "",
     "visibility": "published",
     "id": "calion",
-    "ownerUserId": "system"
-  },
-  {
-    "id": "shizuka-nakamura",
-    "number": "05",
-    "firstName": "Shizuka",
-    "lastName": "Nakamura",
-    "nickname": "",
-    "title": "L'héritière d'une nouvelle génération",
-    "clan": "Nakamura",
-    "clanId": "nakamura",
-    "status": "to-develop",
-    "canon": "draft",
-    "age": "",
-    "gender": "",
-    "species": "",
-    "origin": "",
-    "residence": "Manoir de Sétia",
-    "occupation": "",
-    "traits": [],
-    "shortDescription": "L'héritière d'une nouvelle génération.",
-    "character": "",
-    "appearance": "",
-    "biography": "",
-    "relations": [],
-    "locations": [
-      "manoir-de-setia"
-    ],
-    "tags": [
-      "Nakamura",
-      "Sétia"
-    ],
-    "gallery": [],
-    "ownerUserId": "system"
-  },
-  {
-    "id": "isil",
-    "number": "06",
-    "firstName": "Isil",
-    "lastName": "",
-    "nickname": "",
-    "title": "L'éclat de dix-sept ans",
-    "clan": "",
-    "status": "to-develop",
-    "canon": "draft",
-    "age": "17 ans",
-    "gender": "",
-    "species": "",
-    "origin": "",
-    "residence": "",
-    "occupation": "",
-    "traits": [],
-    "shortDescription": "L'éclat de dix-sept ans. Entourage du clan Nakamura.",
-    "character": "",
-    "appearance": "",
-    "biography": "",
-    "relations": [],
-    "locations": [],
-    "tags": [
-      "Entourage Nakamura"
-    ],
-    "gallery": [],
-    "ownerUserId": "system"
-  },
-  {
-    "id": "myo-nakamura",
-    "number": "07",
-    "firstName": "Myo",
-    "lastName": "Nakamura",
-    "nickname": "",
-    "title": "Le fils du Joyeux Lutin",
-    "clan": "Nakamura",
-    "clanId": "nakamura",
-    "status": "to-develop",
-    "canon": "confirmed",
-    "age": "",
-    "gender": "",
-    "species": "",
-    "origin": "",
-    "residence": "",
-    "occupation": "",
-    "traits": [],
-    "shortDescription": "Le fils du Joyeux Lutin.",
-    "character": "",
-    "appearance": "",
-    "biography": "",
-    "relations": [
-      {
-        "characterId": "fudo-nakamura",
-        "type": "Père",
-        "description": ""
-      }
-    ],
-    "locations": [
-      "joyeux-lutin"
-    ],
-    "tags": [
-      "Nakamura",
-      "Joyeux Lutin",
-      "Famille"
-    ],
-    "gallery": [],
     "ownerUserId": "system"
   }
 ]

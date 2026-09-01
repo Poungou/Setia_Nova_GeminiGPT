@@ -1,22 +1,20 @@
-// worker/routes/ai.js
+// worker/routes/aether.js
 //
-// Port Cloudflare Worker de plugins/woltar-ai.js. Même contrat public : le
-// navigateur n'envoie que { personaId, messages }, jamais de clé API. La clé
-// OpenAI est un secret Wrangler (OPENAI_API_KEY), lue uniquement via `env`,
-// jamais exposée au client. Le prompt système vient tel quel de
-// plugins/lib/personaPrompt.js (aucune divergence de comportement entre dev
-// local et production).
+// Port Cloudflare Worker de plugins/woltar-aether.js. Remplace
+// l'ancien worker/routes/ai.js : plus de Personas RP liées à un personnage,
+// un seul assistant IA central — AETHER, le guide de Woltar.
 //
-// Lit la Persona/le personnage via les lecteurs D1 + repli statique de
-// contentStore.js (au lieu des lecteurs D1 stricts) : ça garantit que le
-// chat des personnages historiques (Fudo...) continue de fonctionner même
-// si D1 n'a pas encore été peuplé pour cette fiche — voir
-// docs/CLOUDFLARE_DEPLOYMENT_PLAN.md.
+// Même contrat de sécurité que l'ancien système : le navigateur n'envoie
+// jamais de clé API, seulement { messages, context? }. La clé OpenAI est un
+// secret Wrangler (OPENAI_API_KEY), lue uniquement via `env`. La brique
+// OpenAI (appel, timeout, gestion d'erreurs, limite de débit) est reprise
+// telle quelle de l'ancien worker/routes/ai.js — seule la construction du
+// prompt et la source de configuration changent (voir plugins/lib/aetherPrompt.js).
 
 import OpenAI from 'openai'
-import { buildSystemPrompt } from '../../plugins/lib/personaPrompt.js'
-import { canEditOwnedResource, getRequestUser } from '../lib/authStore.js'
-import { getCharacterWithFallback, getPersonaWithFallback, listCharactersWithFallback } from '../lib/contentStore.js'
+import { buildAetherSystemPrompt } from '../../plugins/lib/aetherPrompt.js'
+import { getRequestUser, isAdmin } from '../lib/authStore.js'
+import { STATIC_COLLECTIONS, getAetherConfig, listCharactersWithFallback } from '../lib/contentStore.js'
 
 const MAX_MESSAGE_LEN = 4000
 const MAX_HISTORY = 20
@@ -30,8 +28,7 @@ const MAX_OUTPUT_TOKENS = 500
 // Compteur de débit en mémoire, best-effort : un isolate Worker peut être
 // recyclé à tout moment, donc ce n'est PAS une garantie dure contrairement à
 // une vraie solution (KV/Durable Object). Suffisant pour un usage perso/petit
-// groupe, comme en dev local — à revoir avant un trafic public important
-// (voir docs/CLOUDFLARE_DEPLOYMENT_PLAN.md).
+// groupe, comme en dev local — à revoir avant un trafic public important.
 const hits = new Map()
 function isRateLimited(key) {
   const now = Date.now()
@@ -46,12 +43,6 @@ function json(body, init = {}) {
     ...init,
     headers: { 'Content-Type': 'application/json; charset=utf-8', ...(init.headers || {}) },
   })
-}
-
-function clampCreativity(value) {
-  const n = Number(value)
-  if (!Number.isFinite(n)) return 0.7
-  return Math.min(1, Math.max(0, n))
 }
 
 function extractReply(response) {
@@ -73,7 +64,7 @@ function openAiErrorResponse(err) {
   const code = err?.code || err?.error?.code
 
   if (err?.name === 'AbortError' || err?.name === 'APIUserAbortError') {
-    return { status: 504, error: 'Le personnage met trop de temps à répondre — réessaie.' }
+    return { status: 504, error: 'Aether met trop de temps à répondre — réessaie.' }
   }
 
   if (status === 401 || code === 'invalid_api_key') {
@@ -95,8 +86,8 @@ function openAiErrorResponse(err) {
   return { status: 502, error: 'Le service IA a renvoyé une erreur.' }
 }
 
-// `parts` = segments du chemin après /__ai/api/ (ex: ['chat']).
-export async function handleAi(request, env, parts) {
+// `parts` = segments du chemin après /__aether/api/ (ex: ['chat']).
+export async function handleAether(request, env, parts) {
   try {
     if (parts[0] !== 'chat') return json({ error: 'Route inconnue' }, { status: 404 })
     if (request.method !== 'POST') return json({ error: 'Méthode non autorisée' }, { status: 405 })
@@ -108,30 +99,21 @@ export async function handleAi(request, env, parts) {
       return json({ error: 'Corps de requête invalide.' }, { status: 400 })
     }
 
-    const { personaId, messages, testMode } = payload || {}
-    if (!personaId || typeof personaId !== 'string') {
-      return json({ error: 'personaId manquant.' }, { status: 400 })
-    }
+    const { messages, context, testMode } = payload || {}
     if (!Array.isArray(messages) || messages.length === 0) {
       return json({ error: 'Aucun message à envoyer.' }, { status: 400 })
     }
 
-    const persona = await getPersonaWithFallback(env, personaId)
-    if (!persona) return json({ error: 'Persona introuvable.' }, { status: 404 })
+    const config = getAetherConfig()
+    if (!config) return json({ error: 'Aether n’est pas configuré.' }, { status: 404 })
 
     const user = await getRequestUser(env, request)
-    if (testMode && !user) {
-      return json({ error: 'Connexion requise pour tester une Persona.' }, { status: 401 })
+    if (testMode && !isAdmin(user)) {
+      return json({ error: 'Seule une administratrice peut tester Aether désactivé.' }, { status: 403 })
     }
-    if (testMode && !canEditOwnedResource(user, persona)) {
-      return json({ error: 'Tu ne peux tester que tes propres Personas.' }, { status: 403 })
+    if (!testMode && config.enabled !== 'true') {
+      return json({ error: 'Aether n’est pas activé.' }, { status: 403 })
     }
-    if (!testMode && persona.enabled !== 'true') {
-      return json({ error: 'Cette Persona n’est pas activée.' }, { status: 403 })
-    }
-
-    const character = await getCharacterWithFallback(env, persona.characterId)
-    if (!character) return json({ error: 'Fiche personnage associée introuvable.' }, { status: 404 })
 
     const trimmed = messages
       .slice(-MAX_HISTORY)
@@ -158,8 +140,13 @@ export async function handleAi(request, env, parts) {
     }
 
     const characters = await listCharactersWithFallback(env)
-    const system = buildSystemPrompt({ character, persona, characters })
-    const temperature = clampCreativity(persona.creativity)
+    const system = buildAetherSystemPrompt({
+      config,
+      characters,
+      locations: STATIC_COLLECTIONS.locations,
+      clans: STATIC_COLLECTIONS.clans,
+      context: context && typeof context.characterId === 'string' ? context : null,
+    })
     const model = env.OPENAI_MODEL || DEFAULT_MODEL
 
     const openai = new OpenAI({ apiKey })
@@ -173,7 +160,7 @@ export async function handleAi(request, env, parts) {
           model,
           reasoning: { effort: DEFAULT_REASONING_EFFORT },
           max_output_tokens: MAX_OUTPUT_TOKENS,
-          temperature,
+          temperature: 0.7,
           instructions: system,
           input: trimmed,
         },
@@ -182,7 +169,7 @@ export async function handleAi(request, env, parts) {
     } catch (err) {
       clearTimeout(timeout)
       const response = openAiErrorResponse(err)
-      console.error('[worker/ai] erreur OpenAI', err?.status, err?.code || err?.message)
+      console.error('[worker/aether] erreur OpenAI', err?.status, err?.code || err?.message)
       return json({ error: response.error }, { status: response.status })
     }
     clearTimeout(timeout)
@@ -191,7 +178,7 @@ export async function handleAi(request, env, parts) {
     if (!reply) return json({ error: 'Réponse vide du service IA.' }, { status: 502 })
     return json({ reply })
   } catch (err) {
-    console.error('[worker/ai]', err)
+    console.error('[worker/aether]', err)
     return json({ error: 'Erreur interne du serveur.' }, { status: 500 })
   }
 }

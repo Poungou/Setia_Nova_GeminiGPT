@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, Send } from 'lucide-react'
-import { sendPersonaMessage } from '../../lib/personaApi.js'
-import { imgSrc, imgFocus } from '../../lib/image.js'
 import './ChatWidget.css'
 
 const MAX_LOCAL_HISTORY = 20
 
-// Widget de discussion générique pour un « Woltarien IA ». Ne connaît rien
-// de spécifique à un personnage précis : il reçoit une fiche Persona (+ la
-// fiche personnage canonique associée, pour l'affichage) et parle au plugin
-// woltar-ai. Réutilisé tel quel :
-//   - sur une fiche personnage publique (variant="floating", bouton
-//     « Parler avec… »)
-//   - dans /admin, pour le bouton « Tester la Persona » (variant="inline",
-//     testMode) avant de la publier
-export default function ChatWidget({ persona, character, testMode = false, variant = 'floating', onClose }) {
-  const displayName =
-    persona.name || [character?.firstName, character?.lastName].filter(Boolean).join(' ') || character?.id || '…'
-
-  const [messages, setMessages] = useState(() =>
-    persona.greeting ? [{ role: 'assistant', content: persona.greeting }] : [],
-  )
+// Widget de discussion générique, découplé de tout personnage ou Persona —
+// il ne connaît que ce qu'on lui passe en props et une fonction
+// `sendMessage(messages)` qui renvoie une promesse de réponse texte. Utilisé
+// aujourd'hui uniquement par AETHER (voir src/pages/Aether/Aether.jsx et
+// src/lib/aetherApi.js), variant="page" ; les variants "floating"/"inline"
+// restent disponibles pour un futur usage similaire.
+export default function ChatWidget({
+  title,
+  avatarSrc,
+  avatarFocus,
+  badge,
+  greeting,
+  sendMessage,
+  variant = 'floating',
+  onClose,
+}) {
+  const [messages, setMessages] = useState(() => (greeting ? [{ role: 'assistant', content: greeting }] : []))
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
@@ -39,7 +39,7 @@ export default function ChatWidget({ persona, character, testMode = false, varia
     setDraft('')
     setSending(true)
     try {
-      const reply = await sendPersonaMessage(persona.id, next, { testMode })
+      const reply = await sendMessage(next)
       setMessages((m) => [...m, { role: 'assistant', content: reply }].slice(-MAX_LOCAL_HISTORY))
     } catch (e) {
       setError(String(e.message || e))
@@ -48,24 +48,20 @@ export default function ChatWidget({ persona, character, testMode = false, varia
     }
   }
 
-  const avatarSrc = imgSrc(persona.avatar)
-
   return (
-    <div className={`chat-widget chat-widget--${variant}`} role="dialog" aria-label={`Discussion avec ${displayName}`}>
+    <div className={`chat-widget chat-widget--${variant}`} role="dialog" aria-label={`Discussion avec ${title}`}>
       <header className="chat-widget__head">
         <div className="chat-widget__who">
           <span className="chat-widget__avatar" aria-hidden="true">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="" style={{ objectPosition: imgFocus(persona.avatar) }} />
+              <img src={avatarSrc} alt="" style={avatarFocus ? { objectPosition: avatarFocus } : undefined} />
             ) : (
-              <span>{displayName.slice(0, 1).toUpperCase()}</span>
+              <span>{(title || '?').slice(0, 1).toUpperCase()}</span>
             )}
           </span>
           <div className="chat-widget__who-text">
-            <strong>{displayName}</strong>
-            <span className="chat-widget__badge">
-              Personnage interprété par IA{testMode ? ' · test admin' : ''}
-            </span>
+            <strong>{title}</strong>
+            {badge && <span className="chat-widget__badge">{badge}</span>}
           </div>
         </div>
         {onClose && (

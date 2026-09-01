@@ -27,9 +27,9 @@ const VISIBILITY = [
   ['draft', 'Brouillon (caché du site)'],
 ]
 const POST_CAT_OPTIONS = POST_CATEGORIES.map((c) => [c.value, c.label])
-const PERSONA_ENABLED = [
-  ['false', 'Désactivée (invisible sur le site, testable dans /admin)'],
-  ['true', 'Activée (bouton « Parler avec… » visible sur la fiche)'],
+const AETHER_ENABLED = [
+  ['false', 'Désactivé (invisible sur le site, testable dans /admin)'],
+  ['true', 'Activé (page /aether accessible sur le site public)'],
 ]
 
 export const SCHEMA = {
@@ -241,75 +241,46 @@ export const SCHEMA = {
     ],
   },
 
-  // Compagnons IA ("Woltariens IA") — interprétation comportementale d'un
-  // personnage existant, jamais un doublon de sa fiche canonique. `id` ==
-  // `characterId` : une seule Persona par personnage pour l'instant (voir
-  // src/data/personas.js). Le prompt réel envoyé à l'IA est construit côté
-  // serveur par plugins/lib/personaPrompt.js, à partir de ces champs +
-  // de la fiche personnage associée.
-  personas: {
-    label: 'Compagnons IA',
-    singular: 'persona IA',
+  // AETHER — assistant/guide IA central unique du site (remplace l'ancien
+  // système de Personas RP liées à un personnage, supprimé). Collection à
+  // une seule fiche (id toujours "aether") : Aether ne fait jamais de RP à
+  // la place de la joueuse, il l'aide à s'orienter dans Woltar (voir
+  // plugins/lib/aetherPrompt.js pour la construction exacte du prompt).
+  //
+  // Séparation volontaire des deux champs de texte libre :
+  //   - character_context : identité/personnalité d'Aether (ton, humour,
+  //     petites références, sa relation avec Woltar).
+  //   - system_prompt : instructions supplémentaires de l'administratrice
+  //     (contraintes, rappels, cas particuliers).
+  // Les connaissances de Woltar (personnages, clans, lieux) ne se recopient
+  // JAMAIS ici : elles sont assemblées automatiquement à chaque requête à
+  // partir des données du site — voir plugins/lib/aetherPrompt.js.
+  aether: {
+    label: 'Aether',
+    singular: 'Aether',
     icon: 'MessageCircle',
     order: 6,
-    title: (r) => r.name || r.characterId || r.id,
-    subtitle: (r) => (r.enabled === 'true' ? 'Activée' : 'Désactivée'),
-    makeId: (r) => r.characterId || '',
+    title: () => 'Aether',
+    subtitle: (r) => (r.enabled === 'true' ? 'Activé' : 'Désactivé'),
+    makeId: () => 'aether',
     defaults: {
-      characterId: '', name: '', enabled: 'false', avatar: '', greeting: '',
-      personality: '', motivations: '', fears: '', likes: '', dislikes: '',
-      speechStyle: '', creativity: 0.7, background: '', loreKnowledge: '',
-      relationships: [], secrets: '', boundaries: '', behaviorWithUser: '',
-      customInstructions: '', updatedAt: '',
-      ownerUserId: 'system',
+      id: 'aether', name: 'Aether', enabled: 'false', avatar: '',
+      greeting: 'Suis ton cœur. Pour le reste, demande-moi.',
+      system_prompt: '', character_context: '',
     },
     fields: [
+      { key: 'enabled', label: 'Aether activé', type: 'select', options: PERSONA_ENABLED, group: 'Identité' },
+      { key: 'name', label: 'Nom affiché', type: 'text', group: 'Identité' },
+      { key: 'avatar', label: 'Avatar', type: 'image', group: 'Identité' },
+      { key: 'greeting', label: 'Message d’accueil (page /aether)', type: 'textarea', group: 'Identité' },
       {
-        key: 'characterId', label: 'Personnage associé', type: 'characterSelect', group: 'Identité',
-        hint: 'La Persona lit automatiquement le nom, l’âge, le clan, l’historique… depuis cette fiche. Un personnage ne peut avoir qu’une seule Persona.',
+        key: 'character_context', label: 'Personnalité et ton', type: 'textarea', group: 'Personnalité',
+        hint: 'Identité d’Aether : sa façon de parler, sa relation avec Woltar, son humour, ses petites références. Ne décrit jamais un fait canonique — uniquement du ton et du caractère.',
       },
       {
-        key: 'ownerUserId', label: 'Proprietaire', type: 'text', group: 'Identité',
-        hint: 'system = Persona historique/admin protegee. Les comptes joueurs sont assignes cote serveur.',
+        key: 'system_prompt', label: 'Instructions supplémentaires', type: 'textarea', group: 'Instructions',
+        hint: 'Contraintes ou rappels additionnels pour Aether. Les connaissances de Woltar (personnages, clans, lieux) sont ajoutées automatiquement — inutile de les recopier ici.',
       },
-      {
-        key: 'name', label: 'Nom affiché', type: 'text', group: 'Identité',
-        hint: 'Laisse vide pour utiliser le prénom + nom de la fiche personnage.',
-      },
-      { key: 'enabled', label: 'IA activée', type: 'select', options: PERSONA_ENABLED, group: 'Identité' },
-      { key: 'avatar', label: 'Avatar / placeholder', type: 'image', group: 'Identité' },
-      { key: 'greeting', label: 'Message d’accueil', type: 'textarea', group: 'Identité' },
-      {
-        key: 'personality', label: 'Personnalité (traits, qualités, défauts, tempérament)', type: 'textarea',
-        group: 'Personnalité',
-      },
-      { key: 'motivations', label: 'Motivations', type: 'textarea', group: 'Personnalité' },
-      { key: 'fears', label: 'Peurs', type: 'textarea', group: 'Personnalité' },
-      { key: 'likes', label: 'Apprécie', type: 'textarea', group: 'Personnalité' },
-      { key: 'dislikes', label: 'N’apprécie pas', type: 'textarea', group: 'Personnalité' },
-      {
-        key: 'speechStyle', label: 'Manière de parler (ton, vocabulaire, expressions)', type: 'textarea',
-        group: 'Manière de parler',
-      },
-      {
-        key: 'creativity', label: 'Créativité', type: 'number', group: 'Manière de parler',
-        hint: 'Entre 0 (sobre, prévisible) et 1 (très libre). 0,7 par défaut.',
-      },
-      { key: 'background', label: 'Histoire connue de la Persona', type: 'textarea', group: 'Lore' },
-      { key: 'loreKnowledge', label: 'Connaissances du monde', type: 'textarea', group: 'Lore' },
-      {
-        key: 'relationships', label: 'Relations (interprétation RP)', type: 'relations', group: 'Relations',
-        hint: 'Distinct des relations canoniques de la fiche personnage : sert uniquement à guider le ton de l’IA.',
-      },
-      {
-        key: 'secrets', label: 'Secrets (jamais révélés facilement)', type: 'textarea', group: 'Secrets',
-      },
-      {
-        key: 'boundaries', label: 'Limites RP (ce que l’IA ne doit jamais inventer ou modifier)', type: 'textarea',
-        group: 'Limites RP',
-      },
-      { key: 'behaviorWithUser', label: 'Comportement attendu avec le joueur', type: 'textarea', group: 'Instructions' },
-      { key: 'customInstructions', label: 'Instructions personnalisées', type: 'textarea', group: 'Instructions' },
     ],
   },
 }

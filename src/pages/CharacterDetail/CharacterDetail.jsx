@@ -1,17 +1,12 @@
-import { useState } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { MessageCircle } from 'lucide-react'
 import { getRelationTargets } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
 import { getClanByCharacter } from '../../data/clans.js'
 import { events } from '../../data/events.js'
-import { isPersonaEnabled } from '../../data/personas.js'
-import { usePublicCharacter, usePublicPersona } from '../../lib/publicData.js'
+import { usePublicCharacter } from '../../lib/publicData.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
-import ChatWidget from '../../components/ChatWidget/ChatWidget.jsx'
-import PersonaBlock from '../../components/PersonaBlock/PersonaBlock.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
@@ -71,15 +66,11 @@ export default function CharacterDetail() {
   // Fiche « live » : D1 (via /compte, /admin) si disponible, sinon repli sur
   // les données statiques du bundle — voir src/lib/publicData.js.
   const character = usePublicCharacter(id)
-  const persona = usePublicPersona(id)
   const reduce = useReducedMotion()
-  const [chatOpen, setChatOpen] = useState(false)
 
   if (!character || character.visibility === 'draft') {
     return <Navigate to="/personnages" replace />
   }
-
-  const canChat = isPersonaEnabled(persona)
 
   const relations = getRelationTargets(character)
   const associatedLocations = (character.locations || [])
@@ -89,8 +80,6 @@ export default function CharacterDetail() {
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
   const hasCharacterOrAppearance = Boolean(character.character || character.appearance)
   const clanRecord = getClanByCharacter(character)
-
-  const openChat = () => setChatOpen(true)
 
   // Nav interne : ne pointe que vers les sections réellement affichées.
   const sectionsNav = [
@@ -166,19 +155,6 @@ export default function CharacterDetail() {
                 <motion.blockquote className="character-hero__quote" {...itemMotion}>
                   {character.quote}
                 </motion.blockquote>
-              )}
-
-              {canChat && (
-                <motion.div {...itemMotion}>
-                  <button
-                    type="button"
-                    className="btn btn-primary character-hero__chat-btn"
-                    onClick={openChat}
-                  >
-                    <MessageCircle size={15} />
-                    Parler avec {character.firstName}
-                  </button>
-                </motion.div>
               )}
 
               {sectionsNav.length > 0 && (
@@ -311,8 +287,6 @@ export default function CharacterDetail() {
                 </ol>
               </Reveal>
             )}
-
-            <PersonaBlock persona={persona} character={character} />
           </aside>
         </div>
 
@@ -327,10 +301,6 @@ export default function CharacterDetail() {
           </Reveal>
         )}
       </article>
-
-      {chatOpen && canChat && (
-        <ChatWidget persona={persona} character={character} variant="floating" onClose={() => setChatOpen(false)} />
-      )}
     </PageTransition>
   )
 }

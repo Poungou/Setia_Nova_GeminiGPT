@@ -7,21 +7,16 @@
 // en prod, plutôt qu'un import statique figé au build. Les fiches créées ou
 // modifiées via /admin ou /compte en dev sont donc visibles immédiatement,
 // sans redémarrer le serveur (lecture fraîche du disque à chaque requête).
+//
+// Historique — tâche « Aether » : la route /personas/:characterId a été
+// retirée — le système de Personas RP liées à un personnage est supprimé.
+// Voir plugins/woltar-aether.js pour l'assistant IA central unique du site.
 
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-const PUBLIC_PERSONA_FIELDS = ['id', 'characterId', 'name', 'avatar', 'enabled', 'greeting']
-
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
-}
-
-function publicPersona(persona) {
-  if (!persona) return null
-  const safe = {}
-  for (const key of PUBLIC_PERSONA_FIELDS) safe[key] = persona[key]
-  return safe
 }
 
 export default function woltarPublic() {
@@ -60,13 +55,6 @@ export default function woltarPublic() {
             const character = characters.find((c) => c.id === decodeURIComponent(parts[1]))
             if (!isPublished(character)) return send(404, { error: 'Personnage introuvable.' })
             return send(200, { data: character })
-          }
-
-          if (parts[0] === 'personas' && parts[1]) {
-            const personas = await readCollection('personas')
-            const persona = personas.find((p) => p.characterId === decodeURIComponent(parts[1]))
-            if (!persona || persona.enabled !== 'true') return send(200, { data: null })
-            return send(200, { data: publicPersona(persona) })
           }
 
           return send(404, { error: 'Route inconnue' })

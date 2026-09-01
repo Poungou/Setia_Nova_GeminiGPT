@@ -1,0 +1,83 @@
+.aether-hero {
+  position: relative;
+  padding: var(--space-5) 0 var(--space-4);
+  background: var(--gradient-hero);
+  overflow: hidden;
+  text-align: center;
+}
+
+.aether-hero__inner {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aether-hero__avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+  box-shadow: var(--glow-wine);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+.aether-hero__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.aether-hero__avatar span {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--ivory-dim);
+}
+
+.aether-hero__eyebrow {
+  margin-bottom: var(--space-2);
+}
+
+.aether-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 8vw, 3.6rem);
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  margin-bottom: var(--space-2);
+}
+
+.aether-hero__lead {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  color: var(--ivory-dim);
+  margin-bottom: var(--space-1);
+}
+
+.aether-hero__sub {
+  color: var(--ivory-faint);
+  font-size: 0.95rem;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+.aether-chat-wrap {
+  padding: var(--space-4) 0 var(--space-5);
+  display: flex;
+  justify-content: center;
+}
+
+.aether-disabled {
+  width: 100%;
+  max-width: 640px;
+  padding: var(--space-4);
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--gradient-card);
+  color: var(--ivory-dim);
+}

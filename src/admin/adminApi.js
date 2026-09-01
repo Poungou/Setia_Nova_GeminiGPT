@@ -3,6 +3,13 @@
 // Dialogue avec le plugin Vite `woltar-admin` (dev uniquement).
 // En build de production, `adminAvailable` est faux et l'admin s'affiche en
 // lecture seule avec un message d'explication.
+//
+// Les personnages canon suivent exactement les 6 autres collections
+// (lieux, clans, événements, archives, journal, Personas) : l'admin reste
+// un outil localhost, jamais un CMS de production — voir Phase 18
+// (« Séparer canon local et personnages utilisateurs D1 ») dans
+// claude/architecture-decisions.md. Les personnages créés en production
+// passent par /compte (D1), pas par /admin — voir src/lib/accountApi.js.
 
 const BASE = '/__admin/api'
 

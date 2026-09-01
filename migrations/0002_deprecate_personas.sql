@@ -1,0 +1,22 @@
+-- migrations/0002_deprecate_personas.sql
+--
+-- ⚠️ NON APPLIQUÉE PAR COWORK. Ce fichier documente ce qu'il faudrait
+-- exécuter en D1 remote pour finir de retirer le système de Personas RP
+-- (tâche « Aether ») — Cowork n'a pas d'accès shell ni d'identifiants
+-- Cloudflare sur cette machine, donc n'a exécuté AUCUNE commande D1.
+--
+-- Avant d'exécuter quoi que ce soit ici, vérifie d'abord ce que contient
+-- réellement la table `personas` en remote (lecture seule, sans risque) :
+--
+--   npx wrangler d1 execute woltar-db --remote --command "SELECT id, character_id, owner_user_id FROM personas"
+--
+-- Le code applicatif (worker/*, plugins/*) ne lit et n'écrit plus JAMAIS
+-- dans cette table depuis la tâche « Aether » — elle est donc déjà
+-- inerte/orpheline pour le site, que cette migration soit appliquée ou non.
+-- La supprimer n'est donc pas urgent ; ce fichier existe pour que tu (ou
+-- Codex) puisse le faire proprement le jour où tu le souhaites, une fois la
+-- lecture ci-dessus vérifiée.
+--
+-- DROP TABLE IF EXISTS personas;
+-- DROP INDEX IF EXISTS idx_personas_owner;
+-- DROP INDEX IF EXISTS idx_personas_character;

@@ -1,26 +1,29 @@
 // worker/routes/account.js
 //
-// Port Cloudflare Worker de plugins/woltar-account.js. Même règle centrale :
-// un compte ne peut créer/modifier/supprimer que ses propres personnages et
-// Personas (ownerUserId) ; les 5 collections de référence (lieux, clans,
-// chronologie, archives, journal) restent en lecture seule, empaquetées au
-// build — voir worker/lib/contentStore.js et docs/CLOUDFLARE_DEPLOYMENT_PLAN.md,
-// section « Portée retenue ».
+// Port Cloudflare Worker de plugins/woltar-account.js. Un compte ne peut
+// créer/modifier/supprimer que ses propres personnages (ownerUserId) ; les
+// collections de référence (lieux, clans, chronologie, archives, journal)
+// restent en lecture seule, empaquetées au build — voir
+// worker/lib/contentStore.js et docs/CLOUDFLARE_DEPLOYMENT_PLAN.md, section
+// « Portée retenue ».
+//
+// Historique — tâche « Aether » : la collection `personas` (Personas RP
+// liées à un personnage, gérables depuis /compte) a été retirée d'ici. Le
+// site n'a plus qu'un seul assistant IA central, AETHER (config statique,
+// non liée à un compte) — voir worker/routes/aether.js.
 
 import { canEditOwnedResource, getOwnerUserId, getRequestUser, httpError } from '../lib/authStore.js'
-import {
-  STATIC_COLLECTIONS,
-  deleteRow,
-  getCharacter,
-  getPersona,
-  insertRow,
-  listCharacters,
-  listPersonas,
-  updateRow,
-} from '../lib/contentStore.js'
+import { STATIC_COLLECTIONS, deleteRow, getCharacter, insertRow, listCharacters, updateRow } from '../lib/contentStore.js'
+import staticCharactersJson from '../../src/data/characters.json'
 
-const OWNED_COLLECTIONS = new Set(['characters', 'personas'])
-const REFERENCE_COLLECTIONS = ['locations', 'clans', 'events', 'archives', 'posts']
+const REFERENCE_COLLECTIONS = Object.keys(STATIC_COLLECTIONS)
+// Un compte ne peut jamais créer un personnage qui porte l'id d'une fiche
+// canon (src/data/characters.json) — même si D1 ne contient rien pour cet
+// id. Voir worker/lib/contentStore.js : le canon reste prioritaire à la
+// lecture de toute façon, mais autoriser la création éviterait juste une
+// fiche D1 fantôme, jamais affichée nulle part — mieux vaut refuser
+// clairement plutôt que laisser un identifiant piégé.
+const CANON_CHARACTER_IDS = new Set(staticCharactersJson.map((c) => c.id))
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -39,7 +42,7 @@ function ownRows(rows, user) {
 }
 
 function assertOwnedCollection(name) {
-  if (!OWNED_COLLECTIONS.has(name)) {
+  if (name !== 'characters') {
     throw httpError(403, 'Cette collection est réservée à l’administration.')
   }
 }
@@ -52,15 +55,7 @@ function assertId(row) {
   if (!row?.id || typeof row.id !== 'string') throw httpError(400, 'Identifiant manquant.')
 }
 
-async function listRows(env, name) {
-  return name === 'personas' ? listPersonas(env) : listCharacters(env)
-}
-
-async function getRow(env, name, id) {
-  return name === 'personas' ? getPersona(env, id) : getCharacter(env, id)
-}
-
-async function sanitizeOwnedRow(env, name, row, user, existing = null) {
+function sanitizeOwnedRow(row, user, existing = null) {
   const clean = { ...row, ownerUserId: user.id }
   const now = new Date().toISOString()
   clean.updatedAt = now
@@ -71,31 +66,9 @@ async function sanitizeOwnedRow(env, name, row, user, existing = null) {
     clean.ownerUserId = getOwnerUserId(existing)
   }
 
-  if (name === 'characters') {
-    assertId(clean)
-    if (!clean.author) clean.author = user.name || user.email
-    return clean
-  }
-
-  if (name === 'personas') {
-    const characterId = String(clean.characterId || '').trim()
-    if (!characterId) throw httpError(400, 'Choisis un personnage associé.')
-    if (existing && characterId !== existing.characterId) {
-      throw httpError(400, 'Pour changer de personnage associé, crée une nouvelle Persona.')
-    }
-
-    const character = await getCharacter(env, characterId)
-    if (!character) throw httpError(404, 'Fiche personnage associée introuvable.')
-    if (getOwnerUserId(character) !== user.id) {
-      throw httpError(403, 'Tu peux créer une Persona uniquement pour tes propres personnages.')
-    }
-
-    clean.characterId = characterId
-    clean.id = existing?.id || characterId
-    return clean
-  }
-
-  throw httpError(403, 'Collection non autorisée.')
+  assertId(clean)
+  if (!clean.author) clean.author = user.name || user.email
+  return clean
 }
 
 // `parts` = segments du chemin après /__account/api/ (ex: ['collections','characters']).
@@ -107,11 +80,8 @@ export async function handleAccount(request, env, parts) {
     const method = request.method
 
     if (parts[0] === 'bootstrap' && method === 'GET') {
-      const [characters, personas] = await Promise.all([listCharacters(env), listPersonas(env)])
-      const data = {
-        characters: ownRows(characters, user),
-        personas: ownRows(personas, user),
-      }
+      const characters = await listCharacters(env)
+      const data = { characters: ownRows(characters, user) }
       for (const name of REFERENCE_COLLECTIONS) data[name] = STATIC_COLLECTIONS[name] || []
       return json({ user, data })
     }
@@ -121,40 +91,34 @@ export async function handleAccount(request, env, parts) {
       assertOwnedCollection(name)
 
       if (method === 'GET' && parts.length === 2) {
-        const rows = await listRows(env, name)
+        const rows = await listCharacters(env)
         return json({ data: ownRows(rows, user) })
       }
 
       if (method === 'POST' && parts.length === 2) {
-        const clean = await sanitizeOwnedRow(env, name, await readJson(request), user)
-        const existing = await getRow(env, name, clean.id)
+        const clean = sanitizeOwnedRow(await readJson(request), user)
+        if (CANON_CHARACTER_IDS.has(clean.id)) {
+          throw httpError(409, 'Cet identifiant est réservé à un personnage canon — choisis-en un autre.')
+        }
+        const existing = await getCharacter(env, clean.id)
         if (existing) throw httpError(409, 'Cet identifiant existe déjà.')
-        await insertRow(env, name, clean)
+        await insertRow(env, 'characters', clean)
         return json({ row: clean })
       }
 
       if ((method === 'PUT' || method === 'DELETE') && parts[2]) {
         const id = decodeURIComponent(parts[2])
-        const existing = await getRow(env, name, id)
+        const existing = await getCharacter(env, id)
         if (!existing) throw httpError(404, 'Fiche introuvable.')
         assertCanEdit(user, existing)
 
         if (method === 'PUT') {
-          const clean = await sanitizeOwnedRow(env, name, await readJson(request), user, existing)
-          await updateRow(env, name, id, clean)
+          const clean = sanitizeOwnedRow(await readJson(request), user, existing)
+          await updateRow(env, 'characters', id, clean)
           return json({ row: clean })
         }
 
-        await deleteRow(env, name, id)
-
-        if (name === 'characters') {
-          const personas = await listPersonas(env)
-          const toDelete = personas.filter(
-            (persona) => persona.characterId === id && getOwnerUserId(persona) === user.id,
-          )
-          for (const persona of toDelete) await deleteRow(env, 'personas', persona.id)
-        }
-
+        await deleteRow(env, 'characters', id)
         return json({ ok: true })
       }
     }

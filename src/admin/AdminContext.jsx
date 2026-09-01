@@ -11,7 +11,7 @@ import clansJson from '../data/clans.json'
 import eventsJson from '../data/events.json'
 import archivesJson from '../data/archives.json'
 import postsJson from '../data/posts.json'
-import personasJson from '../data/personas.json'
+import aetherJson from '../data/aether.json'
 
 const BUNDLED = {
   characters: charactersJson,
@@ -20,7 +20,7 @@ const BUNDLED = {
   events: eventsJson,
   archives: archivesJson,
   posts: postsJson,
-  personas: personasJson,
+  aether: aetherJson,
 }
 
 export function AdminProvider({ children, currentUser = null }) {
