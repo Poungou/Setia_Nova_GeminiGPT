@@ -269,7 +269,7 @@ export const SCHEMA = {
       system_prompt: '', character_context: '',
     },
     fields: [
-      { key: 'enabled', label: 'Aether activé', type: 'select', options: PERSONA_ENABLED, group: 'Identité' },
+      { key: 'enabled', label: 'Aether activé', type: 'select', options: AETHER_ENABLED, group: 'Identité' },
       { key: 'name', label: 'Nom affiché', type: 'text', group: 'Identité' },
       { key: 'avatar', label: 'Avatar', type: 'image', group: 'Identité' },
       { key: 'greeting', label: 'Message d’accueil (page /aether)', type: 'textarea', group: 'Identité' },
