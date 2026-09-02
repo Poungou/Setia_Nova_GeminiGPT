@@ -2,7 +2,7 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { getPostById, categoryLabel } from '../../data/posts.js'
 import { getCharacterById } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
-import { imgSrc } from '../../lib/image.js'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Lightbox from '../../components/Lightbox/Lightbox.jsx'
@@ -24,36 +24,60 @@ export default function PostDetail() {
 
   const characters = (post.characters || []).map(getCharacterById).filter(Boolean)
   const locations = (post.locations || []).map(getLocationById).filter(Boolean)
-
-  // Illustration principale = couverture, sinon 1re image de galerie.
   const gallery = post.gallery || []
   const hero = post.cover || gallery[0] || ''
-  const restGallery = post.cover ? gallery : gallery.slice(1)
+  const heroSrc = imgSrc(hero)
+  const hasCover = Boolean(imgSrc(post.cover))
+  const restGallery = gallery.filter((image, index) => {
+    if (!heroSrc) return true
+    if (!hasCover && index === 0) return false
+    return imgSrc(image) !== heroSrc
+  })
+  const hasBody = Boolean(post.body?.trim())
+  const lede = post.excerpt?.trim()
   const hasLinks = characters.length > 0 || locations.length > 0 || post.tags?.length > 0
 
   return (
     <PageTransition>
-      <article className={`container post ${hero ? 'post--spread' : ''}`}>
-        {hero && (
-          <Reveal className="post__illus" x={-24}>
-            <img src={imgSrc(hero)} alt={post.title} />
+      <article className="post">
+        <header className="container post__hero">
+          <Reveal className="post__intro">
+            <Link to="/journal" className="post__back">
+              ← Journal
+            </Link>
+            <span className="eyebrow post__meta">
+              {categoryLabel(post.category)} · {formatDate(post.date)}
+              {post.author ? ` · ${post.author}` : ''}
+            </span>
+            <h1 className="post__title">{post.title}</h1>
+            {lede && <p className="post__lede">{lede}</p>}
           </Reveal>
-        )}
 
-        <Reveal className="post__panel" x={hero ? 24 : 0}>
-          <Link to="/journal" className="post__back">
-            ← Journal
-          </Link>
-          <span className="eyebrow post__meta">
-            {categoryLabel(post.category)} · {formatDate(post.date)}
-            {post.author ? ` · ${post.author}` : ''}
-          </span>
-          <h1 className="post__title">{post.title}</h1>
+          {heroSrc && (
+            <Reveal className="post__cover">
+              <img src={heroSrc} alt="" style={{ objectPosition: imgFocus(hero) }} />
+            </Reveal>
+          )}
+        </header>
 
-          <Prose markdown={post.body} />
+        <div className="container post__reading-shell">
+          <Reveal className="post__panel">
+            {hasBody ? (
+              <Prose markdown={post.body} />
+            ) : (
+              <p className="post__empty">Le texte de ce billet sera ajouté ici quand il sera prêt.</p>
+            )}
+          </Reveal>
+
+          {restGallery.length > 0 && (
+            <Reveal className="post__gallery">
+              <h2 className="eyebrow">Galerie</h2>
+              <Lightbox images={restGallery.map((v) => ({ src: imgSrc(v), alt: post.title }))} />
+            </Reveal>
+          )}
 
           {hasLinks && (
-            <div className="post__links">
+            <Reveal className="post__links">
               {characters.length > 0 && (
                 <p>
                   <span className="eyebrow">Personnages</span>
@@ -84,16 +108,9 @@ export default function PostDetail() {
                   ))}
                 </p>
               )}
-            </div>
+            </Reveal>
           )}
-        </Reveal>
-
-        {restGallery.length > 0 && (
-          <Reveal className="post__gallery">
-            <h2 className="eyebrow">Galerie</h2>
-            <Lightbox images={restGallery.map((v) => ({ src: imgSrc(v), alt: post.title }))} />
-          </Reveal>
-        )}
+        </div>
       </article>
     </PageTransition>
   )
