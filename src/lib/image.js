@@ -1,12 +1,8 @@
 // src/lib/image.js
 //
-// Une valeur d'image peut être :
-//   - une simple chaîne  "/media/xxx.webp"
-//   - un objet cadré      { src: "/media/xxx.webp", focus: "50% 20%" }
-//
-// `focus` est un `object-position` CSS : il décide quelle partie de l'image
-// reste visible quand on la recadre en vignette (comme le repositionnement
-// d'une photo de profil).
+// Une valeur d'image peut etre :
+//   - une simple chaine  "/media/xxx.webp"
+//   - un objet cadre      { src: "/media/xxx.webp", focus: "50% 20%" }
 
 export const DEFAULT_FOCUS = '50% 50%'
 
@@ -20,7 +16,15 @@ export function imgFocus(value) {
   return DEFAULT_FOCUS
 }
 
-// Reconstruit une valeur compacte : chaîne si cadrage par défaut, objet sinon.
+export function imgCredit(value, fallback = '') {
+  const credit =
+    value && typeof value === 'object'
+      ? value.source || value.credit || value.image_source || fallback
+      : fallback
+  return String(credit || '').trim()
+}
+
+// Reconstruit une valeur compacte : chaine si cadrage par defaut, objet sinon.
 export function makeImageValue(src, focus) {
   if (!src) return ''
   return !focus || focus === DEFAULT_FOCUS ? src : { src, focus }

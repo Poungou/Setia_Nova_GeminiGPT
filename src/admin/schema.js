@@ -5,7 +5,7 @@
 // fichiers src/data/*.json.
 //
 // Types de champ : text | textarea | prose | markdown | number | date | select
-//                  | tags | image | gallery | refs | relations
+//                  | boolean | tags | image | gallery | refs | relations
 //   refs      -> liste d'ids pointant vers une autre collection (`ref`)
 //   relations -> spécifique aux personnages : [{ characterId, type, description }]
 
@@ -78,6 +78,34 @@ export const SCHEMA = {
     ],
   },
 
+  creator: {
+    label: 'Profil du créateur',
+    singular: 'profil',
+    icon: 'UserRound',
+    order: 0,
+    singleton: true,
+    title: () => 'Profil du créateur',
+    subtitle: (r) => r.displayName || '',
+    makeId: () => 'creator',
+    defaults: {
+      id: 'creator',
+      displayName: 'Poungou',
+      photo: { src: '/media/fudo-presentation-mtg1r17u.webp', focus: '50% 18%' },
+      bio: 'Je rassemble ici mes personnages, leurs liens, leurs lieux et les fragments RP qui composent mon coin de Woltar. Nova-Setia est mon carnet vivant : une vitrine personnelle pour retrouver les histoires, garder les sources sous la main et ouvrir de nouvelles pistes de jeu.',
+    },
+    fields: [
+      { key: 'displayName', label: 'Pseudo affiché', type: 'text', group: 'Qui suis-je ?' },
+      {
+        key: 'photo',
+        label: 'Photo de profil',
+        type: 'image',
+        group: 'Qui suis-je ?',
+        hint: 'Si ce champ est vide, la photo actuelle reste utilisée comme image par défaut.',
+      },
+      { key: 'bio', label: 'Texte “Qui suis-je ?”', type: 'textarea', group: 'Qui suis-je ?' },
+    ],
+  },
+
   characters: {
     label: 'Personnages',
     singular: 'personnage',
@@ -92,10 +120,17 @@ export const SCHEMA = {
       origin: '', residence: '', occupation: '', traits: [], shortDescription: '',
       character: '', appearance: '', biography: '', quote: '', portrait: '', gallery: [],
       color: '', frameColor: '', relations: [], locations: [], tags: [], author: '', visibility: 'published',
-      ownerUserId: 'system',
+      ownerUserId: 'system', is_featured: false, image_source: '', gallery_sources: {},
     },
     fields: [
       { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
+      {
+        key: 'is_featured',
+        label: 'Mettre en avant',
+        type: 'boolean',
+        group: 'Publication',
+        accountHidden: true,
+      },
       {
         key: 'ownerUserId', label: 'Proprietaire', type: 'text', group: 'Publication',
         hint: 'system = contenu historique/admin protege. Les comptes joueurs sont assignes cote serveur.',
@@ -141,6 +176,13 @@ export const SCHEMA = {
       { key: 'appearance', label: 'Apparence', type: 'textarea', group: 'Textes' },
       { key: 'biography', label: 'Histoire', type: 'prose', group: 'Textes' },
       { key: 'portrait', label: 'Portrait', type: 'image', group: 'Images' },
+      {
+        key: 'image_source',
+        label: 'Source / crédit de l’image',
+        type: 'text',
+        group: 'Images',
+        hint: 'Facultatif. Exemple : Poungou / Woltar.net.',
+      },
       { key: 'gallery', label: 'Galerie', type: 'gallery', group: 'Images' },
       { key: 'locations', label: 'Lieux associés', type: 'refs', ref: 'locations', group: 'Liens' },
       { key: 'relations', label: 'Relations', type: 'relations', group: 'Liens' },

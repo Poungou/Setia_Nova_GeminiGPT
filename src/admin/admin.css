@@ -451,6 +451,53 @@ textarea.adm-input {
   font-size: 0.85rem;
 }
 
+.adm-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: fit-content;
+  color: var(--ivory-dim);
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+.adm-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.adm-switch__track {
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--bg-void);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.adm-switch__thumb {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ivory-faint);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.adm-switch input:checked + .adm-switch__track {
+  border-color: var(--wine-bright);
+  background: var(--wine);
+}
+.adm-switch input:checked + .adm-switch__track .adm-switch__thumb {
+  transform: translateX(18px);
+  background: var(--on-accent);
+}
+.adm-switch input:focus-visible + .adm-switch__track {
+  outline: 2px solid var(--wine-bright);
+  outline-offset: 2px;
+}
+.adm-switch input:disabled ~ span {
+  opacity: 0.5;
+}
+
 /* --- markdown ---------------------------------------------------- */
 .adm-markdown__tabs {
   display: flex;

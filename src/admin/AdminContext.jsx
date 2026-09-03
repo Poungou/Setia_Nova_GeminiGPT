@@ -13,9 +13,11 @@ import archivesJson from '../data/archives.json'
 import postsJson from '../data/posts.json'
 import aetherJson from '../data/aether.json'
 import homeJson from '../data/home.json'
+import { creatorProfile } from '../data/creator.js'
 
 const BUNDLED = {
   home: homeJson,
+  creator: [creatorProfile],
   characters: charactersJson,
   locations: locationsJson,
   clans: clansJson,
@@ -29,6 +31,7 @@ export function AdminProvider({ children, currentUser = null }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [readOnly, setReadOnly] = useState(!adminAvailable)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -36,15 +39,18 @@ export function AdminProvider({ children, currentUser = null }) {
     try {
       if (!adminAvailable) {
         setData({ ...BUNDLED })
+        setReadOnly(true)
         return
       }
       const entries = await Promise.all(
         COLLECTION_NAMES.map(async (name) => [name, await getCollection(name)]),
       )
       setData(Object.fromEntries(entries))
+      setReadOnly(false)
     } catch (e) {
       setError(String(e.message || e))
       setData({ ...BUNDLED })
+      setReadOnly(true)
     } finally {
       setLoading(false)
     }
@@ -55,13 +61,15 @@ export function AdminProvider({ children, currentUser = null }) {
   }, [load])
 
   const save = useCallback(async (name, rows) => {
-    await saveCollection(name, rows)
-    setData((d) => ({ ...d, [name]: rows }))
-  }, [])
+    if (readOnly) throw new Error('Mode lecture seule.')
+    const savedRows = await saveCollection(name, rows)
+    setData((d) => ({ ...d, [name]: savedRows }))
+    return savedRows
+  }, [readOnly])
 
   const value = useMemo(
-    () => ({ data, loading, error, reload: load, save, readOnly: !adminAvailable, currentUser }),
-    [data, loading, error, load, save, currentUser],
+    () => ({ data, loading, error, reload: load, save, readOnly, currentUser }),
+    [data, loading, error, load, save, readOnly, currentUser],
   )
 
   return <AdminCtx.Provider value={value}>{children}</AdminCtx.Provider>

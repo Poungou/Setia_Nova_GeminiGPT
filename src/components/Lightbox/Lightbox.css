@@ -93,6 +93,11 @@
   text-transform: uppercase;
   border-bottom: 1px solid rgba(239, 230, 218, 0.4);
 }
+.lightbox-figure__source {
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
 
 .lightbox-btn {
   position: absolute;

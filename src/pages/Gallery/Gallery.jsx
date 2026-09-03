@@ -14,9 +14,10 @@ export default function Gallery() {
     () =>
       (source === 'all' ? all : all.filter((a) => a.source === source)).map((a) => ({
         src: a.src,
-        label: a.credit ? `${a.title} · ${a.credit}` : a.title,
+        label: a.title,
         alt: a.title,
         to: a.to,
+        source: a.credit,
       })),
     [all, source],
   )

@@ -113,6 +113,15 @@
   flex: 1;
 }
 
+.character-card__source {
+  margin: 0;
+  padding: 0.35rem var(--space-2) 0;
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
 .character-card__clan {
   color: var(--ivory-faint);
 }
@@ -126,6 +135,17 @@
   margin: 0;
   color: var(--ivory-dim);
   font-size: 0.88rem;
+}
+
+.character-card__summary {
+  margin: 0;
+  color: var(--ivory-faint);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   flex: 1;
 }
 

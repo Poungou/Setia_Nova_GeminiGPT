@@ -1,8 +1,7 @@
 // src/admin/adminApi.js
 //
-// Dialogue avec le plugin Vite `woltar-admin` (dev uniquement).
-// En build de production, `adminAvailable` est faux et l'admin s'affiche en
-// lecture seule avec un message d'explication.
+// Dialogue avec /__admin/api. En dev, ce endpoint est fourni par le plugin
+// Vite `woltar-admin`; en production, il est fourni par le Worker Cloudflare.
 //
 // Les personnages canon suivent exactement les 6 autres collections
 // (lieux, clans, événements, archives, journal, Personas) : l'admin reste
@@ -13,7 +12,9 @@
 
 const BASE = '/__admin/api'
 
-export const adminAvailable = import.meta.env.DEV
+export const adminAvailable = import.meta.env.VITE_WOLTAR_ADMIN_BACKEND !== 'disabled'
+export const localFileUploadsAvailable = import.meta.env.DEV
+export const adminStorageLabel = import.meta.env.DEV ? 'src/data/*.json' : 'Cloudflare D1'
 
 async function json(res) {
   const body = await res.json().catch(() => ({}))
@@ -35,7 +36,7 @@ export async function saveCollection(name, rows) {
       body: JSON.stringify(rows),
     }),
   )
-  return body
+  return body.data || rows
 }
 
 export function fileToDataUrl(file) {

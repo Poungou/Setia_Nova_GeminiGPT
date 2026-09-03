@@ -9,7 +9,7 @@
 // supprimé au profit d'AETHER, l'assistant IA central unique du site (voir
 // worker/routes/aether.js, branché sur /__aether, pas /__public).
 
-import { getPublicCharacter, listPublicCharacters } from '../lib/publicStore.js'
+import { getPublicCharacter, getPublicCreatorProfile, listPublicCharacters } from '../lib/publicStore.js'
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -29,6 +29,10 @@ export async function handlePublic(request, env, parts) {
 
     if (parts[0] === 'characters' && parts.length === 1) {
       return json({ data: await listPublicCharacters(env) })
+    }
+
+    if (parts[0] === 'creator-profile' && parts.length === 1) {
+      return json({ data: await getPublicCreatorProfile(env) })
     }
 
     if (parts[0] === 'characters' && parts[1]) {

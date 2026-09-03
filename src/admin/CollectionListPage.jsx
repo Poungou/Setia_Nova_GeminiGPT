@@ -58,6 +58,7 @@ export default function CollectionListPage() {
               </div>
               <code className="adm-card__id">{r.id}</code>
               {r.ownerUserId && <span className="adm-pill">{r.ownerUserId}</span>}
+              {r.is_featured && <span className="adm-pill">en avant</span>}
               {r.canon === 'draft' && <span className="adm-pill">ébauche</span>}
             </Link>
           </li>

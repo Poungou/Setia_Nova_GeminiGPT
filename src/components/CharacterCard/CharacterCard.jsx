@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { imgSrc, imgFocus } from '../../lib/image.js'
+import { imgSrc, imgFocus, imgCredit } from '../../lib/image.js'
 import { resolveFrameColor, getFrameMeta } from '../../lib/frames.js'
 import PixelFrame from '../PixelIcons/PixelFrame.jsx'
 import PixelHeart from '../PixelIcons/PixelHeart.jsx'
@@ -21,6 +21,7 @@ export default function CharacterCard({ character, index = 0 }) {
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
   const frameColor = resolveFrameColor(character)
   const frameMeta = getFrameMeta(frameColor)
+  const imageSource = imgCredit(character.portrait, character.image_source)
 
   const motionProps = reduce
     ? {}
@@ -59,11 +60,13 @@ export default function CharacterCard({ character, index = 0 }) {
           <PixelFrame frameColor={frameColor} className="character-card__frame" />
         </span>
       </div>
+      {imgSrc(character.portrait) && imageSource && <p className="character-card__source">Source : {imageSource}</p>}
 
       <div className="character-card__body">
         {character.clan && <span className="character-card__clan eyebrow">Clan {character.clan}</span>}
         <h3 className="character-card__name">{fullName}</h3>
         <p className="character-card__title">{character.title}</p>
+        {character.shortDescription && <p className="character-card__summary">{character.shortDescription}</p>}
         <span className="character-card__cta">
           Voir la fiche <PixelPaopu size={18} />
         </span>

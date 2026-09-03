@@ -58,7 +58,12 @@ function assertId(row) {
 }
 
 function sanitizeOwnedRow(row, user, existing = null) {
-  const clean = { ...row, ownerUserId: user.id }
+  const clean = {
+    ...row,
+    ownerUserId: user.id,
+    is_featured: Boolean(existing?.is_featured),
+    __managedByAdmin: Boolean(existing?.__managedByAdmin),
+  }
   const now = new Date().toISOString()
   clean.updatedAt = now
 

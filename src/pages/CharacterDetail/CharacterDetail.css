@@ -12,6 +12,14 @@
   align-items: end;
 }
 
+.character-hero__portrait-wrap {
+  margin: 0;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
 .character-hero__portrait {
   aspect-ratio: 3 / 4;
   max-width: 340px;
@@ -35,6 +43,14 @@
   font-family: var(--font-display);
   font-size: 4.5rem;
   color: var(--ivory-dim);
+}
+
+.image-source {
+  margin: 0;
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1.35;
 }
 
 .character-hero__info {
@@ -72,6 +88,15 @@
   color: var(--ivory-dim);
   font-size: 1.1rem;
   margin: 0.3rem 0 0.2rem;
+}
+
+.character-hero__summary {
+  max-width: 58ch;
+  color: var(--ivory-dim);
+  font-family: var(--font-reading);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0.35rem 0 0;
 }
 
 .character-hero__clan {
@@ -483,6 +508,13 @@
   gap: var(--space-2);
 }
 
+.character-gallery__item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
 .character-gallery img {
   width: 100%;
   aspect-ratio: 3 / 4;
@@ -496,6 +528,10 @@
   }
 
   .character-hero__portrait {
+    max-width: none;
+  }
+
+  .character-hero__portrait-wrap {
     max-width: none;
   }
 

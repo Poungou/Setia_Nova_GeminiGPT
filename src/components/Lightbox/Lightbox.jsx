@@ -5,7 +5,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import './Lightbox.css'
 
 // Galerie cliquable + visionneuse plein écran.
-// images : liste de chaînes, ou d'objets { src, alt, label, to }
+// images : liste de chaînes, ou d'objets { src, alt, label, to, source }
 export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
   const items = images
     .map((i) => (typeof i === 'string' ? { src: i } : i))
@@ -67,9 +67,12 @@ export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
             )}
             <figure className="lightbox-figure" onClick={(e) => e.stopPropagation()}>
               <img src={current.src} alt={current.alt || current.label || ''} />
-              {(current.label || current.to) && (
+              {(current.label || current.source || current.credit || current.to) && (
                 <figcaption>
-                  {current.label}
+                  {current.label && <span>{current.label}</span>}
+                  {(current.source || current.credit) && (
+                    <span className="lightbox-figure__source">Source : {current.source || current.credit}</span>
+                  )}
                   {current.to && (
                     <Link to={current.to} className="lightbox-figure__link">
                       voir la source →

@@ -9,7 +9,7 @@
     "clanId": "nakamura",
     "status": "active",
     "canon": "confirmed",
-    "age": "35",
+    "age": "~35 ans (officiellement)",
     "gender": "Féminin",
     "species": "Woltarienne",
     "origin": "",
@@ -19,9 +19,9 @@
       "Pelage vert",
       "Yeux cyan"
     ],
-    "shortDescription": "Ancienne, puissante et profondément liée à l’histoire sombre de sa famille, elle donne souvent l’impression d’observer le monde. \nSon caractère est froid, sarcastique, calculateur et extrêmement pragmatique. Kazuko accorde difficilement sa confiance et supporte très mal qu’on cherche à la contrôler. Elle peut se montrer cruelle ou impitoyable lorsque la situation l’exige, mais reste farouchement attachée à son clan.",
-    "character": "Froide, soucieuse, bienveillante\nVoix : grave et douce  ",
-    "appearance": "Pelage vert, yeux cyan.",
+    "shortDescription": "Kazuko Nakamura est la matriarche du clan Nakamura, une Woltarienne au pelage vert et au regard cyan particulièrement marquant. Ancienne, puissante et profondément liée à l’histoire sombre de sa famille, elle donne souvent l’impression d’observer le monde avec plusieurs coups d’avance.",
+    "character": "Kazuko paraît sympathique, bienveillante et particulièrement courtoise. En sérieux décalage avec son époque, elle a notamment pour habitude de saluer ses interlocuteurs par une révérence. Elle se montre volontiers serviable et prête à venir en aide aux autres.\n\nIl faudra néanmoins creuser davantage pour réellement apprendre à la connaître. Son statut de Matriarche lui a donné un sang-froid presque légendaire : même dans les situations tendues, elle essaie généralement de mettre les formes afin de ne pas heurter inutilement son interlocuteur.\n\nDerrière ce calme se cache surtout une femme froide, sarcastique, calculatrice et extrêmement pragmatique : Kazuko accorde difficilement sa confiance et supporte très mal qu’on cherche à la contrôler. Elle peut se montrer cruelle ou impitoyable lorsque la situation l’exige, mais reste farouchement attachée à son clan.\n\nVoix : grave et douce.",
+    "appearance": "Pelage vert, yeux cyan au regard particulièrement marquant. Woltarienne d’environ 1m70, assez fine, avec une démarche naturellement élégante ; sa silhouette reste néanmoins généreuse.\n\n**Tenue :** Kazuko porte généralement de longues robes noires aux bordures rouges, accompagnées d’un grand couvre-chef rappelant ceux des sorcières, ainsi que de hautes cuissardes qui accentuent sa silhouette. Dans les RP fantastiques, elle porte autour du cou un pendentif en forme de cristal ou de pierre.",
     "biography": "Faut venir RP pour connaître l'histoire ✨ ",
     "quote": "🪄 Et hop ! Un p'tit coup et c'est fini ✨ ",
     "portrait": {
@@ -31,7 +31,27 @@
     "gallery": [
       "/media/9091-mthrn7q3.webp",
       "/media/3020-mthrnzl6.webp",
-      "/media/3005-mthrohrv.webp"
+      "/media/3005-mthrohrv.webp",
+      "/media/kazu-18.09-mtls5dnb.webp",
+      "/media/kazuko-23.06.2022-mtls5g3r.webp",
+      "/media/kazu-grotte-mtls5jsm.webp",
+      "/media/kazdelanight-mtls5t3m.webp",
+      "/media/illustration8-4-mtlswh05.webp",
+      "/media/hragoxkazubaldec25-mtlswlv8.webp",
+      "/media/kazukodeuxcarto-mtlswqgz.webp",
+      "/media/kazuuuko-mtlswtbw.webp",
+      "/media/kazzzuu-mtlsww6y.webp",
+      "/media/illustration59-1-mtlswzz7.webp",
+      "/media/illustration52-1-mtlsx3dp.webp",
+      "/media/illustration46-2-mtlsx7i4.webp",
+      "/media/illustration35-1-mtlsxak8.webp",
+      "/media/illustration33-mtlsxdlo.webp",
+      "/media/illustration76-mtlsxhfm.webp",
+      "/media/illustration17-1-mtlsxprs.webp",
+      "/media/illustration10-mtlsxv42.webp",
+      "/media/kazuko-run22-mtlsy08q.gif",
+      "/media/kazu-15.08.2022-mtlt1iq5.webp",
+      "/media/pdp-mtlt1m6x.webp"
     ],
     "color": "#4dd8d0",
     "frameColor": "gris",
@@ -69,6 +89,9 @@
     "author": "",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": true,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "kazuko-nakamura"
   },
   {
@@ -81,25 +104,31 @@
     "clanId": "nakamura",
     "status": "active",
     "canon": "confirmed",
-    "age": "",
-    "gender": "",
+    "age": "~35 ans (officiellement)",
+    "gender": "Masculin",
     "species": "",
     "origin": "",
     "residence": "Manoir de Sétia",
     "occupation": "",
     "traits": [
-      "Hétérochromie"
+      "Hétérochromie",
+      "Pelage fuchsia"
     ],
     "shortDescription": "Le jumeau aux deux regards.",
-    "character": "",
-    "appearance": "Hétérochromie.",
+    "character": "Hachiro est probablement l’un de mes personnages les plus tendus. Violent, arrogant et rarement aimable au premier abord, il peut néanmoins passer d’un individu parfaitement imbuvable à quelqu’un d’étonnamment agréable.\n\nIl est capable de reconnaître lorsqu’il va trop loin… du moins s’il estime que son interlocuteur en vaut la peine. Il possède aujourd’hui un profond dégoût pour l’amour et ne croit pratiquement plus en ce sentiment.",
+    "appearance": "Hétérochromie. Contrairement à Kazuko, Hachiro possède une carrure particulièrement imposante : il mesure environ 1m95. Ses nombreuses années d’errance lui ont forgé un corps robuste et solidement structuré. Son pelage fuchsia accentue encore davantage son volume.\n\n**Tenue :** jean sombre et délavé, t-shirt noir et grande parka. Son torse porte plusieurs cicatrices issues d’une époque lointaine ; il ne porte actuellement aucun pendentif ni bijou autour du cou.",
     "biography": "",
     "quote": "",
     "portrait": {
       "src": "/media/11200-mtfuj2nm.webp",
       "focus": "58% 9%"
     },
-    "gallery": [],
+    "gallery": [
+      "/media/illustration22-3-mtlsqpyv.webp",
+      "/media/illustration15-mtlsqvlp.webp",
+      "/media/hachiromood-mtlsqyqr.webp",
+      "/media/illustration81-mtlsr5uu.webp"
+    ],
     "color": "",
     "frameColor": "",
     "relations": [
@@ -125,6 +154,9 @@
     "author": "",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": true,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "hachiro-nakamura"
   },
   {
@@ -138,7 +170,7 @@
     "status": "active",
     "canon": "confirmed",
     "age": "~25 ans",
-    "gender": "",
+    "gender": "Masculin",
     "species": "",
     "origin": "",
     "residence": "",
@@ -146,9 +178,9 @@
     "traits": [
       "Esthétique rouge feu"
     ],
-    "shortDescription": "🫪 ",
-    "character": "",
-    "appearance": "Taille : 1m87 \nPoids : 92 kg\nPhysique : Poils soyeux, ",
+    "shortDescription": "Ancien entrepreneur de l’import-export à Spido, il a tout perdu après l’Effondrement et reconstruit aujourd’hui son pub, Le Joyeux Lutin, dans le vieux Sétia.",
+    "character": "Fudo ne vit pratiquement que pour le travail : c’est un véritable hard worker. Il dirigeait autrefois l’une des entreprises d’import-export de Spido.\n\nAprès l’Effondrement, il a tout perdu et consacre désormais une grande partie de son énergie à reconstruire son précieux pub : Le Joyeux Lutin, installé dans l’une des ruelles sombres du vieux Sétia.\n\nFudo sait parfaitement mettre les formes lorsqu’il s’adresse à quelqu’un. Doté d’un charisme naturel et d’une grande éloquence, il maîtrise particulièrement bien ses émotions — il est donc difficile de savoir ce qu’il pense réellement ou de réussir à le percer.\n\n*Note RP actuelle : en ce moment, il peut franchement être très con.*",
+    "appearance": "Taille : 1m87. Poids : 92 kg. Carrure naturellement musclée, poils soyeux.\n\n**Tenue :** toujours habillé avec distinction — jean et chemise blanche lorsqu’il travaille au pub ; costumes, souvent dans des tons bleu marine, la journée ou lors de rendez-vous professionnels.",
     "biography": "",
     "quote": "",
     "portrait": {
@@ -157,7 +189,20 @@
     },
     "gallery": [
       "/media/3028-mthsff1a.webp",
-      "/media/725-mthsinel.webp"
+      "/media/725-mthsinel.webp",
+      "/media/illustration52-5-mtls2peh.webp",
+      "/media/received-465646648922005-mtls2wk7.webp",
+      "/media/story-board-fudoxhaina-mtls2zmu.webp",
+      "/media/fudoxsadie18.09-mtls36bd.webp",
+      "/media/fudo-x-hoya-06.05.2022-mtls3ayi.webp",
+      "/media/illu-chap-iv-mtls3ikw.webp",
+      "/media/illustration46-mtls3mzb.webp",
+      "/media/illu-fudocometropico2-mtls3pbn.webp",
+      "/media/fudoxsadie4ans-mtls3sbh.webp",
+      "/media/fudo-halloween-3-mtls3y8c.webp",
+      "/media/55-mtls40gr.webp",
+      "/media/illustration1154-mtlsyh8t.webp",
+      "/media/illustration9-16-mtlszzrr.webp"
     ],
     "color": "#e2492b",
     "frameColor": "",
@@ -174,6 +219,9 @@
     "author": "",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": true,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "fudo-nakamura"
   },
   {
@@ -186,11 +234,11 @@
     "clanId": "",
     "status": "active",
     "canon": "confirmed",
-    "age": "25",
+    "age": "~25 ans",
     "gender": "Masculin",
     "species": "",
     "origin": "",
-    "residence": "",
+    "residence": "Studio miteux",
     "occupation": "",
     "traits": [
       "Mèche plaqué en arrière",
@@ -198,25 +246,50 @@
       "Morose"
     ],
     "shortDescription": "L'énigme violette. Entourage du clan Nakamura.",
-    "character": "",
-    "appearance": "Identité visuelle violette.",
+    "character": "Son apparence androgyne lui permet de naviguer facilement entre les univers masculins et féminins… souvent contre son gré. Calion essaie désespérément de s’imposer comme un woltarien débordant de testostérone, mais le résultat n’est pas toujours très convaincant.\n\nDepuis la perte de sa jumelle, il vit souvent dans l’ombre de Fudo et éprouve envers lui une certaine jalousie. Cette frustration peut le pousser à faire des choses stupides ou à prononcer des paroles particulièrement blessantes.\n\nTrès exigeant concernant le physique de ses partenaires potentiels, Calion correspond assez bien à l’image du « bobo Sétian ». Il n’a souvent pas un rond en poche mais tente malgré tout de fréquenter les endroits chics, généralement en se faisant inviter — souvent par Fudo.",
+    "appearance": "Identité visuelle violette. Calion possède des traits à la fois féminins et masculins : son visage naturellement androgyne contraste avec la petite barbichette formée par un excédent de pelage sous son menton.\n\nIl mesure environ 1m80. Sa carrure reste relativement fine, ses muscles à peine dessinés. Il s’habille généralement de manière assez classique.",
     "biography": "",
     "quote": "",
     "portrait": {
       "src": "/media/2930-mtfun51g.webp",
       "focus": "16% 0%"
     },
-    "gallery": [],
+    "gallery": [
+      "/media/calion-nakamura-et-daya-mtls6796.webp",
+      "/media/illustration4-mtls69wk.webp",
+      "/media/caliondemonna-mtls6fla.webp",
+      "/media/548-mtls6jl5.webp",
+      "/media/caliioonn-mtls6nfq.webp",
+      "/media/calhosto1-mtlsywgt.webp",
+      "/media/calionxebony-mtlsyysr.webp",
+      "/media/illustration-mtlsz185.webp",
+      "/media/illustration2-mtlsz3dl.webp",
+      "/media/calionblog-mtlsz7c7.webp",
+      "/media/sadiecalionfudodec25-mtlszc2t.webp",
+      "/media/illustration84-2-mtlszegt.webp"
+    ],
     "color": "#8a5cd6",
     "frameColor": "violet",
-    "relations": [],
-    "locations": [],
+    "relations": [
+      {
+        "characterId": "",
+        "type": "",
+        "description": ""
+      }
+    ],
+    "locations": [
+      "joyeux-lutin",
+      "groove-s"
+    ],
     "tags": [
       "Entourage Nakamura"
     ],
     "author": "",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": false,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "calion"
   },
   {
@@ -279,7 +352,7 @@
     "id": "shizuka-nakamura"
   },
   {
-    "number": "999",
+    "number": "#999",
     "firstName": "Marie",
     "lastName": "Chat-Nakamura",
     "nickname": "L'originel",
@@ -315,10 +388,13 @@
     "author": "",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": false,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "marie-chat-nakamura"
   },
   {
-    "number": "998",
+    "number": "#998",
     "firstName": "Salut",
     "lastName": "Nakamura",
     "nickname": "",
@@ -368,6 +444,63 @@
     "author": "",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": false,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "salut-nakamura"
+  },
+  {
+    "number": "",
+    "firstName": "Kumiko",
+    "lastName": "Lolita",
+    "nickname": "",
+    "title": "Adoptée par Kazuko via un pacte avec Chaton Lolita",
+    "clan": "",
+    "clanId": "",
+    "status": "active",
+    "canon": "confirmed",
+    "age": "Fin d’adolescence, environ 20 ans",
+    "gender": "Féminin",
+    "species": "Woltarienne",
+    "origin": "",
+    "residence": "",
+    "occupation": "",
+    "traits": [
+      "Style punk-teufeur",
+      "Piercings",
+      "Mèches impeccables"
+    ],
+    "shortDescription": "Adoptée par Kazuko via un pacte avec Chaton Lolita. Malgré son style punk et son grain de folie, Kumiko reste une gentille woltarienne.",
+    "character": "Que dire de Kumiko ?\n\nEn plus d’être assez niaise, elle est extrêmement crédule. Malgré son apparence, Kumiko reste une gentille woltarienne. Elle possède simplement un sacré grain de folie et recherche constamment de nouvelles sensations et de l’adrénaline.\n\nElle est notamment fascinée par tout ce qui circule dans les festivals et les soirées, même si elle n’a jamais réellement eu le courage de franchir certaines limites seule.",
+    "appearance": "Kumiko mesure environ 1m60. Elle possède un style mélangeant punk et univers teufeur. Sa silhouette est relativement fine, avec une poitrine peu généreuse.\n\nElle possède plusieurs piercings, notamment aux oreilles et à la langue. Ses mèches sont généralement impeccables et elle porte souvent du maquillage.",
+    "biography": "",
+    "quote": "",
+    "portrait": {
+      "src": "/media/illustration21-1-mtlt0nqw.webp",
+      "focus": "50% 32%"
+    },
+    "gallery": [
+      "/media/illustration31-1-mtlt0u8p.webp"
+    ],
+    "color": "",
+    "frameColor": "",
+    "relations": [
+      {
+        "characterId": "kazuko-nakamura",
+        "type": "Adoptée (pacte avec Chaton Lolita)",
+        "description": ""
+      }
+    ],
+    "locations": [],
+    "tags": [
+      "Entourage Nakamura"
+    ],
+    "author": "",
+    "visibility": "published",
+    "ownerUserId": "system",
+    "is_featured": false,
+    "image_source": "",
+    "gallery_sources": {},
+    "id": "kumiko-lolita"
   }
 ]

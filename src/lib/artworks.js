@@ -5,7 +5,7 @@
 import { publishedPosts } from '../data/posts.js'
 import { characters } from '../data/characters.js'
 import { locations } from '../data/locations.js'
-import { imgSrc } from './image.js'
+import { imgCredit, imgSrc } from './image.js'
 
 export const ARTWORK_SOURCES = [
   { value: 'all', label: 'Tout' },
@@ -30,9 +30,9 @@ export function collectArtworks() {
 
   characters.forEach((c) => {
     const name = [c.firstName, c.lastName].filter(Boolean).join(' ')
-    push(c.portrait, { title: name, to: `/personnages/${c.id}`, source: 'personnages', tags: c.tags || [] })
+    push(c.portrait, { title: name, credit: imgCredit(c.portrait, c.image_source), to: `/personnages/${c.id}`, source: 'personnages', tags: c.tags || [] })
     ;(c.gallery || []).forEach((v) =>
-      push(v, { title: name, to: `/personnages/${c.id}`, source: 'personnages', tags: c.tags || [] }),
+      push(v, { title: name, credit: imgCredit(v, c.gallery_sources?.[imgSrc(v)]), to: `/personnages/${c.id}`, source: 'personnages', tags: c.tags || [] }),
     )
   })
 

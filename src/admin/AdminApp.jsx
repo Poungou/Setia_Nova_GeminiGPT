@@ -1,4 +1,3 @@
-// src/admin/AdminApp.jsx
 import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, Link } from 'react-router-dom'
 import { AdminProvider } from './AdminContext.jsx'
@@ -8,11 +7,14 @@ import CollectionListPage from './CollectionListPage.jsx'
 import CollectionEditPage from './CollectionEditPage.jsx'
 import AdminUsersPage from './AdminUsersPage.jsx'
 import { COLLECTION_NAMES } from './schema.js'
-import { getSession, loginLocalAdmin, logoutAccount } from '../lib/authApi.js'
+import { getSession, loginAccount, loginLocalAdmin, logoutAccount } from '../lib/authApi.js'
 import './admin.css'
 
 function Gate({ onOpen }) {
+  const localGate = import.meta.env.DEV
   const [pass, setPass] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -20,7 +22,7 @@ function Gate({ onOpen }) {
     setBusy(true)
     setErr('')
     try {
-      const body = await loginLocalAdmin(pass)
+      const body = localGate ? await loginLocalAdmin(pass) : await loginAccount({ email, password })
       if (body.user?.role !== 'admin') throw new Error('Compte non admin.')
       onOpen(body.user)
     } catch (e) {
@@ -41,19 +43,51 @@ function Gate({ onOpen }) {
       >
         <h1>Administration Nova-Setia</h1>
         <p className="adm-muted">
-          Accès local protégé côté serveur. Les comptes joueurs se gèrent dans l&apos;espace compte.
+          {localGate
+            ? 'Accès local protégé côté serveur.'
+            : 'Connexion avec un compte administrateur Nova-Setia.'}
         </p>
-        <input
-          className="adm-input"
-          type="password"
-          autoFocus
-          placeholder="Phrase d’accès"
-          value={pass}
-          onChange={(e) => {
-            setPass(e.target.value)
-            setErr('')
-          }}
-        />
+
+        {localGate ? (
+          <input
+            className="adm-input"
+            type="password"
+            autoFocus
+            placeholder="Phrase d’accès"
+            value={pass}
+            onChange={(e) => {
+              setPass(e.target.value)
+              setErr('')
+            }}
+          />
+        ) : (
+          <>
+            <input
+              className="adm-input"
+              type="email"
+              autoComplete="email"
+              autoFocus
+              placeholder="Email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                setErr('')
+              }}
+            />
+            <input
+              className="adm-input"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setErr('')
+              }}
+            />
+          </>
+        )}
+
         {err && <p className="adm-error">{err}</p>}
         <button className="adm-btn adm-btn--primary" type="submit" disabled={busy}>
           {busy ? 'Connexion...' : 'Entrer'}

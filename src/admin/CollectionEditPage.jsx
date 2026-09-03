@@ -5,6 +5,7 @@ import { Save, Trash2, ArrowLeft } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import { Field } from './Fields.jsx'
+import { adminStorageLabel, localFileUploadsAvailable } from './adminApi.js'
 
 export default function CollectionEditPage() {
   const { collection, id } = useParams()
@@ -82,8 +83,8 @@ export default function CollectionEditPage() {
       const row = { ...s.defaults, ...form, id: computedId }
       const next = isNew ? [...rows, row] : rows.map((r) => (r.id === computedId ? row : r))
       skipReset.current = true
-      await save(collection, next)
-      setForm(row)
+      const savedRows = await save(collection, next)
+      setForm(savedRows?.find((r) => r.id === computedId) || row)
       setDirty(false)
       setFlash('saved')
       setSaving(false)
@@ -131,7 +132,7 @@ export default function CollectionEditPage() {
       </header>
 
       {flash === 'saved' && (
-        <div className="adm-banner adm-banner--ok">Enregistré dans src/data/{collection}.json</div>
+        <div className="adm-banner adm-banner--ok">Enregistré dans {adminStorageLabel}</div>
       )}
       {flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}
       {dirty && !saving && flash !== 'saved' && (
@@ -152,7 +153,14 @@ export default function CollectionEditPage() {
               <div key={f.key} className={`adm-field adm-field--${f.type}`}>
                 <label htmlFor={`f-${f.key}`}>{f.label}</label>
                 {f.hint && <p className="adm-hint">{f.hint}</p>}
-                <Field field={f} value={form[f.key]} onChange={(v) => setField(f.key, v)} allData={data} />
+                <Field
+                  field={f}
+                  value={form[f.key]}
+                  onChange={(v) => setField(f.key, v)}
+                  allData={data}
+                  disabled={readOnly || saving}
+                  uploadEnabled={localFileUploadsAvailable}
+                />
               </div>
             ))}
           </fieldset>

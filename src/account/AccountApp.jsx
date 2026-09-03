@@ -209,6 +209,7 @@ function AccountEdit({ data, reload }) {
     const groups = {}
     for (const field of schema.fields) {
       if (field.key === 'ownerUserId') continue
+      if (field.accountHidden) continue
       ;(groups[field.group || 'Autres'] ||= []).push(field)
     }
     return groups

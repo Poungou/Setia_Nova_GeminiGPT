@@ -50,6 +50,11 @@ export default function woltarPublic() {
             return send(200, { data: characters })
           }
 
+          if (parts[0] === 'creator-profile' && parts.length === 1) {
+            const profiles = await readCollection('creator')
+            return send(200, { data: profiles[0] || null })
+          }
+
           if (parts[0] === 'characters' && parts[1]) {
             const characters = await readCollection('characters')
             const character = characters.find((c) => c.id === decodeURIComponent(parts[1]))

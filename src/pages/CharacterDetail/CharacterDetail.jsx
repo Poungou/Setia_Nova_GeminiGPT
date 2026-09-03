@@ -5,7 +5,7 @@ import { getLocationById } from '../../data/locations.js'
 import { getClanByCharacter } from '../../data/clans.js'
 import { events } from '../../data/events.js'
 import { usePublicCharacter } from '../../lib/publicData.js'
-import { imgSrc, imgFocus } from '../../lib/image.js'
+import { imgSrc, imgFocus, imgCredit } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
@@ -80,6 +80,7 @@ export default function CharacterDetail() {
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
   const hasCharacterOrAppearance = Boolean(character.character || character.appearance)
   const clanRecord = getClanByCharacter(character)
+  const portraitSource = imgCredit(character.portrait, character.image_source)
 
   // Nav interne : ne pointe que vers les sections réellement affichées.
   const sectionsNav = [
@@ -99,17 +100,22 @@ export default function CharacterDetail() {
       <article className="character-detail">
         <section className="character-hero">
           <motion.div className="container character-hero__inner" {...heroMotion}>
-            <motion.div className="character-hero__portrait" {...portraitMotion}>
-              {imgSrc(character.portrait) ? (
-                <img
-                  src={imgSrc(character.portrait)}
-                  alt={fullName}
-                  style={{ objectPosition: imgFocus(character.portrait) }}
-                />
-              ) : (
-                <span>{getInitials(character)}</span>
+            <motion.figure className="character-hero__portrait-wrap" {...portraitMotion}>
+              <div className="character-hero__portrait">
+                {imgSrc(character.portrait) ? (
+                  <img
+                    src={imgSrc(character.portrait)}
+                    alt={fullName}
+                    style={{ objectPosition: imgFocus(character.portrait) }}
+                  />
+                ) : (
+                  <span>{getInitials(character)}</span>
+                )}
+              </div>
+              {imgSrc(character.portrait) && portraitSource && (
+                <figcaption className="image-source">Source : {portraitSource}</figcaption>
               )}
-            </motion.div>
+            </motion.figure>
 
             <div className="character-hero__info">
               <motion.span className="character-hero__number" {...itemMotion}>
@@ -135,6 +141,11 @@ export default function CharacterDetail() {
               {character.title && (
                 <motion.p className="character-hero__title" {...itemMotion}>
                   {character.title}
+                </motion.p>
+              )}
+              {character.shortDescription && (
+                <motion.p className="character-hero__summary" {...itemMotion}>
+                  {character.shortDescription}
                 </motion.p>
               )}
               {character.clan && (
@@ -209,13 +220,13 @@ export default function CharacterDetail() {
                 {character.character && (
                   <div>
                     <h2 className="eyebrow section-card-title">Caractère</h2>
-                    <p>{character.character}</p>
+                    <Prose markdown={character.character} className="prose--tight" />
                   </div>
                 )}
                 {character.appearance && (
                   <div>
                     <h2 className="eyebrow section-card-title">Apparence</h2>
-                    <p>{character.appearance}</p>
+                    <Prose markdown={character.appearance} className="prose--tight" />
                   </div>
                 )}
               </Reveal>
@@ -294,8 +305,15 @@ export default function CharacterDetail() {
           <Reveal as="section" id="galerie" className="container character-section">
             <h2 className="eyebrow">Galerie</h2>
             <div className="character-gallery">
-              {character.gallery.map((src) => (
-                <img key={src} src={src} alt={`${fullName} — illustration`} loading="lazy" />
+              {character.gallery.map((item) => (
+                <figure key={imgSrc(item)} className="character-gallery__item">
+                  <img src={imgSrc(item)} alt={`${fullName} — illustration`} loading="lazy" />
+                  {imgCredit(item, character.gallery_sources?.[imgSrc(item)]) && (
+                    <figcaption className="image-source">
+                      Source : {imgCredit(item, character.gallery_sources?.[imgSrc(item)])}
+                    </figcaption>
+                  )}
+                </figure>
               ))}
             </div>
           </Reveal>

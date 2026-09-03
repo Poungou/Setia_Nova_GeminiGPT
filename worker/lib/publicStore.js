@@ -13,18 +13,29 @@
 // l'assistant IA central unique du site, qui n'est pas exposé via cette API
 // publique (il a sa propre route, /__aether).
 
-import { getCharacterWithFallback, listCharactersWithFallback } from './contentStore.js'
+import { getCharacterWithFallback, getCreatorProfile, listCharactersWithFallback } from './contentStore.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
 }
 
+function publicCharacter(character) {
+  if (!character) return null
+  const clean = { ...character }
+  delete clean.__managedByAdmin
+  return clean
+}
+
 export async function listPublicCharacters(env) {
   const all = await listCharactersWithFallback(env)
-  return all.filter(isPublished)
+  return all.filter(isPublished).map(publicCharacter)
 }
 
 export async function getPublicCharacter(env, id) {
   const character = await getCharacterWithFallback(env, id)
-  return isPublished(character) ? character : null
+  return isPublished(character) ? publicCharacter(character) : null
+}
+
+export async function getPublicCreatorProfile(env) {
+  return getCreatorProfile(env)
 }

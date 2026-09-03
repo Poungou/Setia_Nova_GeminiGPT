@@ -1,36 +1,13 @@
 // worker/lib/contentStore.js
 //
-// Lieux / clans / chronologie / archives / journal / configuration Aether
-// restent statiques (empaquetés au build, lecture seule en production — voir
-// docs/CLOUDFLARE_DEPLOYMENT_PLAN.md, section « Portée retenue »).
+// Collections statiques: lieux, clans, chronologie, archives, journal et
+// configuration Aether restent empaquetees au build pour le moment.
 //
-// Personnages : depuis la tâche « Séparer canon local et personnages
-// utilisateurs D1 » (Phase 18), la séparation est stricte —
-//   - CANON (personnages historiques ou créés par l'admin en local) : vit
-//     uniquement dans src/data/characters.json, édité en localhost via
-//     l'admin dev (plugins/woltar-admin.js), publié par build + déploiement.
-//     Ne vit JAMAIS dans D1 — voir docs/CLOUDFLARE_DEPLOYMENT_PLAN.md.
-//   - UTILISATEUR (créé depuis /compte en production) : vit uniquement dans
-//     D1, `ownerUserId` = l'id du compte créateur.
-//
-// getCharacterWithFallback/listCharactersWithFallback construisent la vue
-// publique unifiée : le JSON statique (canon) est TOUJOURS prioritaire — un
-// id canon n'est jamais remplacé ni masqué par une ligne D1 du même id,
-// même si D1 en contient une (résidu d'un ancien seed, par exemple). Seules
-// les lignes D1 dont l'id ne correspond à aucun personnage canon sont
-// ajoutées à la vue (= les personnages utilisateurs). Ça garantit aussi que
-// les fiches canon restent visibles même si D1 est indisponible, en panne,
-// ou pas encore peuplé : leur lecture ne dépend plus de D1 du tout.
-//
-// Historique — Phase « Aether » : la table D1 `personas` et toute la
-// logique de lecture/écriture associée (get/listPersonas,
-// get/listPersonasWithFallback) ont été retirées d'ici : le système de
-// Personas RP liées à un personnage est supprimé au profit d'AETHER, un
-// assistant IA central unique (config statique, voir STATIC_COLLECTIONS.aether
-// et worker/routes/aether.js). La table `personas` reste présente sur le
-// disque D1 tant qu'elle n'a pas été explicitement supprimée par
-// l'utilisatrice/Codex — voir migrations/0002_deprecate_personas.sql (non
-// appliquée).
+// Personnages: la vue publique combine le canon statique et les personnages
+// D1. Les anciennes lignes D1 portant l'id d'un personnage canon sont ignorees
+// par defaut pour eviter qu'un ancien seed masque le JSON actuel. Une ligne D1
+// ne peut remplacer/etendre une fiche canon que si `managed_by_admin = 1`, ce
+// qui est pose par la nouvelle API admin de production.
 
 import locationsJson from '../../src/data/locations.json'
 import clansJson from '../../src/data/clans.json'
@@ -39,6 +16,7 @@ import archivesJson from '../../src/data/archives.json'
 import postsJson from '../../src/data/posts.json'
 import aetherJson from '../../src/data/aether.json'
 import staticCharactersJson from '../../src/data/characters.json'
+import { creatorProfile, normalizeCreatorProfile } from '../../src/data/creator.js'
 
 export const STATIC_COLLECTIONS = {
   locations: locationsJson,
@@ -48,17 +26,57 @@ export const STATIC_COLLECTIONS = {
   posts: postsJson,
 }
 
-// Config Aether : un seul objet, jamais une liste dans le reste du code —
-// voir worker/routes/aether.js. Édité comme les autres collections de
-// référence via l'admin local (src/admin/schema.js, collection singleton
-// `aether`), publié par build + déploiement, jamais stocké en D1.
 export function getAetherConfig() {
   return (aetherJson && aetherJson[0]) || null
 }
 
+function bool(value) {
+  return value === true || value === 'true' || value === 1 || value === '1'
+}
+
+function parseObjectJson(value, fallback = {}) {
+  if (!value) return fallback
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : fallback
+  } catch {
+    return fallback
+  }
+}
+
+function dataForStorage(row, id) {
+  const data = { ...row, id }
+  delete data.ownerUserId
+  delete data.__managedByAdmin
+  return data
+}
+
 function rowToRecord(row) {
   if (!row) return null
-  return { ...JSON.parse(row.data), id: row.id, ownerUserId: row.owner_user_id }
+  const data = JSON.parse(row.data)
+  const gallerySources = parseObjectJson(row.gallery_sources, data.gallery_sources || {})
+  return {
+    ...data,
+    id: row.id,
+    ownerUserId: row.owner_user_id,
+    is_featured: row.is_featured === undefined ? bool(data.is_featured) : bool(row.is_featured),
+    image_source: row.image_source ?? data.image_source ?? '',
+    gallery_sources: gallerySources,
+    __managedByAdmin: bool(row.managed_by_admin),
+  }
+}
+
+function characterColumns(row, options = {}) {
+  return {
+    isFeatured: bool(row?.is_featured) ? 1 : 0,
+    imageSource: String(row?.image_source || '').trim(),
+    gallerySources: JSON.stringify(
+      row?.gallery_sources && typeof row.gallery_sources === 'object' && !Array.isArray(row.gallery_sources)
+        ? row.gallery_sources
+        : {},
+    ),
+    managedByAdmin: (options.managedByAdmin || row?.__managedByAdmin) ? 1 : 0,
+  }
 }
 
 export async function listCharacters(env) {
@@ -74,27 +92,50 @@ export async function getCharacter(env, id) {
 
 const TABLES = { characters: 'characters' }
 
-export async function insertRow(env, collection, row) {
+export async function insertRow(env, collection, row, options = {}) {
   if (!TABLES[collection]) throw new Error(`Collection inconnue : ${collection}`)
   const now = new Date().toISOString()
-  const { id, ownerUserId, ...rest } = row
-  const data = JSON.stringify({ ...rest, id })
+  const { id, ownerUserId } = row
+  const data = JSON.stringify(dataForStorage(row, id))
+  const columns = characterColumns(row, options)
 
   await env.WOLTAR_DB.prepare(
-    'INSERT INTO characters (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO characters (id, owner_user_id, data, is_featured, image_source, gallery_sources, managed_by_admin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
   )
-    .bind(id, ownerUserId || 'system', data, now, now)
+    .bind(
+      id,
+      ownerUserId || 'system',
+      data,
+      columns.isFeatured,
+      columns.imageSource,
+      columns.gallerySources,
+      columns.managedByAdmin,
+      now,
+      now,
+    )
     .run()
 }
 
-export async function updateRow(env, collection, id, row) {
+export async function updateRow(env, collection, id, row, options = {}) {
   if (!TABLES[collection]) throw new Error(`Collection inconnue : ${collection}`)
   const now = new Date().toISOString()
-  const { ownerUserId, ...rest } = row
-  const data = JSON.stringify({ ...rest, id })
+  const { ownerUserId } = row
+  const data = JSON.stringify(dataForStorage(row, id))
+  const columns = characterColumns(row, options)
 
-  await env.WOLTAR_DB.prepare('UPDATE characters SET owner_user_id = ?, data = ?, updated_at = ? WHERE id = ?')
-    .bind(ownerUserId || 'system', data, now, id)
+  await env.WOLTAR_DB.prepare(
+    'UPDATE characters SET owner_user_id = ?, data = ?, is_featured = ?, image_source = ?, gallery_sources = ?, managed_by_admin = ?, updated_at = ? WHERE id = ?',
+  )
+    .bind(
+      ownerUserId || 'system',
+      data,
+      columns.isFeatured,
+      columns.imageSource,
+      columns.gallerySources,
+      columns.managedByAdmin,
+      now,
+      id,
+    )
     .run()
 }
 
@@ -104,13 +145,11 @@ export async function deleteRow(env, collection, id) {
   await env.WOLTAR_DB.prepare(`DELETE FROM ${table} WHERE id = ?`).bind(id).run()
 }
 
-// --- Lecture résiliente (D1 + repli statique) ------------------------------
-
 async function safeGetCharacter(env, id) {
   try {
     return await getCharacter(env, id)
   } catch (err) {
-    console.error('[contentStore] lecture D1 (personnage) impossible, repli sur les données statiques', err)
+    console.error('[contentStore] lecture D1 (personnage) impossible, repli sur les donnees statiques', err)
     return null
   }
 }
@@ -119,35 +158,73 @@ async function safeListCharacters(env) {
   try {
     return await listCharacters(env)
   } catch (err) {
-    console.error('[contentStore] liste D1 (personnages) impossible, repli sur les données statiques', err)
+    console.error('[contentStore] liste D1 (personnages) impossible, repli sur les donnees statiques', err)
     return []
   }
 }
 
-// Le canon (JSON statique) est toujours prioritaire — jamais interrogé après
-// D1, jamais remplacé par une ligne D1 du même id. Une fiche canon reste
-// donc lisible même si D1 est en panne, indisponible, ou pas encore
-// peuplée : sa lecture ne fait plus aucun appel réseau.
+function mergeAdminCharacter(staticRow, d1Row) {
+  return {
+    ...staticRow,
+    ...d1Row,
+    ownerUserId: d1Row.ownerUserId || staticRow.ownerUserId || 'system',
+  }
+}
+
 export async function getCharacterWithFallback(env, id) {
   if (!id) return null
   const staticRow = staticCharactersJson.find((c) => c.id === id)
-  if (staticRow) return staticRow
-  return await safeGetCharacter(env, id)
+  const d1Row = await safeGetCharacter(env, id)
+  if (!staticRow) return d1Row
+  if (!d1Row) return staticRow
+  return d1Row.__managedByAdmin ? mergeAdminCharacter(staticRow, d1Row) : staticRow
 }
 
-// Vue unifiée : tout le canon + uniquement les lignes D1 dont l'id n'est
-// pas un id canon (= personnages utilisateurs). Une ligne D1 qui porterait
-// malgré tout un id canon (résidu d'un ancien seed, `ownerUserId: "system"`
-// legacy...) est ignorée sans exception — jamais mélangée à la fiche canon
-// correspondante, jamais affichée en double.
 export async function listCharactersWithFallback(env) {
   const staticIds = new Set(staticCharactersJson.map((c) => c.id))
   const d1Rows = await safeListCharacters(env)
   const byId = new Map()
-  for (const c of staticCharactersJson) byId.set(c.id, c)
-  for (const c of d1Rows) {
-    if (staticIds.has(c.id)) continue
-    byId.set(c.id, c)
+
+  for (const character of staticCharactersJson) byId.set(character.id, character)
+  for (const character of d1Rows) {
+    if (staticIds.has(character.id)) {
+      if (character.__managedByAdmin) {
+        byId.set(character.id, mergeAdminCharacter(byId.get(character.id), character))
+      }
+      continue
+    }
+    byId.set(character.id, character)
   }
+
   return [...byId.values()]
+}
+
+export async function getSiteSetting(env, key, fallback = null) {
+  const row = await env.WOLTAR_DB.prepare('SELECT data FROM site_settings WHERE key = ?').bind(key).first()
+  if (!row) return fallback
+  return JSON.parse(row.data)
+}
+
+export async function upsertSiteSetting(env, key, data) {
+  const now = new Date().toISOString()
+  await env.WOLTAR_DB.prepare(
+    'INSERT INTO site_settings (key, data, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(key) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at',
+  )
+    .bind(key, JSON.stringify(data), now, now)
+    .run()
+}
+
+export async function getCreatorProfile(env) {
+  try {
+    return normalizeCreatorProfile(await getSiteSetting(env, 'creator_profile', creatorProfile))
+  } catch (err) {
+    console.error('[contentStore] lecture D1 (profil createur) impossible, repli statique', err)
+    return creatorProfile
+  }
+}
+
+export async function saveCreatorProfile(env, profile) {
+  const clean = normalizeCreatorProfile(profile)
+  await upsertSiteSetting(env, 'creator_profile', clean)
+  return clean
 }

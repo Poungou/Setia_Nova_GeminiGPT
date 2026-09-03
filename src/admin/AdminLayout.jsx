@@ -1,11 +1,11 @@
 // src/admin/AdminLayout.jsx
 import { NavLink, Outlet, Link } from 'react-router-dom'
-import { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, Circle, UserCog, House } from 'lucide-react'
+import { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, Circle, UserCog, House, UserRound } from 'lucide-react'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 
-const ICONS = { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, House }
+const ICONS = { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, House, UserRound }
 
 export default function AdminLayout({ onLock, currentUser }) {
   const { readOnly, error, reload } = useAdmin()
@@ -50,8 +50,7 @@ export default function AdminLayout({ onLock, currentUser }) {
       <main className="adm-main">
         {readOnly && (
           <div className="adm-banner adm-banner--warn">
-            Mode lecture seule — l’édition fonctionne uniquement en local via
-            <code> npm run dev</code>.
+            Mode lecture seule — le backend admin n’est pas joignable sur ce build.
           </div>
         )}
         {error && (

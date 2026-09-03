@@ -19,6 +19,8 @@
 //   relations[]  { characterId, type, description } — uniquement des liens confirmés
 //   locations[]  ids de lieux (voir data/locations.json)
 //   tags[]       recherche et filtres
+//   is_featured  true si le personnage apparait dans "Personnages en avant"
+//   image_source credit facultatif affiche sous le portrait
 //   ownerUserId  "system" pour les fiches historiques, ou id du compte createur
 //
 // Une valeur inconnue reste vide ("") plutôt qu'inventée : l'UI affiche alors "—".

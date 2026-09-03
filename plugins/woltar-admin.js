@@ -10,14 +10,14 @@
 //   PUT  /collections/:name        -> réécrit src/data/:name.json (corps = tableau JSON)
 //   POST /upload                   -> { filename, dataUrl } -> écrit public/media/<slug>, renvoie { path }
 //
-// En build de production, ce plugin ne fait rien : /admin devient une page inerte.
+// En build de production, ce plugin ne fait rien : le Worker prend le relais.
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { getRequestUser, httpError, isAdmin } from './lib/authStore.js'
 
-const COLLECTIONS = ['home', 'characters', 'locations', 'clans', 'events', 'archives', 'posts', 'aether']
+const COLLECTIONS = ['home', 'creator', 'characters', 'locations', 'clans', 'events', 'archives', 'posts', 'aether']
 const MEDIA_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg' }
 
 function slugify(s) {

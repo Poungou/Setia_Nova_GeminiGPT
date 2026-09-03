@@ -59,6 +59,8 @@ export function Field({
           ))}
         </select>
       )
+    case 'boolean':
+      return <BooleanInput id={common.id} value={Boolean(value)} onChange={onChange} disabled={disabled} />
     case 'tags':
       return <TagsInput value={value || []} onChange={onChange} disabled={disabled} />
     case 'image':
@@ -89,6 +91,24 @@ export function Field({
         />
       )
   }
+}
+
+function BooleanInput({ id, value, onChange, disabled }) {
+  return (
+    <label className="adm-switch" htmlFor={id}>
+      <input
+        id={id}
+        type="checkbox"
+        checked={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className="adm-switch__track" aria-hidden="true">
+        <span className="adm-switch__thumb" />
+      </span>
+      <span>{value ? 'Oui' : 'Non'}</span>
+    </label>
+  )
 }
 
 function MarkdownInput({ id, value, onChange, disabled }) {

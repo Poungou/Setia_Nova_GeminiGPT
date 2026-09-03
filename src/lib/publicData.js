@@ -18,6 +18,7 @@
 
 import { useEffect, useState } from 'react'
 import { allCharacters as staticCharacters, characters as staticPublicCharacters } from '../data/characters.js'
+import { creatorProfile as staticCreatorProfile, normalizeCreatorProfile } from '../data/creator.js'
 
 const BASE = '/__public/api'
 
@@ -69,4 +70,22 @@ export function usePublicCharacter(id) {
   }, [id])
 
   return character
+}
+
+export function useCreatorProfile() {
+  const [profile, setProfile] = useState(staticCreatorProfile)
+
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/creator-profile`)
+      .then((data) => {
+        if (alive) setProfile(normalizeCreatorProfile(data))
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  return profile
 }

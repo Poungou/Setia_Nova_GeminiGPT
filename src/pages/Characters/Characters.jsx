@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { usePublicCharacters } from '../../lib/publicData.js'
+import { useCreatorProfile, usePublicCharacters } from '../../lib/publicData.js'
+import { imgFocus, imgSrc } from '../../lib/image.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
@@ -47,6 +48,9 @@ function matchesQuery(character, query) {
     character.nickname,
     character.clan,
     character.title,
+    character.shortDescription,
+    character.character,
+    character.appearance,
     character.occupation,
     character.residence,
     ...(character.traits || []),
@@ -61,6 +65,7 @@ function matchesQuery(character, query) {
 
 export default function Characters() {
   const characters = usePublicCharacters()
+  const creator = useCreatorProfile()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [clan, setClan] = useState('all')
@@ -85,6 +90,12 @@ export default function Characters() {
     return sorted
   }, [characters, query, status, clan, canon, sort])
 
+  const featured = useMemo(
+    () => characters.filter((c) => c.is_featured === true).sort(compareByNumber),
+    [characters],
+  )
+  const creatorPhoto = imgSrc(creator.photo)
+
   return (
     <PageTransition>
       <section className="container characters-page">
@@ -95,6 +106,45 @@ export default function Characters() {
             Chaque visage conserve une histoire. Certaines sont encore en train de s&rsquo;écrire.
           </p>
         </Reveal>
+
+        <Reveal as="section" className="creator-profile" aria-labelledby="creator-profile-title">
+          <figure className="creator-profile__photo">
+            {creatorPhoto ? (
+              <img src={creatorPhoto} alt={creator.displayName} style={{ objectPosition: imgFocus(creator.photo) }} />
+            ) : (
+              <span>{creator.displayName?.[0] || 'N'}</span>
+            )}
+          </figure>
+          <div className="creator-profile__body">
+            <span className="eyebrow">Qui suis-je ?</span>
+            <h2 id="creator-profile-title">{creator.displayName}</h2>
+            <p>{creator.bio}</p>
+          </div>
+        </Reveal>
+
+        <Reveal as="section" className="characters-featured" aria-labelledby="characters-featured-title">
+          <div className="characters-page__section-head">
+            <span className="eyebrow">Sélection</span>
+            <h2 id="characters-featured-title">Personnages en avant</h2>
+          </div>
+          {featured.length > 0 ? (
+            <div className="characters-page__grid characters-page__grid--featured">
+              {featured.map((c, i) => (
+                <CharacterCard key={c.id} character={c} index={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <strong>Aucun personnage mis en avant</strong>
+              Active “Mettre en avant” dans l’admin pour composer cette sélection.
+            </div>
+          )}
+        </Reveal>
+
+        <div className="characters-page__section-head">
+          <span className="eyebrow">Galerie</span>
+          <h2>Tous les personnages</h2>
+        </div>
 
         <div className="characters-page__controls">
           <SearchBar value={query} onChange={setQuery} />
