@@ -21,7 +21,7 @@ const NAV_LINKS = [
   },
   { to: '/journal', label: 'Journal' },
   { to: '/galerie', label: 'Galerie' },
-  { to: '/archives', label: 'Archives' },
+  { to: '/archives', label: 'Textes RP' },
   { to: '/aether', label: 'Aether' },
 ]
 
@@ -58,10 +58,10 @@ export default function Header() {
     <header className="site-header">
       <div className="container site-header__inner">
         <NavLink to="/" className="site-header__brand" onClick={() => setOpen(false)}>
-          <span className="site-header__mark">W</span>
+          <span className="site-header__mark">N</span>
           <span className="site-header__brand-text">
-            WOLTAR
-            <small>Archives Vivantes</small>
+            Nova-Setia
+            <small>vitrine RP</small>
           </span>
         </NavLink>
 

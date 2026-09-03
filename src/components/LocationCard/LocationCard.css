@@ -48,6 +48,12 @@
   font-size: 1.2rem;
 }
 
+.location-card__meta {
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
 .location-card__body p {
   margin: 0;
   color: var(--ivory-dim);

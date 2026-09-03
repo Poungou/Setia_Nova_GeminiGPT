@@ -10,30 +10,40 @@
   z-index: 0;
 }
 
+:root[data-theme='light'] .ambient--light-media {
+  z-index: 0;
+}
+
+:root[data-theme='dark'] .ambient--dark-media ~ .site-header,
 :root[data-theme='dark'] .ambient--dark-media ~ .page-main,
-:root[data-theme='dark'] .ambient--dark-media ~ .site-footer {
+:root[data-theme='dark'] .ambient--dark-media ~ .site-footer,
+:root[data-theme='light'] .ambient--light-media ~ .site-header,
+:root[data-theme='light'] .ambient--light-media ~ .page-main,
+:root[data-theme='light'] .ambient--light-media ~ .site-footer {
   position: relative;
   z-index: 1;
 }
 
-.ambient__dark-fallback,
-.ambient__dark-video,
-.ambient__dark-veil {
+.ambient__media-fallback,
+.ambient__video,
+.ambient__media-veil {
   display: none;
   position: absolute;
   inset: 0;
 }
 
-:root[data-theme='dark'] .ambient--dark-media .ambient__dark-fallback {
+:root[data-theme='dark'] .ambient--dark-media .ambient__media-fallback,
+:root[data-theme='light'] .ambient--light-media .ambient__media-fallback {
   display: block;
   z-index: 0;
-  background-image: url('/media/fond_sombre.jfif');
+  background-image: var(--ambient-fallback);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
 }
 
-:root[data-theme='dark'] .ambient--dark-media .ambient__dark-video {
+:root[data-theme='dark'] .ambient--dark-media .ambient__video,
+:root[data-theme='light'] .ambient--light-media .ambient__video {
   display: block;
   z-index: 1;
   width: 100%;
@@ -41,12 +51,22 @@
   object-fit: cover;
 }
 
-:root[data-theme='dark'] .ambient--dark-media .ambient__dark-veil {
+:root[data-theme='dark'] .ambient--dark-media .ambient__media-veil,
+:root[data-theme='light'] .ambient--light-media .ambient__media-veil {
   display: block;
   z-index: 2;
+}
+
+:root[data-theme='dark'] .ambient--dark-media .ambient__media-veil {
   background:
     radial-gradient(ellipse 80% 58% at 50% 24%, rgba(12, 13, 22, 0.18), rgba(12, 13, 22, 0.52)),
     rgba(5, 7, 14, 0.34);
+}
+
+:root[data-theme='light'] .ambient--light-media .ambient__media-veil {
+  background:
+    linear-gradient(180deg, rgba(255, 251, 254, 0.72), rgba(246, 238, 244, 0.78)),
+    radial-gradient(ellipse 86% 58% at 50% 18%, rgba(255, 251, 254, 0.1), rgba(246, 238, 244, 0.46));
 }
 
 .ambient__blob {
@@ -130,7 +150,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient__dark-video {
+  .ambient__video {
     display: none;
   }
 
@@ -141,7 +161,7 @@
 }
 
 @media (max-width: 768px) {
-  .ambient__dark-video {
+  :root[data-theme='dark'] .ambient__video {
     display: none;
   }
 }

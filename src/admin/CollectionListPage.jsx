@@ -1,7 +1,7 @@
 // src/admin/CollectionListPage.jsx
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Plus, Search } from 'lucide-react'
+import { Pencil, Plus, Search } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 
@@ -12,6 +12,10 @@ export default function CollectionListPage() {
   const [q, setQ] = useState('')
 
   const rows = useMemo(() => data?.[collection] || [], [data, collection])
+  const singletonRow = s?.singleton ? rows[0] : null
+  const createHref = singletonRow
+    ? `/admin/${collection}/${encodeURIComponent(singletonRow.id)}`
+    : `/admin/${collection}/new`
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     const list = [...rows]
@@ -28,8 +32,9 @@ export default function CollectionListPage() {
           <h1>{s.label}</h1>
           <p className="adm-muted">{rows.length} fiche(s)</p>
         </div>
-        <Link to={`/admin/${collection}/new`} className="adm-btn adm-btn--primary">
-          <Plus size={16} /> Nouveau {s.singular}
+        <Link to={createHref} className="adm-btn adm-btn--primary">
+          {singletonRow ? <Pencil size={16} /> : <Plus size={16} />}
+          {singletonRow ? 'Modifier' : `Nouveau ${s.singular}`}
         </Link>
       </header>
 

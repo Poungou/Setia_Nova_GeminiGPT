@@ -10,32 +10,32 @@ const EASE = [0.22, 1, 0.36, 1]
 const CHAPTERS = [
   {
     title: 'Woltar',
-    text: "Nom de l'univers. Les habitants sont appelés « woltarien » / « woltarienne » (pluriel employé en RP : « woltarions »).",
+    text: "Le monde d'origine des personnages. Les habitants sont appelés « woltarien » / « woltarienne » (pluriel employé en RP : « woltarions »).",
     to: null,
   },
   {
     title: 'Sétia',
-    text: 'Lieu central de Woltar.',
+    text: 'Un repère central pour cette vitrine RP personnelle.',
     to: '/lieux',
   },
   {
     title: 'Clan Nakamura',
-    text: "L'un des axes principaux de la vitrine.",
+    text: "L'un des axes principaux de Nova-Setia.",
     to: '/clans/nakamura',
   },
   {
     title: 'Lieux',
-    text: 'Manoir de Sétia, Le Joyeux Lutin, Palais des Astres, et d’autres à venir.',
+    text: "Manoir de Sétia, Le Joyeux Lutin, Palais des Astres, et d'autres endroits à étoffer tranquillement.",
     to: '/lieux',
   },
   {
     title: 'Chronologie',
-    text: 'Les événements marquants de Woltar, dans l’ordre.',
+    text: 'Des repères pour situer les RP, les liens de famille et les grands tournants.',
     to: '/chronologie',
   },
   {
     title: 'Culture',
-    text: 'Coutumes, société, politique, magie, technologie — à documenter progressivement.',
+    text: 'Coutumes, société, politique, magie, technologie : des notes à documenter progressivement.',
     to: null,
   },
 ]
@@ -47,12 +47,8 @@ export default function Universe() {
     <PageTransition>
       <section className="container universe-page">
         <Reveal className="section-heading">
-          <span className="eyebrow">Encyclopédie</span>
-          <h1 className="section-title">
-            LES ARCHIVES
-            <br />
-            DE WOLTAR
-          </h1>
+          <span className="eyebrow">Repères</span>
+          <h1 className="section-title">Autour de Nova-Setia</h1>
         </Reveal>
 
         <div className="universe-grid">

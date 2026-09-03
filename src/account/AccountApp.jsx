@@ -21,7 +21,7 @@ function AccountBackendUnavailable() {
   return (
     <div className="adm-gate">
       <div className="adm-gate__card">
-        <h1>Espace Woltar</h1>
+        <h1>Espace Nova-Setia</h1>
         <p className="adm-hint">
           {"L'espace compte n'est pas actif sur ce build Cloudflare tant que le stockage persistant D1 et les routes serveur n'ont pas ete valides."}
         </p>
@@ -67,7 +67,7 @@ function AuthGate({ onSession }) {
           await submit()
         }}
       >
-        <h1>Espace Woltar</h1>
+        <h1>Espace Nova-Setia</h1>
         <div className="adm-markdown__tabs">
           <button type="button" className={mode === 'login' ? 'is-active' : ''} onClick={() => setMode('login')}>
             Connexion
@@ -306,7 +306,14 @@ function AccountEdit({ data, reload }) {
               <div key={field.key} className={`adm-field adm-field--${field.type}`}>
                 <label htmlFor={`f-${field.key}`}>{field.label}</label>
                 {field.hint && <p className="adm-hint">{field.hint}</p>}
-                <Field field={field} value={form[field.key]} onChange={(value) => setField(field.key, value)} allData={data} />
+                <Field
+                  field={field}
+                  value={form[field.key]}
+                  onChange={(value) => setField(field.key, value)}
+                  allData={data}
+                  disabled={saving}
+                  uploadEnabled={import.meta.env.DEV && !saving}
+                />
               </div>
             ))}
           </fieldset>
@@ -342,7 +349,7 @@ function Workspace({ user, onLogout }) {
     <div className="adm">
       <aside className="adm-side">
         <div className="adm-side__head">
-          <Link to="/" className="adm-side__logo">Woltar</Link>
+          <Link to="/" className="adm-side__logo">Nova-Setia</Link>
           <span className="adm-side__tag">Compte</span>
         </div>
         <nav className="adm-nav">

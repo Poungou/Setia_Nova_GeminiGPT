@@ -9,7 +9,7 @@ export default function Archives() {
       <section className="container universe-page">
         <Reveal className="section-heading">
           <span className="eyebrow">Textes RP</span>
-          <h1 className="section-title">Archives</h1>
+          <h1 className="section-title">Récits et notes</h1>
         </Reveal>
 
         {archives.length > 0 ? (
@@ -24,8 +24,8 @@ export default function Archives() {
           </div>
         ) : (
           <div className="empty-state">
-            <strong>Les archives sont encore vides</strong>
-            Les RP retranscrits apparaîtront ici, organisés par arc.
+            <strong>Aucun texte RP pour l&rsquo;instant</strong>
+            Les scènes retranscrites apparaîtront ici, organisées par arc.
           </div>
         )}
       </section>

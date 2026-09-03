@@ -19,3 +19,9 @@
   max-width: 60ch;
   margin-top: var(--space-2);
 }
+
+.location-detail__children {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+}

@@ -9,9 +9,23 @@ import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import homeData from '../../data/home.json'
 import './Home.css'
 
 const aetherConfig = aetherData[0] || null
+const DEFAULT_HOME = {
+  eyebrow: 'Nova-Setia · vitrine RP personnelle',
+  title: 'Quelques histoires méritent qu’on s’y attarde.',
+  subtitle: 'Explore les visages, les liens et les lieux qui donnent vie aux récits de Nova-Setia, à ton rythme.',
+  intro: 'Ici, les histoires prennent le temps de respirer.',
+  primaryCtaLabel: 'Découvrir le clan',
+  primaryCtaUrl: '/personnages',
+  secondaryCtaLabel: 'Explorer l’univers',
+  secondaryCtaUrl: '/univers',
+  aetherCtaLabel: 'Parler à Aether',
+  aetherCtaUrl: '/aether',
+}
+const homeConfig = { ...DEFAULT_HOME, ...(homeData[0] || {}) }
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -42,25 +56,22 @@ export default function Home() {
         <section className="hero">
           <motion.div className="container hero__inner" {...heroMotion}>
             <motion.span className="eyebrow hero__eyebrow" {...itemMotion}>
-              Woltar · Archives Vivantes
+              {homeConfig.eyebrow}
             </motion.span>
             <motion.h1 className="hero__title" {...itemMotion}>
-              LES HISTOIRES
-              <br />
-              NE DISPARAISSENT JAMAIS.
+              {homeConfig.title}
             </motion.h1>
             <motion.p className="hero__subtitle" {...itemMotion}>
-              Explore les visages, les liens et les lieux qui façonnent Woltar. Une vitrine
-              vivante pour retrouver l&rsquo;essentiel de chaque récit.
+              {homeConfig.subtitle}
             </motion.p>
             <motion.div className="hero__actions" {...itemMotion}>
-              <Link to="/personnages" className="btn btn-primary">
-                Découvrir le clan
+              <Link to={homeConfig.primaryCtaUrl || '/personnages'} className="btn btn-primary">
+                {homeConfig.primaryCtaLabel}
               </Link>
-              <Link to="/univers" className="btn">
-                Ouvrir les archives
+              <Link to={homeConfig.secondaryCtaUrl || '/univers'} className="btn">
+                {homeConfig.secondaryCtaLabel}
               </Link>
-              <Link to="/aether" className="hero__aether-cta">
+              <Link to={homeConfig.aetherCtaUrl || '/aether'} className="hero__aether-cta">
                 <span className="hero__aether-avatar" aria-hidden="true">
                   {imgSrc(aetherConfig?.avatar) ? (
                     <img
@@ -72,7 +83,7 @@ export default function Home() {
                     <span>A</span>
                   )}
                 </span>
-                Parler à Aether
+                {homeConfig.aetherCtaLabel}
               </Link>
             </motion.div>
 
@@ -94,11 +105,7 @@ export default function Home() {
         </section>
 
         <Reveal as="section" className="container home-quote">
-          <p>
-            « On ne naît pas légende.
-            <br />
-            On le devient en refusant de disparaître. »
-          </p>
+          <p>« {homeConfig.intro} »</p>
         </Reveal>
 
         <section className="container home-section">
@@ -118,8 +125,8 @@ export default function Home() {
 
         <section className="container home-section">
           <Reveal className="section-heading">
-            <span className="eyebrow">Cartographie narrative</span>
-            <h2 className="section-title">Les lieux de Woltar</h2>
+            <span className="eyebrow">Coins à explorer</span>
+            <h2 className="section-title">Les lieux de Nova-Setia</h2>
           </Reveal>
           <div className="home-grid home-grid--locations">
             {featuredLocations.map((l, i) => (

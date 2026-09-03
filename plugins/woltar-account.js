@@ -11,7 +11,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
-  canEditOwnedResource,
   getOwnerUserId,
   getRequestUser,
   httpError,
@@ -56,7 +55,9 @@ function assertOwnedCollection(name) {
 }
 
 function assertCanEdit(user, row) {
-  if (!canEditOwnedResource(user, row)) throw httpError(403, 'Tu ne peux modifier que tes propres contenus.')
+  if (!user?.id || getOwnerUserId(row) !== user.id) {
+    throw httpError(403, 'Tu ne peux modifier que tes propres contenus.')
+  }
 }
 
 function assertId(row) {

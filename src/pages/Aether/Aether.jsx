@@ -39,17 +39,17 @@ export default function Aether() {
             )}
           </motion.div>
           <motion.span className="eyebrow aether-hero__eyebrow" {...itemMotion}>
-            Woltar · Archives Vivantes
+            Nova-Setia · vitrine RP
           </motion.span>
           <motion.h1 className="aether-hero__title" {...itemMotion}>
-            AETHER
+            Aether
           </motion.h1>
           <motion.p className="aether-hero__lead" {...itemMotion}>
             Suis ton cœur. Pour le reste, demande-moi.
           </motion.p>
           <motion.p className="aether-hero__sub" {...itemMotion}>
-            Personnages, histoires, relations ou simplement envie de trouver un RP qui te plaît : je peux
-            t’orienter.
+            Personnages, histoires, relations ou simple envie de trouver un RP qui te plaît :
+            je peux t&rsquo;orienter.
           </motion.p>
         </motion.div>
       </section>
@@ -66,7 +66,7 @@ export default function Aether() {
           />
         ) : (
           <div className="aether-disabled">
-            <p>Aether n’est pas encore activé sur ce site.</p>
+            <p>Aether n&rsquo;est pas encore activé sur ce site.</p>
           </div>
         )}
       </div>

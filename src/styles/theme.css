@@ -1,5 +1,5 @@
 /* ===================================================================
-   THEME — palette "Archives Vivantes"
+   THEME — palette "Nova-Setia"
    Sombre par défaut (bordeaux / bleu nuit / violet / ivoire).
    Clair en option (rose poudré / mauve / aubergine), via
    <html data-theme="light">. Un 3e thème "woltar" (hommage aux
@@ -118,7 +118,7 @@
    fidèle"). --bg-void/--bg-base reprennent maintenant le rouge saturé réel
    (#980000) plutôt qu'un bordeaux assourdi, avec des pois de fond bien
    visibles (cf. règle body plus bas). Les cartes/panneaux (--bg-raised,
-   --bg-raised-2) restent en revanche sombres façon "Archives Vivantes" —
+   --bg-raised-2) restent en revanche sombres façon "Nova-Setia" —
    choix explicite de l'utilisatrice de ne PAS reprendre le panneau
    bleu/blanc du jeu, pour rester cohérente avec le reste du site. Pas de
    violet dans la source : --violet est ici aliasé sur la famille bleue

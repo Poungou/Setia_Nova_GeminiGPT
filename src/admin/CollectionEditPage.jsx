@@ -119,7 +119,7 @@ export default function CollectionEditPage() {
           <code>{computedId || '(identifiant à venir)'}</code>
         </div>
         <div className="adm-edit__actions">
-          {!isNew && (
+          {!isNew && !s.singleton && (
             <button type="button" className="adm-btn adm-btn--danger" onClick={onDelete} disabled={readOnly || saving}>
               <Trash2 size={15} /> Supprimer
             </button>

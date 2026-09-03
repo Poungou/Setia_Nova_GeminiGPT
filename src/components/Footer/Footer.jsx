@@ -8,9 +8,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="container site-footer__inner">
         <Reveal as="p" className="site-footer__quote" y={12}>
-          « On ne naît pas légende.
-          <br />
-          On le devient en refusant de disparaître. »
+          « Ici, les histoires prennent le temps de respirer. »
         </Reveal>
         <div className="site-footer__meta">
           <span>Vitrine RP privée · Univers en évolution</span>

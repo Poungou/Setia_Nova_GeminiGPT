@@ -10,3 +10,15 @@ export const locations = locationsData
 export function getLocationById(id) {
   return locations.find((l) => l.id === id)
 }
+
+export function getLocationParent(location) {
+  return location?.parentId ? getLocationById(location.parentId) : null
+}
+
+export function getLocationChildren(parentId) {
+  return locations.filter((l) => l.parentId === parentId)
+}
+
+export function isTopLevelLocation(location) {
+  return !location.parentId
+}

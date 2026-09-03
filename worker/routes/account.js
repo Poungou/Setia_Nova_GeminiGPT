@@ -12,7 +12,7 @@
 // site n'a plus qu'un seul assistant IA central, AETHER (config statique,
 // non liée à un compte) — voir worker/routes/aether.js.
 
-import { canEditOwnedResource, getOwnerUserId, getRequestUser, httpError } from '../lib/authStore.js'
+import { getOwnerUserId, getRequestUser, httpError } from '../lib/authStore.js'
 import { STATIC_COLLECTIONS, deleteRow, getCharacter, insertRow, listCharacters, updateRow } from '../lib/contentStore.js'
 import staticCharactersJson from '../../src/data/characters.json'
 
@@ -48,7 +48,9 @@ function assertOwnedCollection(name) {
 }
 
 function assertCanEdit(user, row) {
-  if (!canEditOwnedResource(user, row)) throw httpError(403, 'Tu ne peux modifier que tes propres contenus.')
+  if (!user?.id || getOwnerUserId(row) !== user.id) {
+    throw httpError(403, 'Tu ne peux modifier que tes propres contenus.')
+  }
 }
 
 function assertId(row) {

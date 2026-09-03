@@ -12,6 +12,9 @@ const browserGlobals = {
   fetch: 'readonly',
   FileReader: 'readonly',
   Image: 'readonly',
+  MutationObserver: 'readonly',
+  navigator: 'readonly',
+  requestAnimationFrame: 'readonly',
   matchMedia: 'readonly',
   setTimeout: 'readonly',
   clearTimeout: 'readonly',
@@ -23,6 +26,13 @@ const nodeGlobals = {
   URL: 'readonly',
   console: 'readonly',
   __dirname: 'readonly',
+}
+
+const workerGlobals = {
+  ...browserGlobals,
+  ...nodeGlobals,
+  AbortController: 'readonly',
+  Response: 'readonly',
 }
 
 export default [
@@ -61,6 +71,17 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: nodeGlobals,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+    },
+  },
+  {
+    files: ['worker/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: workerGlobals,
     },
     rules: {
       ...js.configs.recommended.rules,

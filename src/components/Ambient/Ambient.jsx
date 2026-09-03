@@ -1,23 +1,31 @@
 import { useEffect, useState } from 'react'
+import homeData from '../../data/home.json'
 import './Ambient.css'
 
 const DARK_BACKGROUND_IMAGE = '/media/fond_sombre.jfif'
 const DARK_BACKGROUND_VIDEO = '/media/fond_sombre_anime.mp4'
+const homeConfig = homeData[0] || {}
+const LIGHT_BACKGROUND_IMAGE = homeConfig.lightBackgroundFallback || '/media/fond_clair_statique.webp'
+const LIGHT_BACKGROUND_VIDEO = homeConfig.lightBackgroundVideo || '/media/fond_clair_anime.mp4'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const DESKTOP_VIDEO_QUERY = '(min-width: 769px)'
 
 function readAmbientMediaState() {
   if (typeof window === 'undefined') {
-    return { isDark: false, useVideo: false }
+    return { theme: 'dark', useVideo: false }
   }
 
-  const isDark = document.documentElement.dataset.theme === 'dark'
+  const theme = document.documentElement.dataset.theme || 'dark'
   const reduceMotion = window.matchMedia(REDUCED_MOTION_QUERY).matches
   const desktop = window.matchMedia(DESKTOP_VIDEO_QUERY).matches
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection
+  const saveData = Boolean(connection?.saveData)
+  const lowMemory = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 2
+  const motionSafe = !reduceMotion && !saveData && !lowMemory
 
   return {
-    isDark,
-    useVideo: isDark && desktop && !reduceMotion,
+    theme,
+    useVideo: (theme === 'dark' && desktop && motionSafe) || (theme === 'light' && motionSafe),
   }
 }
 
@@ -53,26 +61,41 @@ export default function Ambient() {
     }
   }, [])
 
-  const showVideo = mediaState.useVideo && !videoError
+  useEffect(() => {
+    setVideoError(false)
+  }, [mediaState.theme])
+
+  const isDark = mediaState.theme === 'dark'
+  const isLight = mediaState.theme === 'light'
+  const showVideo = mediaState.useVideo && !videoError && (isDark || isLight)
+  const videoSrc = isLight ? LIGHT_BACKGROUND_VIDEO : DARK_BACKGROUND_VIDEO
+  const posterSrc = isLight ? LIGHT_BACKGROUND_IMAGE : DARK_BACKGROUND_IMAGE
 
   return (
-    <div className={`ambient${mediaState.isDark ? ' ambient--dark-media' : ''}`} aria-hidden="true">
-      <div className="ambient__dark-fallback" />
+    <div
+      className={[
+        'ambient',
+        isDark ? 'ambient--dark-media' : '',
+        isLight ? 'ambient--light-media' : '',
+      ].filter(Boolean).join(' ')}
+      aria-hidden="true"
+    >
+      <div className="ambient__media-fallback" style={{ '--ambient-fallback': `url("${posterSrc}")` }} />
       {showVideo && (
         <video
-          className="ambient__dark-video"
+          className="ambient__video"
           autoPlay
           muted
           loop
           playsInline
-          poster={DARK_BACKGROUND_IMAGE}
+          poster={posterSrc}
           preload="metadata"
           onError={() => setVideoError(true)}
         >
-          <source src={DARK_BACKGROUND_VIDEO} type="video/mp4" />
+          <source src={videoSrc} type="video/mp4" />
         </video>
       )}
-      <div className="ambient__dark-veil" />
+      <div className="ambient__media-veil" />
       <span className="ambient__blob ambient__blob--wine" />
       <span className="ambient__blob ambient__blob--midnight" />
       <span className="ambient__blob ambient__blob--violet" />

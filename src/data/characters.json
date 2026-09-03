@@ -1,6 +1,6 @@
 [
   {
-    "number": "01",
+    "number": "1587",
     "firstName": "Kazuko",
     "lastName": "Nakamura",
     "nickname": "La vieille Chouette",
@@ -20,7 +20,7 @@
       "Yeux cyan"
     ],
     "shortDescription": "Ancienne, puissante et profondément liée à l’histoire sombre de sa famille, elle donne souvent l’impression d’observer le monde. \nSon caractère est froid, sarcastique, calculateur et extrêmement pragmatique. Kazuko accorde difficilement sa confiance et supporte très mal qu’on cherche à la contrôler. Elle peut se montrer cruelle ou impitoyable lorsque la situation l’exige, mais reste farouchement attachée à son clan.",
-    "character": "",
+    "character": "Froide, soucieuse, bienveillante\nVoix : grave et douce  ",
     "appearance": "Pelage vert, yeux cyan.",
     "biography": "Faut venir RP pour connaître l'histoire ✨ ",
     "quote": "🪄 Et hop ! Un p'tit coup et c'est fini ✨ ",
@@ -50,6 +50,11 @@
         "characterId": "calion",
         "type": "Tante",
         "description": ""
+      },
+      {
+        "characterId": "",
+        "type": "",
+        "description": ""
       }
     ],
     "locations": [
@@ -67,7 +72,7 @@
     "id": "kazuko-nakamura"
   },
   {
-    "number": "02",
+    "number": "14882",
     "firstName": "Hachiro",
     "lastName": "Nakamura",
     "nickname": "",
@@ -89,11 +94,14 @@
     "character": "",
     "appearance": "Hétérochromie.",
     "biography": "",
+    "quote": "",
     "portrait": {
       "src": "/media/11200-mtfuj2nm.webp",
       "focus": "58% 9%"
     },
     "gallery": [],
+    "color": "",
+    "frameColor": "",
     "relations": [
       {
         "characterId": "kazuko-nakamura",
@@ -116,15 +124,15 @@
     ],
     "author": "",
     "visibility": "published",
-    "id": "hachiro-nakamura",
-    "ownerUserId": "system"
+    "ownerUserId": "system",
+    "id": "hachiro-nakamura"
   },
   {
-    "number": "03",
+    "number": "1589",
     "firstName": "Fudo",
     "lastName": "Nakamura",
     "nickname": "",
-    "title": "Patron du Joyeux Lutin",
+    "title": "Dirigeant grincheux",
     "clan": "Nakamura",
     "clanId": "nakamura",
     "status": "active",
@@ -140,7 +148,7 @@
     ],
     "shortDescription": "🫪 ",
     "character": "",
-    "appearance": "Esthétique rouge feu.",
+    "appearance": "Taille : 1m87 \nPoids : 92 kg\nPhysique : Poils soyeux, ",
     "biography": "",
     "quote": "",
     "portrait": {
@@ -169,13 +177,14 @@
     "id": "fudo-nakamura"
   },
   {
-    "number": "04",
+    "number": "1818",
     "firstName": "Calion",
     "lastName": "Nakamura",
     "nickname": "",
-    "title": "L'énigme violette",
+    "title": "On peut être BG et à côté de ses pompes. ",
     "clan": "",
-    "status": "to-develop",
+    "clanId": "",
+    "status": "active",
     "canon": "confirmed",
     "age": "25",
     "gender": "Masculin",
@@ -183,11 +192,16 @@
     "origin": "",
     "residence": "",
     "occupation": "",
-    "traits": [],
+    "traits": [
+      "Mèche plaqué en arrière",
+      "Hipster",
+      "Morose"
+    ],
     "shortDescription": "L'énigme violette. Entourage du clan Nakamura.",
     "character": "",
     "appearance": "Identité visuelle violette.",
     "biography": "",
+    "quote": "",
     "portrait": {
       "src": "/media/2930-mtfun51g.webp",
       "focus": "16% 0%"
@@ -202,7 +216,158 @@
     ],
     "author": "",
     "visibility": "published",
-    "id": "calion",
-    "ownerUserId": "system"
+    "ownerUserId": "system",
+    "id": "calion"
+  },
+  {
+    "number": "31732",
+    "firstName": "Shizuka",
+    "lastName": "Nakamura",
+    "nickname": "",
+    "title": "La tisseuse de rêve ",
+    "clan": "Nakamura ",
+    "clanId": "Nakamura",
+    "status": "active",
+    "canon": "confirmed",
+    "age": "20",
+    "gender": "Féminin",
+    "species": "Woltarienne",
+    "origin": "",
+    "residence": "Studio- centre ville",
+    "occupation": "Étudiante en art",
+    "traits": [
+      "Salopette",
+      "Gris",
+      "Cyan"
+    ],
+    "shortDescription": "",
+    "character": "",
+    "appearance": "",
+    "biography": "",
+    "quote": "",
+    "portrait": {
+      "src": "/media/2970-mtkk8oco.webp",
+      "focus": "21% 32%"
+    },
+    "gallery": [],
+    "color": "",
+    "frameColor": "",
+    "relations": [
+      {
+        "characterId": "kazuko-nakamura",
+        "type": "Grand-mère ",
+        "description": ""
+      },
+      {
+        "characterId": "fudo-nakamura",
+        "type": "Oncle",
+        "description": ""
+      },
+      {
+        "characterId": "calion",
+        "type": "Oncle",
+        "description": ""
+      }
+    ],
+    "locations": [
+      "planetarium"
+    ],
+    "tags": [],
+    "author": "",
+    "visibility": "published",
+    "ownerUserId": "system",
+    "id": "shizuka-nakamura"
+  },
+  {
+    "number": "999",
+    "firstName": "Marie",
+    "lastName": "Chat-Nakamura",
+    "nickname": "L'originel",
+    "title": "La pactiseuse",
+    "clan": "Nakamura",
+    "clanId": "",
+    "status": "deceased",
+    "canon": "draft",
+    "age": "~70ans",
+    "gender": "Féminin",
+    "species": "",
+    "origin": "",
+    "residence": "Nécropole",
+    "occupation": "Dcd",
+    "traits": [
+      "Pelage vert pale"
+    ],
+    "shortDescription": "",
+    "character": "",
+    "appearance": "",
+    "biography": "",
+    "quote": "",
+    "portrait": {
+      "src": "/media/851-mtkkxc9b.png",
+      "focus": "0% 22%"
+    },
+    "gallery": [],
+    "color": "",
+    "frameColor": "rouge",
+    "relations": [],
+    "locations": [],
+    "tags": [],
+    "author": "",
+    "visibility": "published",
+    "ownerUserId": "system",
+    "id": "marie-chat-nakamura"
+  },
+  {
+    "number": "998",
+    "firstName": "Salut",
+    "lastName": "Nakamura",
+    "nickname": "",
+    "title": "Même le diable n'a pas voulu de lui",
+    "clan": "Nakamura",
+    "clanId": "",
+    "status": "deceased",
+    "canon": "draft",
+    "age": "~80 ans",
+    "gender": "",
+    "species": "",
+    "origin": "",
+    "residence": "",
+    "occupation": "",
+    "traits": [],
+    "shortDescription": "",
+    "character": "",
+    "appearance": "",
+    "biography": "",
+    "quote": "",
+    "portrait": {
+      "src": "/media/850-mtkkze4s.png",
+      "focus": "0% 48%"
+    },
+    "gallery": [],
+    "color": "",
+    "frameColor": "rouge",
+    "relations": [
+      {
+        "characterId": "marie-chat-nakamura",
+        "type": "Mariés ",
+        "description": ""
+      },
+      {
+        "characterId": "kazuko-nakamura",
+        "type": "Fille",
+        "description": ""
+      },
+      {
+        "characterId": "hachiro-nakamura",
+        "type": "Fils",
+        "description": ""
+      }
+    ],
+    "locations": [],
+    "tags": [],
+    "author": "",
+    "visibility": "published",
+    "ownerUserId": "system",
+    "id": "salut-nakamura"
   }
 ]

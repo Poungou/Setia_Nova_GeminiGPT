@@ -1,8 +1,9 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { getLocationById } from '../../data/locations.js'
+import { getLocationById, getLocationChildren, getLocationParent } from '../../data/locations.js'
 import { characters } from '../../data/characters.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
+import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
@@ -26,6 +27,9 @@ export default function LocationDetail() {
     return <Navigate to="/lieux" replace />
   }
 
+  const parent = getLocationParent(location)
+  const children = getLocationChildren(location.id)
+  const placement = [location.wing, location.zone].filter(Boolean).join(' · ')
   const associatedCharacters = (location.characters || [])
     .map((cid) => characters.find((c) => c.id === cid))
     .filter(Boolean)
@@ -53,9 +57,15 @@ export default function LocationDetail() {
         </Reveal>
 
         <Reveal as="section" className="container character-section">
-          <h2 className="eyebrow">Informations</h2>
+          <h2 className="eyebrow">Repères</h2>
           <dl className="identity-grid">
             <Field label="Type" value={location.type} />
+            <Field
+              label="Lieu parent"
+              value={parent && <Link to={`/lieux/${parent.id}`}>{parent.name}</Link>}
+            />
+            <Field label="Aile / zone" value={placement} />
+            <Field label="Étage" value={location.floor} />
             <Field label="Localisation" value={location.location} />
             <Field label="Propriétaire" value={location.owner} />
             <Field label="Faction" value={location.faction} />
@@ -75,10 +85,33 @@ export default function LocationDetail() {
           )}
         </Reveal>
 
+        <Reveal as="section" className="container character-section">
+          <h2 className="eyebrow">Lore libre</h2>
+          {location.lore ? (
+            <Prose markdown={location.lore} className="prose--tight" />
+          ) : (
+            <div className="empty-state">
+              <strong>Espace prêt pour le lore</strong>
+              Notes d&rsquo;ambiance, secrets, habitudes du lieu ou détails RP pourront être posés ici.
+            </div>
+          )}
+        </Reveal>
+
         {location.history && (
           <Reveal as="section" className="container character-section">
             <h2 className="eyebrow">Histoire</h2>
             <Prose markdown={location.history} className="prose--tight" />
+          </Reveal>
+        )}
+
+        {children.length > 0 && (
+          <Reveal as="section" className="container character-section">
+            <h2 className="eyebrow">Sous-lieux</h2>
+            <div className="location-detail__children">
+              {children.map((child, i) => (
+                <LocationCard key={child.id} location={child} index={i} />
+              ))}
+            </div>
           </Reveal>
         )}
 

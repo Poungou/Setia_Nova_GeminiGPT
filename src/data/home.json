@@ -1,0 +1,17 @@
+[
+  {
+    "id": "home",
+    "eyebrow": "L'antre des damnés · vitrine RP",
+    "title": "Quelques histoires méritent qu’on s’y attarde.",
+    "subtitle": "Explore les visages, les liens et les lieux qui donnent vie aux récits de Nova-Setia, à ton rythme.",
+    "intro": "Ici, les histoires prennent le temps de respirer.",
+    "primaryCtaLabel": "Découvrir le clan",
+    "primaryCtaUrl": "/personnages",
+    "secondaryCtaLabel": "Explorer l’univers",
+    "secondaryCtaUrl": "/univers",
+    "aetherCtaLabel": "Parler à Aether",
+    "aetherCtaUrl": "/aether",
+    "lightBackgroundVideo": "/media/fond_clair_anime.mp4",
+    "lightBackgroundFallback": "/media/fond_clair_statique.webp"
+  }
+]

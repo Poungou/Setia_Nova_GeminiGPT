@@ -8,6 +8,7 @@ const EASE = [0.22, 1, 0.36, 1]
 
 export default function LocationCard({ location, index = 0 }) {
   const reduce = useReducedMotion()
+  const meta = [location.floor, location.wing || location.zone].filter(Boolean).join(' · ')
 
   const motionProps = reduce
     ? {}
@@ -36,6 +37,7 @@ export default function LocationCard({ location, index = 0 }) {
       <div className="location-card__body">
         {location.type && <span className="eyebrow">{location.type}</span>}
         <h3>{location.name}</h3>
+        {meta && <span className="location-card__meta">{meta}</span>}
         <p>{location.shortDescription || <span className="dash">—</span>}</p>
       </div>
     </MotionLink>

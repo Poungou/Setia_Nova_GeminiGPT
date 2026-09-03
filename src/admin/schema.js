@@ -22,6 +22,12 @@ const CANON = [
   ['confirmed', 'Confirmé'],
   ['draft', 'Ébauche'],
 ]
+const CANON_SCOPE = [
+  ['personal', 'Canon Nakamura / personnel'],
+  ['community', 'Lore communautaire'],
+  ['interpretation', 'Interprétation RP'],
+  ['rumor', 'Rumeur / incertain'],
+]
 const VISIBILITY = [
   ['published', 'Publié'],
   ['draft', 'Brouillon (caché du site)'],
@@ -33,6 +39,45 @@ const AETHER_ENABLED = [
 ]
 
 export const SCHEMA = {
+  home: {
+    label: 'Accueil',
+    singular: 'accueil',
+    icon: 'House',
+    order: -1,
+    singleton: true,
+    title: () => 'Accueil',
+    subtitle: (r) => r.title || '',
+    makeId: () => 'home',
+    defaults: {
+      id: 'home', eyebrow: '', title: '', subtitle: '', intro: '',
+      primaryCtaLabel: '', primaryCtaUrl: '/personnages',
+      secondaryCtaLabel: '', secondaryCtaUrl: '/univers',
+      aetherCtaLabel: '', aetherCtaUrl: '/aether',
+      lightBackgroundVideo: '/media/fond_clair_anime.mp4',
+      lightBackgroundFallback: '/media/fond_clair_statique.webp',
+    },
+    fields: [
+      { key: 'eyebrow', label: 'Petit libellé au-dessus du titre', type: 'text', group: 'Textes' },
+      { key: 'title', label: 'Titre principal', type: 'textarea', group: 'Textes' },
+      { key: 'subtitle', label: 'Sous-titre', type: 'textarea', group: 'Textes' },
+      { key: 'intro', label: 'Texte d’intro', type: 'textarea', group: 'Textes' },
+      { key: 'primaryCtaLabel', label: 'Bouton principal', type: 'text', group: 'Boutons' },
+      { key: 'primaryCtaUrl', label: 'Lien du bouton principal', type: 'text', group: 'Boutons' },
+      { key: 'secondaryCtaLabel', label: 'Bouton secondaire', type: 'text', group: 'Boutons' },
+      { key: 'secondaryCtaUrl', label: 'Lien du bouton secondaire', type: 'text', group: 'Boutons' },
+      { key: 'aetherCtaLabel', label: 'Bouton Aether', type: 'text', group: 'Boutons' },
+      { key: 'aetherCtaUrl', label: 'Lien du bouton Aether', type: 'text', group: 'Boutons' },
+      {
+        key: 'lightBackgroundVideo', label: 'Fond clair animé', type: 'text', group: 'Médias',
+        hint: 'Préparé pour plus tard : le fond clair actuel est servi par le composant d’ambiance.',
+      },
+      {
+        key: 'lightBackgroundFallback', label: 'Fond clair statique', type: 'text', group: 'Médias',
+        hint: 'Image utilisée quand la vidéo est coupée, indisponible, ou évitée par préférence de mouvement.',
+      },
+    ],
+  },
+
   characters: {
     label: 'Personnages',
     singular: 'personnage',
@@ -112,20 +157,36 @@ export const SCHEMA = {
     subtitle: (r) => r.type || '',
     makeId: (r) => slug(r.name),
     defaults: {
-      name: '', type: '', canon: 'draft', location: '', owner: '', faction: '',
-      status: '', shortDescription: '', description: '', history: '', image: '',
-      characters: [], events: [], gallery: [],
+      name: '', type: '', canon: 'draft', canonScope: 'personal', parentId: '',
+      location: '', wing: '', zone: '', floor: '', owner: '', faction: '',
+      status: '', shortDescription: '', description: '', lore: '', history: '',
+      image: '', characters: [], events: [], gallery: [],
     },
     fields: [
       { key: 'name', label: 'Nom', type: 'text', group: 'Identité' },
       { key: 'type', label: 'Type', type: 'text', group: 'Identité' },
       { key: 'canon', label: 'Fiabilité', type: 'select', options: CANON, group: 'Identité' },
+      {
+        key: 'canonScope', label: 'Portée canon', type: 'select', options: CANON_SCOPE, group: 'Identité',
+        hint: 'Prépare la distinction future entre lore communautaire, canon personnel, interprétation RP et rumeur. Non affiché publiquement pour l’instant.',
+      },
+      {
+        key: 'parentId', label: 'Lieu parent', type: 'text', group: 'Identité',
+        hint: 'Id d’un autre lieu, ex. "manoir-de-setia" pour une pièce du manoir. Laisser vide pour un lieu principal.',
+      },
       { key: 'location', label: 'Situé à / dans', type: 'text', group: 'Identité' },
+      { key: 'wing', label: 'Aile', type: 'text', group: 'Identité' },
+      { key: 'zone', label: 'Zone', type: 'text', group: 'Identité' },
+      { key: 'floor', label: 'Étage', type: 'text', group: 'Identité' },
       { key: 'owner', label: 'Propriétaire', type: 'text', group: 'Identité' },
       { key: 'faction', label: 'Faction', type: 'text', group: 'Identité' },
       { key: 'status', label: 'Statut', type: 'text', group: 'Identité' },
       { key: 'shortDescription', label: 'Description courte', type: 'textarea', group: 'Textes' },
       { key: 'description', label: 'Description', type: 'prose', group: 'Textes' },
+      {
+        key: 'lore', label: 'Lore libre', type: 'prose', group: 'Textes',
+        hint: 'Grand champ libre : ambiance, secrets, habitudes, rumeurs, notes RP. Aucun format imposé.',
+      },
       { key: 'history', label: 'Histoire', type: 'prose', group: 'Textes' },
       { key: 'image', label: 'Image principale', type: 'image', group: 'Images' },
       { key: 'gallery', label: 'Galerie', type: 'gallery', group: 'Images' },

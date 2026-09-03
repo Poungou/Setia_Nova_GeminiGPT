@@ -39,7 +39,7 @@ function Gate({ onOpen }) {
           await submit()
         }}
       >
-        <h1>Administration Woltar</h1>
+        <h1>Administration Nova-Setia</h1>
         <p className="adm-muted">
           Accès local protégé côté serveur. Les comptes joueurs se gèrent dans l&apos;espace compte.
         </p>
