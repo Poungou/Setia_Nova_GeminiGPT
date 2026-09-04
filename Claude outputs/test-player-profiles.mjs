@@ -52,4 +52,6 @@ const deleted = await handleAuth(request(`/__auth/api/users/${tallouna.id}/profi
 assert(deleted.status === 200 && db.prepare('SELECT id FROM characters WHERE id = ?').get('tallouna-character')?.id === 'tallouna-character', 'l’admin supprime uniquement la fiche joueur')
 const member = await register('', 'Membre'); const adminCreated = await handleAuth(request(`/__auth/api/users/${member.id}/profile`, 'POST', { profile_public: false }, adminSession), env, ['users', member.id, 'profile'])
 assert(adminCreated.status === 201, 'l’admin peut créer une fiche pour un autre compte')
+const orphanAttempt = await handleAuth(request(`/__auth/api/users/user_does-not-exist/profile`, 'POST', { profile_public: false }, adminSession), env, ['users', 'user_does-not-exist', 'profile'])
+assert(orphanAttempt.status === 404 && !db.prepare('SELECT user_id FROM user_profiles WHERE user_id = ?').get('user_does-not-exist'), 'impossible de créer un profil orphelin pour un compte inexistant')
 console.log(`\n${passed} OK, ${failed} FAIL`); if (failed) process.exitCode = 1

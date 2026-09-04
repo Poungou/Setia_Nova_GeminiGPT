@@ -11,7 +11,13 @@ export function normalizePlayerProfile(payload = {}) {
   return { avatar: text(payload.avatar, 2000), image_source: text(payload.image_source, 500), player_intro: text(payload.player_intro), writing_style: text(payload.writing_style), univers: text(payload.univers), tw: text(payload.tw), rhythm: text(payload.rhythm), ig_username: text(payload.ig_username, 160), profile_public: payload.profile_public === true || payload.profile_public === 1 || payload.profile_public === '1' }
 }
 export async function getPlayerProfile(root, userId) { const all = await load(root); return { userId, exists: Boolean(all[userId]), ...normalizePlayerProfile(all[userId]) } }
-export async function createPlayerProfile(root, userId, payload) { const all = await load(root); if (all[userId]) { const error = new Error('Ce compte possède déjà un profil joueur.'); error.status = 409; throw error } return savePlayerProfile(root, userId, payload) }
+export async function createPlayerProfile(root, userId, payload) {
+  // Même garde-fou que la version Worker (worker/lib/playerProfiles.js) :
+  // jamais de profil joueur orphelin, même via un appel direct à l'API.
+  const users = await loadUsers(root)
+  if (!users.some((user) => user.id === userId)) { const error = new Error('Ce compte est introuvable.'); error.status = 404; throw error }
+  const all = await load(root); if (all[userId]) { const error = new Error('Ce compte possède déjà un profil joueur.'); error.status = 409; throw error } return savePlayerProfile(root, userId, payload)
+}
 export async function savePlayerProfile(root, userId, payload) { const all = await load(root); all[userId] = normalizePlayerProfile(payload); await save(root, all); return getPlayerProfile(root, userId) }
 export async function deletePlayerProfile(root, userId) { const all = await load(root); delete all[userId]; await save(root, all) }
 export async function listPublicPlayerProfiles(root) {

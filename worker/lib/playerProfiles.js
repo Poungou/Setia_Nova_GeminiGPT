@@ -36,6 +36,16 @@ export async function getPlayerProfile(env, userId) {
 }
 
 export async function createPlayerProfile(env, userId, payload) {
+  // Un profil joueur doit toujours être rattaché à un compte existant —
+  // jamais de fiche orpheline, même via un appel direct à l'API (l'admin ne
+  // propose que des comptes existants dans son sélecteur, mais ça ne protège
+  // pas l'API elle-même).
+  const user = await env.WOLTAR_DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first()
+  if (!user) {
+    const error = new Error('Ce compte est introuvable.')
+    error.status = 404
+    throw error
+  }
   const existing = await env.WOLTAR_DB.prepare('SELECT user_id FROM user_profiles WHERE user_id = ?').bind(userId).first()
   if (existing) {
     const error = new Error('Ce compte possède déjà un profil joueur.')
