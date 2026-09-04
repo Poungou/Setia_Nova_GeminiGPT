@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { publishedPosts, categoryLabel, POST_CATEGORIES } from '../../data/posts.js'
+import { categoryLabel, POST_CATEGORIES } from '../../data/posts.js'
+import { usePublicPosts } from '../../lib/publicData.js'
 import { excerptFromMarkdown } from '../../lib/markdown.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
@@ -19,10 +20,11 @@ function formatDate(iso) {
 
 export default function Journal() {
   const [category, setCategory] = useState('all')
+  const posts = usePublicPosts()
 
   const list = useMemo(
-    () => (category === 'all' ? publishedPosts : publishedPosts.filter((p) => p.category === category)),
-    [category],
+    () => (category === 'all' ? posts : posts.filter((p) => p.category === category)),
+    [category, posts],
   )
 
   return (

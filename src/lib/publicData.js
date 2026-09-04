@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react'
 import { allCharacters as staticCharacters, characters as staticPublicCharacters } from '../data/characters.js'
 import { clans as staticClans, getClanById as getStaticClanById } from '../data/clans.js'
 import { locations as staticLocations, getLocationById as getStaticLocationById } from '../data/locations.js'
+import { getPostById as getStaticPostById, posts as staticPosts } from '../data/posts.js'
 
 const BASE = '/__public/api'
 
@@ -124,6 +125,33 @@ export function usePublicPlayers() {
     return () => { alive = false }
   }, [])
   return players
+}
+
+export function usePublicPosts() {
+  const [posts, setPosts] = useState(staticPosts.filter((post) => post.visibility !== 'draft'))
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/posts`).then((data) => { if (alive && Array.isArray(data)) setPosts(data) }).catch(() => {})
+    return () => { alive = false }
+  }, [])
+  return posts
+}
+
+export function usePublicPost(id) {
+  const [post, setPost] = useState(() => getStaticPostById(id) || null)
+  const [loading, setLoading] = useState(Boolean(id))
+  useEffect(() => {
+    setPost(getStaticPostById(id) || null)
+    setLoading(Boolean(id))
+    if (!id) return undefined
+    let alive = true
+    getJson(`${BASE}/posts/${encodeURIComponent(id)}`)
+      .then((data) => { if (alive && data) setPost(data) })
+      .catch(() => {})
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [id])
+  return { post, loading }
 }
 
 export function usePublicLocations() {

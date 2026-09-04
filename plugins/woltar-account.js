@@ -1,7 +1,7 @@
 // plugins/woltar-account.js
 //
 // API serveur pour l'espace utilisateur /compte. Un compte joueur ne peut
-// créer/modifier/supprimer que ses propres personnages et clans — sauf une
+// créer/modifier/supprimer que ses propres personnages, clans, lieux et articles — sauf une
 // administratrice, qui voit et modère tout (voir canEditOwnedResource/
 // isAdmin dans lib/authStore.js).
 //
@@ -41,8 +41,8 @@ import { canCreate, CREATE_PERMISSIONS } from '../worker/lib/permissions.js'
 import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
 
 const MAX_BODY_BYTES = 1024 * 1024
-const REFERENCE_COLLECTIONS = ['events', 'archives', 'posts']
-const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations'])
+const REFERENCE_COLLECTIONS = ['events', 'archives']
+const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts'])
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -268,6 +268,7 @@ export default function woltarAccount() {
               characters: visibleRows(characters, user),
               clans: visibleRows(clans, user),
               locations: visibleRows(locations, user),
+              posts: visibleRows(await readCollection(dataDir, 'posts'), user),
             }
             for (const name of REFERENCE_COLLECTIONS) data[name] = await readCollection(dataDir, name)
             return send(200, { user, data })

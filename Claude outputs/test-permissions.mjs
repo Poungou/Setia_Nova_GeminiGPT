@@ -34,6 +34,9 @@ for (const file of [
   'migrations/0004_clans_and_members.sql',
   'migrations/0005_account_security.sql',
   'migrations/0006_user_permissions_and_locations.sql',
+  'migrations/0007_optional_user_email.sql',
+  'migrations/0008_user_profiles.sql',
+  'migrations/0010_user_posts.sql',
 ]) sqlite.exec(readFileSync(file, 'utf8'))
 
 const env = {
@@ -76,7 +79,7 @@ const updateUser = (id, patch) => handleAuth(new Request(`https://test.local/__a
 
 const permissionResponse = await updateUser(tallouna.id, {
   status: 'RPiste',
-  permissions: { create_character: true, create_clan: true, create_location: true },
+  permissions: { create_character: true, create_clan: true, create_location: true, create_journal_article: true },
 })
 assert(permissionResponse.status === 200, 'admin peut definir le statut et les trois permissions')
 const enabledUser = await loginUser(env, { email: tallouna.email, password: 'TallounaPass123' })
@@ -93,12 +96,13 @@ async function create(collection, id, extra = {}) {
 assert((await create('characters', 'tallouna-character')).status === 200, 'create_character autorise la creation')
 assert((await create('clans', 'tallouna-clan')).status === 200, 'create_clan autorise la creation')
 assert((await create('locations', 'tallouna-location', { description: 'Lieu RP', image: '', image_source: 'credit' })).status === 200, 'create_location autorise la creation')
+assert((await create('posts', 'tallouna-article', { title: 'Journal Tallouna', visibility: 'draft' })).status === 200, 'create_journal_article autorise la creation')
 
-const revoke = await updateUser(tallouna.id, { permissions: { create_character: false, create_clan: false, create_location: false } })
+const revoke = await updateUser(tallouna.id, { permissions: { create_character: false, create_clan: false, create_location: false, create_journal_article: false } })
 assert(revoke.status === 200, 'admin peut retirer les permissions')
 const revokedUser = await loginUser(env, { email: tallouna.email, password: 'TallounaPass123' })
 const revokedCookie = createSessionToken(env, revokedUser)
-for (const collection of ['characters', 'clans', 'locations']) {
+for (const collection of ['characters', 'clans', 'locations', 'posts']) {
   const response = await handleAccount(request({ id: `blocked-${collection}` }, 'POST', revokedCookie), env, ['collections', collection])
   assert(response.status === 403, `permission retiree refuse POST ${collection}`)
 }

@@ -13,9 +13,11 @@ import {
   getPublicCharacter,
   getPublicClan,
   getPublicLocation,
+  getPublicPost,
   listPublicCharacters,
   listPublicClans,
   listPublicLocations,
+  listPublicPosts,
 } from '../lib/publicStore.js'
 import { listPublicPlayerProfiles } from '../lib/playerProfiles.js'
 
@@ -51,6 +53,10 @@ export async function handlePublic(request, env, parts) {
       return json({ data: await listPublicLocations(env) })
     }
 
+    if (parts[0] === 'posts' && parts.length === 1) {
+      return json({ data: await listPublicPosts(env) })
+    }
+
     if (parts[0] === 'clans' && parts[1]) {
       const clan = await getPublicClan(env, decodeURIComponent(parts[1]))
       if (!clan) return json({ error: 'Clan introuvable.' }, { status: 404 })
@@ -67,6 +73,12 @@ export async function handlePublic(request, env, parts) {
       const location = await getPublicLocation(env, decodeURIComponent(parts[1]))
       if (!location) return json({ error: 'Lieu introuvable.' }, { status: 404 })
       return json({ data: location })
+    }
+
+    if (parts[0] === 'posts' && parts[1]) {
+      const post = await getPublicPost(env, decodeURIComponent(parts[1]))
+      if (!post) return json({ error: 'Article introuvable.' }, { status: 404 })
+      return json({ data: post })
     }
 
     return json({ error: 'Route inconnue' }, { status: 404 })

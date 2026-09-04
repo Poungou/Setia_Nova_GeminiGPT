@@ -2,12 +2,14 @@ export const CREATE_PERMISSIONS = {
   characters: 'create_character',
   clans: 'create_clan',
   locations: 'create_location',
+  posts: 'create_journal_article',
 }
 
 export const PERMISSION_LABELS = {
   create_character: 'Créer des personnages RP',
   create_clan: 'Créer des clans',
   create_location: 'Créer des lieux',
+  create_journal_article: 'Créer des articles de journal',
 }
 
 export function canCreate(user, permission) {

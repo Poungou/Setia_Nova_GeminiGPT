@@ -17,9 +17,11 @@ import {
   getCharacterWithFallback,
   getClanWithFallback,
   getLocationWithFallback,
+  getPostWithFallback,
   listCharactersWithFallback,
   listClansWithFallback,
   listLocationsWithFallback,
+  listPostsWithFallback,
 } from './contentStore.js'
 
 function isPublished(character) {
@@ -72,4 +74,17 @@ export async function listPublicLocations(env) {
 export async function getPublicLocation(env, id) {
   const location = await getLocationWithFallback(env, id)
   return isPublishedLocation(location) ? location : null
+}
+
+function isPublishedPost(post) {
+  return Boolean(post) && post.visibility !== 'draft'
+}
+
+export async function listPublicPosts(env) {
+  return (await listPostsWithFallback(env)).filter(isPublishedPost)
+}
+
+export async function getPublicPost(env, id) {
+  const post = await getPostWithFallback(env, id)
+  return isPublishedPost(post) ? post : null
 }

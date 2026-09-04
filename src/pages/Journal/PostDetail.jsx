@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { getPostById, categoryLabel } from '../../data/posts.js'
+import { categoryLabel } from '../../data/posts.js'
+import { usePublicPost } from '../../lib/publicData.js'
 import { getCharacterById } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
@@ -18,8 +19,9 @@ function formatDate(iso) {
 
 export default function PostDetail() {
   const { id } = useParams()
-  const post = getPostById(id)
+  const { post, loading } = usePublicPost(id)
 
+  if (loading) return <div className="container">Chargement...</div>
   if (!post || post.visibility === 'draft') return <Navigate to="/journal" replace />
 
   const characters = (post.characters || []).map(getCharacterById).filter(Boolean)

@@ -6,6 +6,7 @@ const PERMISSIONS = [
   ['create_character', 'Personnages'],
   ['create_clan', 'Clans'],
   ['create_location', 'Lieux'],
+  ['create_journal_article', 'Articles de journal'],
 ]
 
 export default function AdminUsersPage() {
@@ -18,7 +19,7 @@ export default function AdminUsersPage() {
   const [formError, setFormError] = useState('')
   const [form, setForm] = useState({
     name: '', email: '', password: '', passwordConfirmation: '', role: 'user', status: 'Membre', active: true,
-    permissions: { create_character: false, create_clan: false, create_location: false },
+    permissions: { create_character: false, create_clan: false, create_location: false, create_journal_article: false },
   })
   const [profileUser, setProfileUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -103,7 +104,7 @@ export default function AdminUsersPage() {
       setShowCreate(false)
       setForm({
         name: '', email: '', password: '', passwordConfirmation: '', role: 'user', status: 'Membre', active: true,
-        permissions: { create_character: false, create_clan: false, create_location: false },
+        permissions: { create_character: false, create_clan: false, create_location: false, create_journal_article: false },
       })
       setFlash('Utilisateur créé.')
     } catch (e) {

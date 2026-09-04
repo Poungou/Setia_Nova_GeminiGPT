@@ -1,11 +1,11 @@
 // worker/routes/account.js
 //
 // Port Cloudflare Worker de plugins/woltar-account.js. Un compte ne peut
-// créer/modifier/supprimer que ses propres personnages et clans
+// créer/modifier/supprimer que ses propres personnages, clans, lieux et articles
 // (ownerUserId) — sauf une administratrice, qui voit et modère tout (voir
 // canEditOwnedResource/isAdmin dans lib/authStore.js). Les collections de
-// référence restantes (lieux, chronologie, archives, journal) restent en
-// lecture seule, empaquetées au build — voir worker/lib/contentStore.js et
+// référence restantes (chronologie et archives) restent en lecture seule,
+// empaquetées au build — voir worker/lib/contentStore.js et
 // docs/CLOUDFLARE_DEPLOYMENT_PLAN.md, section « Portée retenue ».
 //
 // Historique — tâche « Aether » : la collection `personas` (Personas RP
@@ -52,6 +52,11 @@ import {
   insertLocation,
   updateLocation,
   deleteLocation,
+  listPosts,
+  getPost,
+  insertPost,
+  updatePost,
+  deletePost,
   removeClanMember,
   updateClan,
   updateRow,
@@ -63,7 +68,7 @@ import staticClansJson from '../../src/data/clans.json' with { type: 'json' }
 import staticLocationsJson from '../../src/data/locations.json' with { type: 'json' }
 
 const REFERENCE_COLLECTIONS = Object.keys(STATIC_COLLECTIONS).filter((name) => name !== 'locations')
-const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations'])
+const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts'])
 
 // Un compte ne peut jamais créer une fiche qui porte l'id d'une entrée
 // canon (src/data/characters.json, src/data/clans.json) — même si D1 ne
@@ -74,6 +79,7 @@ const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations'])
 const CANON_CHARACTER_IDS = new Set(staticCharactersJson.map((c) => c.id))
 const CANON_CLAN_IDS = new Set(staticClansJson.map((c) => c.id))
 const CANON_LOCATION_IDS = new Set(staticLocationsJson.map((l) => l.id))
+const CANON_POST_IDS = new Set((await import('../../src/data/posts.json', { with: { type: 'json' } })).default.map((post) => post.id))
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -199,6 +205,16 @@ const COLLECTION_OPS = {
     canonIds: CANON_LOCATION_IDS,
     canonMessage: 'Cet identifiant est réservé à un lieu canon — choisis-en un autre.',
   },
+  posts: {
+    list: (env) => listPosts(env),
+    get: (env, id) => getPost(env, id),
+    insert: (env, row) => insertPost(env, row),
+    update: (env, id, row) => updatePost(env, id, row),
+    remove: (env, id) => deletePost(env, id),
+    sanitize: sanitizeOwnedRow,
+    canonIds: CANON_POST_IDS,
+    canonMessage: 'Cet identifiant est réservé à un article canon — choisis-en un autre.',
+  },
 }
 
 // Un personnage canon ne peut jamais rejoindre un clan de compte, et un
@@ -305,6 +321,7 @@ export async function handleAccount(request, env, parts) {
         characters: visibleRows(characters, user),
         clans: visibleRows(clans, user),
         locations: visibleRows(await listLocations(env), user),
+        posts: visibleRows(await listPosts(env), user),
       }
       for (const name of REFERENCE_COLLECTIONS) data[name] = STATIC_COLLECTIONS[name] || []
       return json({ user, data })

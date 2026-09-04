@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Lock, LogOut, MapPin, Plus, Save, Shield, Trash2, UserRound } from 'lucide-react'
+import { ArrowLeft, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound } from 'lucide-react'
 import {
   accountBackendAvailable,
   confirmEmail,
@@ -32,12 +32,14 @@ const SECTIONS = {
   personnages: { collection: 'characters', label: 'Mes personnages', singular: 'personnage' },
   clans: { collection: 'clans', label: 'Mes clans', singular: 'clan' },
   lieux: { collection: 'locations', label: 'Mes lieux', singular: 'lieu' },
+  articles: { collection: 'posts', label: 'Mes articles', singular: 'article' },
 }
 
 const CREATE_PERMISSION_BY_COLLECTION = {
   characters: 'create_character',
   clans: 'create_clan',
   locations: 'create_location',
+  posts: 'create_journal_article',
 }
 
 function canCreate(user, collection) {
@@ -558,6 +560,7 @@ function Dashboard({ data, user }) {
   const characters = data?.characters || []
   const clans = data?.clans || []
   const locations = data?.locations || []
+  const posts = data?.posts || []
   return (
     <div className="adm-list">
       <header className="adm-list__head">
@@ -598,6 +601,12 @@ function Dashboard({ data, user }) {
               <span className="adm-muted">{locations.length} fiche(s)</span>
             </div>
             <MapPin size={16} />
+          </Link>
+        </li>}
+        {(canCreate(user, 'posts') || posts.length > 0) && <li>
+          <Link to="/compte/articles" className="adm-card">
+            <div className="adm-card__body"><strong>Mes articles</strong><span className="adm-muted">{posts.length} fiche(s)</span></div>
+            <PenLine size={16} />
           </Link>
         </li>}
       </ul>
@@ -945,6 +954,11 @@ function Workspace({ user, onLogout }) {
           {(canCreate(user, 'locations') || data?.locations?.length > 0) && (
             <NavLink to="/compte/lieux" className="adm-nav__link">
               <MapPin size={16} /> Mes lieux
+            </NavLink>
+          )}
+          {(canCreate(user, 'posts') || data?.posts?.length > 0) && (
+            <NavLink to="/compte/articles" className="adm-nav__link">
+              <PenLine size={16} /> Mes articles
             </NavLink>
           )}
           <NavLink to="/compte/securite" className="adm-nav__link">

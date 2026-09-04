@@ -24,7 +24,6 @@ export const STATIC_COLLECTIONS = {
   locations: locationsJson,
   events: eventsJson,
   archives: archivesJson,
-  posts: postsJson,
 }
 
 export function getAetherConfig() {
@@ -409,5 +408,57 @@ export async function listLocationsWithFallback(env) {
   for (const location of d1Rows) {
     if (!byId.has(location.id)) byId.set(location.id, location)
   }
+  return [...byId.values()]
+}
+
+// --- Articles de journal de comptes ---------------------------------------
+
+function postDataForStorage(row, id) {
+  const data = { ...row, id }
+  delete data.ownerUserId
+  return data
+}
+
+function postRowToRecord(row) {
+  if (!row) return null
+  return { ...JSON.parse(row.data), id: row.id, ownerUserId: row.owner_user_id }
+}
+
+export async function listPosts(env) {
+  const { results } = await env.WOLTAR_DB.prepare('SELECT * FROM posts ORDER BY created_at ASC').all()
+  return (results || []).map(postRowToRecord)
+}
+
+export async function getPost(env, id) {
+  if (!id) return null
+  const row = await env.WOLTAR_DB.prepare('SELECT * FROM posts WHERE id = ?').bind(id).first()
+  return postRowToRecord(row)
+}
+
+export async function insertPost(env, row) {
+  const now = new Date().toISOString()
+  await env.WOLTAR_DB.prepare('INSERT INTO posts (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+    .bind(row.id, row.ownerUserId, JSON.stringify(postDataForStorage(row, row.id)), now, now)
+    .run()
+}
+
+export async function updatePost(env, id, row) {
+  const now = new Date().toISOString()
+  await env.WOLTAR_DB.prepare('UPDATE posts SET owner_user_id = ?, data = ?, updated_at = ? WHERE id = ?')
+    .bind(row.ownerUserId, JSON.stringify(postDataForStorage(row, id)), now, id)
+    .run()
+}
+
+export async function deletePost(env, id) {
+  await env.WOLTAR_DB.prepare('DELETE FROM posts WHERE id = ?').bind(id).run()
+}
+
+export async function getPostWithFallback(env, id) {
+  return postsJson.find((post) => post.id === id) || getPost(env, id)
+}
+
+export async function listPostsWithFallback(env) {
+  const byId = new Map(postsJson.map((post) => [post.id, post]))
+  for (const post of await listPosts(env)) if (!byId.has(post.id)) byId.set(post.id, post)
   return [...byId.values()]
 }

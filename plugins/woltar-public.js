@@ -74,6 +74,11 @@ export default function woltarPublic() {
             return send(200, { data: locations })
           }
 
+          if (parts[0] === 'posts' && parts.length === 1) {
+            const posts = (await readCollection('posts')).filter((post) => post.visibility !== 'draft')
+            return send(200, { data: posts })
+          }
+
           if (parts[0] === 'clans' && parts[1]) {
             const clans = await readCollection('clans')
             const clan = clans.find((c) => c.id === decodeURIComponent(parts[1]))
@@ -94,6 +99,13 @@ export default function woltarPublic() {
             const location = locations.find((item) => item.id === decodeURIComponent(parts[1]))
             if (!location || location.visibility === 'draft') return send(404, { error: 'Lieu introuvable.' })
             return send(200, { data: location })
+          }
+
+          if (parts[0] === 'posts' && parts[1]) {
+            const posts = await readCollection('posts')
+            const post = posts.find((item) => item.id === decodeURIComponent(parts[1]))
+            if (!post || post.visibility === 'draft') return send(404, { error: 'Article introuvable.' })
+            return send(200, { data: post })
           }
 
           return send(404, { error: 'Route inconnue' })
