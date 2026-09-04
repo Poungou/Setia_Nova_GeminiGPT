@@ -21,6 +21,32 @@ function emptyProfile() {
   }
 }
 
+function fileToAvatarDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Choisis un fichier image.'))
+      return
+    }
+    const reader = new FileReader()
+    reader.onerror = () => reject(reader.error || new Error('Image illisible.'))
+    reader.onload = () => {
+      const image = new Image()
+      image.onerror = () => reject(new Error('Image illisible.'))
+      image.onload = () => {
+        const maxEdge = 512
+        const scale = Math.min(1, maxEdge / Math.max(image.width, image.height))
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.max(1, Math.round(image.width * scale))
+        canvas.height = Math.max(1, Math.round(image.height * scale))
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/webp', 0.82))
+      }
+      image.src = reader.result
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function AdminCommunityPage() {
   const [users, setUsers] = useState([])
   const [profiles, setProfiles] = useState({})
@@ -32,6 +58,7 @@ export default function AdminCommunityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [flash, setFlash] = useState('')
+  const [avatarBusy, setAvatarBusy] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -56,6 +83,22 @@ export default function AdminCommunityPage() {
     setEditingUser(user)
     setDraft({ ...emptyProfile(), ...(profiles[user.id] || {}) })
     setFlash('')
+  }
+
+  const chooseAvatar = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    setAvatarBusy(true)
+    setError('')
+    try {
+      const avatar = await fileToAvatarDataUrl(file)
+      setDraft((current) => ({ ...current, avatar }))
+    } catch (requestError) {
+      setError(String(requestError.message || requestError))
+    } finally {
+      setAvatarBusy(false)
+    }
   }
 
   const save = async () => {
@@ -145,7 +188,12 @@ export default function AdminCommunityPage() {
               <button type="button" className="adm-btn adm-btn--ghost" onClick={() => togglePublic(user)}>{profile.profile_public ? 'Dépublier' : 'Publier'}</button>
               <button type="button" className="adm-btn adm-btn--danger" onClick={() => remove(user)}><Trash2 size={14} /> Supprimer</button>
               {editingUser?.id === user.id && draft && <div className="adm-user-profile-editor">
-                {FIELDS.map(([key, label, type]) => <label key={key}>{label}{type === 'textarea'
+                <label>Avatar
+                  <input className="adm-input" type="file" accept="image/*" onChange={chooseAvatar} disabled={avatarBusy} />
+                  {avatarBusy && <span className="adm-muted">Préparation de l’image...</span>}
+                  {draft.avatar && <img className="player-card__avatar" src={draft.avatar} alt="Aperçu de l’avatar" />}
+                </label>
+                {FIELDS.filter(([key]) => key !== 'avatar').map(([key, label, type]) => <label key={key}>{label}{type === 'textarea'
                   ? <textarea className="adm-input" rows="4" value={draft[key] || ''} onChange={(event) => setDraft({ ...draft, [key]: event.target.value })} />
                   : <input className="adm-input" value={draft[key] || ''} onChange={(event) => setDraft({ ...draft, [key]: event.target.value })} />}
                 </label>)}

@@ -8,7 +8,7 @@ async function load(root) { return existsSync(file(root)) ? JSON.parse(await rea
 async function save(root, data) { await mkdir(path.dirname(file(root)), { recursive: true }); await writeFile(file(root), JSON.stringify(data, null, 2) + '\n', 'utf8') }
 export function normalizePlayerProfile(payload = {}) {
   const text = (value, max = 12000) => String(value || '').trim().slice(0, max)
-  return { avatar: text(payload.avatar, 2000), image_source: text(payload.image_source, 500), player_intro: text(payload.player_intro), writing_style: text(payload.writing_style), univers: text(payload.univers), tw: text(payload.tw), rhythm: text(payload.rhythm), ig_username: text(payload.ig_username, 160), profile_public: payload.profile_public === true || payload.profile_public === 1 || payload.profile_public === '1' }
+  return { avatar: text(payload.avatar, 100000), image_source: text(payload.image_source, 500), player_intro: text(payload.player_intro), writing_style: text(payload.writing_style), univers: text(payload.univers), tw: text(payload.tw), rhythm: text(payload.rhythm), ig_username: text(payload.ig_username, 160), profile_public: payload.profile_public === true || payload.profile_public === 1 || payload.profile_public === '1' }
 }
 export async function getPlayerProfile(root, userId) { const all = await load(root); return { userId, exists: Boolean(all[userId]), ...normalizePlayerProfile(all[userId]) } }
 export async function createPlayerProfile(root, userId, payload) {

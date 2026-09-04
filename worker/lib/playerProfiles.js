@@ -6,7 +6,7 @@ function cleanText(value, max = 12000) {
 
 export function normalizePlayerProfile(payload = {}) {
   return {
-    avatar: cleanText(payload.avatar, 2000),
+    avatar: cleanText(payload.avatar, 100000),
     image_source: cleanText(payload.image_source, 500),
     player_intro: cleanText(payload.player_intro),
     writing_style: cleanText(payload.writing_style),
