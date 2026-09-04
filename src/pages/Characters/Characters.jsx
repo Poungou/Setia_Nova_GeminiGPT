@@ -53,7 +53,7 @@ function PlayerCard({ player }) {
     </summary>
     <div className="player-card__content">
       {PROFILE_SECTIONS.map(([key, label]) => player.profile?.[key] && <section key={key}><h3>{label}</h3><p>{player.profile[key]}</p></section>)}
-      <section><h3>Pseudo IG &amp; Personnages</h3>{player.profile?.ig_username && <p>Pseudo IG : {player.profile.ig_username}</p>}<ul>{(player.characters || []).map((character) => <li key={character.id}><Link to={`/personnages/${character.id}`}>{character.name}</Link></li>)}</ul></section>
+      <section><h3>Pseudo IG &amp; Personnages</h3>{player.profile?.ig_username && <p>Pseudo IG : {player.profile.ig_username}</p>}{player.characters?.length ? <ul>{player.characters.map((character) => <li key={character.id}><Link to={`/personnages/${character.id}`}>{character.name}</Link></li>)}</ul> : <p className="player-card__empty">Aucun personnage lié pour le moment.</p>}</section>
     </div>
   </details>
 }

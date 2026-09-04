@@ -12,7 +12,6 @@
 import {
   getPublicCharacter,
   getPublicClan,
-  getPublicCreatorProfile,
   getPublicLocation,
   listPublicCharacters,
   listPublicClans,
@@ -38,10 +37,6 @@ export async function handlePublic(request, env, parts) {
 
     if (parts[0] === 'characters' && parts.length === 1) {
       return json({ data: await listPublicCharacters(env) })
-    }
-
-    if (parts[0] === 'creator-profile' && parts.length === 1) {
-      return json({ data: await getPublicCreatorProfile(env) })
     }
 
     if (parts[0] === 'players' && parts.length === 1) {

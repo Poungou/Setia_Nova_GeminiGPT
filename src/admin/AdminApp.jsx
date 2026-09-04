@@ -6,6 +6,7 @@ import AdminLayout from './AdminLayout.jsx'
 import CollectionListPage from './CollectionListPage.jsx'
 import CollectionEditPage from './CollectionEditPage.jsx'
 import AdminUsersPage from './AdminUsersPage.jsx'
+import AdminCommunityPage from './AdminCommunityPage.jsx'
 import { COLLECTION_NAMES } from './schema.js'
 import { getSession, loginAccount, loginLocalAdmin, logoutAccount } from '../lib/authApi.js'
 import './admin.css'
@@ -146,6 +147,8 @@ export default function AdminApp() {
         >
           <Route index element={<Navigate to={COLLECTION_NAMES[0]} replace />} />
           <Route path="users" element={<AdminUsersPage />} />
+          <Route path="community" element={<AdminCommunityPage />} />
+          <Route path="creator/*" element={<Navigate to="/admin/community" replace />} />
           <Route path=":collection" element={<CollectionListPage />} />
           <Route path=":collection/:id" element={<CollectionEditPage />} />
         </Route>

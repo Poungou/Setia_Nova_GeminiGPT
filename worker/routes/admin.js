@@ -6,14 +6,7 @@
 // bundle statique tant qu'elles ne sont pas migrees.
 
 import { getRequestUser, httpError, isAdmin } from '../lib/authStore.js'
-import {
-  getCreatorProfile,
-  getCharacter,
-  insertRow,
-  listCharactersWithFallback,
-  saveCreatorProfile,
-  updateRow,
-} from '../lib/contentStore.js'
+import { getCharacter, insertRow, listCharactersWithFallback, updateRow } from '../lib/contentStore.js'
 import homeJson from '../../src/data/home.json' with { type: 'json' }
 import locationsJson from '../../src/data/locations.json' with { type: 'json' }
 import clansJson from '../../src/data/clans.json' with { type: 'json' }
@@ -33,7 +26,7 @@ const STATIC_COLLECTIONS = {
   aether: aetherJson,
 }
 
-const COLLECTIONS = new Set(['creator', 'characters', ...Object.keys(STATIC_COLLECTIONS)])
+const COLLECTIONS = new Set(['characters', ...Object.keys(STATIC_COLLECTIONS)])
 const STATIC_CHARACTER_IDS = new Set(staticCharactersJson.map((character) => character.id))
 
 function json(body, init = {}) {
@@ -109,7 +102,6 @@ export async function handleAdmin(request, env, parts) {
       if (!COLLECTIONS.has(name)) return json({ error: 'Collection inconnue' }, { status: 404 })
 
       if (request.method === 'GET' && parts.length === 2) {
-        if (name === 'creator') return json({ data: [await getCreatorProfile(env)] })
         if (name === 'characters') return json({ data: await listCharactersWithFallback(env) })
         return json({ data: STATIC_COLLECTIONS[name] || [] })
       }
@@ -117,11 +109,6 @@ export async function handleAdmin(request, env, parts) {
       if (request.method === 'PUT' && parts.length === 2) {
         const rows = await readJson(request)
         if (!Array.isArray(rows)) throw httpError(400, 'Tableau attendu.')
-
-        if (name === 'creator') {
-          const profile = await saveCreatorProfile(env, rows[0] || {})
-          return json({ ok: true, count: 1, data: [profile] })
-        }
 
         if (name === 'characters') {
           const saved = await saveCharacters(env, rows)

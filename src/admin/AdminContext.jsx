@@ -13,11 +13,9 @@ import archivesJson from '../data/archives.json'
 import postsJson from '../data/posts.json'
 import aetherJson from '../data/aether.json'
 import homeJson from '../data/home.json'
-import { creatorProfile } from '../data/creator.js'
 
 const BUNDLED = {
   home: homeJson,
-  creator: [creatorProfile],
   characters: charactersJson,
   locations: locationsJson,
   clans: clansJson,

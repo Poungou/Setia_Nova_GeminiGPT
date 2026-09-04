@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { KeyRound, Plus, RefreshCw, ShieldCheck } from 'lucide-react'
-import { createUser, getUserProfile, listUsers, updateUser, updateUserProfile } from '../lib/authApi.js'
+import { createUser, deleteUser, getUserProfile, listUsers, updateUser, updateUserProfile } from '../lib/authApi.js'
 
 const PERMISSIONS = [
   ['create_character', 'Personnages'],
@@ -57,6 +57,18 @@ export default function AdminUsersPage() {
       const body = await updateUser(id, changes)
       setUsers((rows) => rows.map((u) => (u.id === id ? body.user : u)))
       setFlash('Utilisateur mis à jour.')
+    } catch (e) {
+      setError(String(e.message || e))
+    }
+  }
+
+  const removeUser = async (user) => {
+    if (!window.confirm(`Supprimer définitivement le compte « ${user.name || user.email} » ? Cette action est irréversible.`)) return
+    setError('')
+    try {
+      await deleteUser(user.id)
+      setUsers((rows) => rows.filter((row) => row.id !== user.id))
+      setFlash('Utilisateur supprimé.')
     } catch (e) {
       setError(String(e.message || e))
     }
@@ -212,6 +224,7 @@ export default function AdminUsersPage() {
                 <KeyRound size={14} /> Réinitialiser le mot de passe
               </button>
               <button type="button" className="adm-btn adm-btn--ghost" onClick={() => editProfile(user)}>Profil RP</button>
+              <button type="button" className="adm-btn adm-btn--danger" onClick={() => removeUser(user)}>Supprimer</button>
               {profileUser?.id === user.id && profile && <div className="adm-user-profile-editor"><label>Avatar<input className="adm-input" value={profile.avatar} onChange={(e) => setProfile({ ...profile, avatar: e.target.value })} /></label><label>Source / crédit image<input className="adm-input" value={profile.image_source} onChange={(e) => setProfile({ ...profile, image_source: e.target.value })} /></label><label>Quelques mots<textarea className="adm-input" value={profile.player_intro} onChange={(e) => setProfile({ ...profile, player_intro: e.target.value })} /></label><label>Style d’écriture<textarea className="adm-input" value={profile.writing_style} onChange={(e) => setProfile({ ...profile, writing_style: e.target.value })} /></label><label>Univers<textarea className="adm-input" value={profile.univers} onChange={(e) => setProfile({ ...profile, univers: e.target.value })} /></label><label>TW<textarea className="adm-input" value={profile.tw} onChange={(e) => setProfile({ ...profile, tw: e.target.value })} /></label><label>Rythme<textarea className="adm-input" value={profile.rhythm} onChange={(e) => setProfile({ ...profile, rhythm: e.target.value })} /></label><label>Pseudo IG<input className="adm-input" value={profile.ig_username} onChange={(e) => setProfile({ ...profile, ig_username: e.target.value })} /></label><label className="adm-check"><input type="checkbox" checked={profile.profile_public} onChange={(e) => setProfile({ ...profile, profile_public: e.target.checked })} />Profil public</label><button type="button" className="adm-btn adm-btn--primary" onClick={saveProfile}>Enregistrer le profil</button></div>}
             </article>
           </li>

@@ -16,6 +16,7 @@ import {
   clearSessionCookie,
   confirmEmailChange,
   createUser,
+  deleteUser,
   createSessionToken,
   getRequestUser,
   httpError,
@@ -30,7 +31,7 @@ import {
   updateUser,
 } from './lib/authStore.js'
 import { checkRateLimit, clientIp } from './lib/rateLimit.js'
-import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
+import { createPlayerProfile, deletePlayerProfile, getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
 
 const MAX_BODY_BYTES = 64 * 1024
 const DEFAULT_LOCAL_ADMIN_PASSPHRASE = 'woltar'
@@ -140,6 +141,10 @@ export default function woltarAuth() {
             if (!actor) throw httpError(401, 'Connexion requise.')
             if (!isAdmin(actor)) throw httpError(403, 'Reserve admin.')
 
+            if (req.method === 'DELETE') {
+              console.log(`[woltar-auth] DELETE ${url.pathname} parts=${JSON.stringify(parts)}`)
+            }
+
             if (req.method === 'GET' && parts.length === 1) {
               return send(200, { users: await listPublicUsers(root) })
             }
@@ -153,9 +158,18 @@ export default function woltarAuth() {
               return send(200, { user })
             }
 
+            if (req.method === 'DELETE' && parts.length === 2 && parts[1]) {
+              return send(200, await deleteUser(root, parts[1], actor))
+            }
+
             if (parts[1] && parts[2] === 'profile') {
               if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, parts[1]) })
+              if (req.method === 'POST') return send(201, { profile: await createPlayerProfile(root, parts[1], await readJson(req)) })
               if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, parts[1], await readJson(req)) })
+              if (req.method === 'DELETE') {
+                await deletePlayerProfile(root, parts[1])
+                return send(200, { ok: true })
+              }
             }
           }
 

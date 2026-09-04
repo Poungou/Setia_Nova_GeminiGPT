@@ -22,6 +22,7 @@ function rowToProfile(row) {
   if (!row) return null
   return {
     userId: row.user_id,
+    exists: true,
     ...Object.fromEntries(PROFILE_FIELDS.map((field) => [field, row[field] || ''])),
     profile_public: Boolean(row.profile_public),
     createdAt: row.created_at,
@@ -31,7 +32,17 @@ function rowToProfile(row) {
 
 export async function getPlayerProfile(env, userId) {
   const row = await env.WOLTAR_DB.prepare('SELECT * FROM user_profiles WHERE user_id = ?').bind(userId).first()
-  return rowToProfile(row) || { userId, ...normalizePlayerProfile() }
+  return rowToProfile(row) || { userId, exists: false, ...normalizePlayerProfile() }
+}
+
+export async function createPlayerProfile(env, userId, payload) {
+  const existing = await env.WOLTAR_DB.prepare('SELECT user_id FROM user_profiles WHERE user_id = ?').bind(userId).first()
+  if (existing) {
+    const error = new Error('Ce compte possède déjà un profil joueur.')
+    error.status = 409
+    throw error
+  }
+  return savePlayerProfile(env, userId, payload)
 }
 
 export async function savePlayerProfile(env, userId, payload) {
@@ -46,6 +57,10 @@ export async function savePlayerProfile(env, userId, payload) {
      profile_public = excluded.profile_public, updated_at = excluded.updated_at`,
   ).bind(userId, profile.avatar, profile.image_source, profile.player_intro, profile.writing_style, profile.univers, profile.tw, profile.rhythm, profile.ig_username, profile.profile_public ? 1 : 0, now, now).run()
   return getPlayerProfile(env, userId)
+}
+
+export async function deletePlayerProfile(env, userId) {
+  await env.WOLTAR_DB.prepare('DELETE FROM user_profiles WHERE user_id = ?').bind(userId).run()
 }
 
 export async function listPublicPlayerProfiles(env) {

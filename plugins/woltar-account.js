@@ -100,6 +100,12 @@ function assertCanEdit(user, row) {
   }
 }
 
+function assertCanManagePlayerProfile(user) {
+  if (!isAdmin(user) && user.status !== 'RPiste') {
+    throw httpError(403, 'Un statut RPiste est requis pour créer ou modifier un profil joueur.')
+  }
+}
+
 function assertId(row) {
   if (!row?.id || typeof row.id !== 'string') throw httpError(400, 'Identifiant manquant.')
 }
@@ -248,7 +254,8 @@ export default function woltarAccount() {
             return send(result.code, result.body)
           }
 
-          if (parts[0] === 'profile') {
+          if (parts[0] === 'profile' && parts.length === 1) {
+            assertCanManagePlayerProfile(user)
             if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, user.id) })
             if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, user.id, await readJson(req)) })
           }

@@ -116,6 +116,15 @@ export async function updateUser(id, patch) {
   )
 }
 
+export async function deleteUser(id) {
+  return json(
+    await fetch(`${BASE}/users/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    }),
+  )
+}
+
 export async function getUserProfile(id) {
   return json(await fetch(`${BASE}/users/${encodeURIComponent(id)}/profile`, { credentials: 'same-origin' }))
 }
@@ -123,5 +132,17 @@ export async function getUserProfile(id) {
 export async function updateUserProfile(id, profile) {
   return json(await fetch(`${BASE}/users/${encodeURIComponent(id)}/profile`, {
     method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile),
+  }))
+}
+
+export async function createUserProfile(id, profile = {}) {
+  return json(await fetch(`${BASE}/users/${encodeURIComponent(id)}/profile`, {
+    method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile),
+  }))
+}
+
+export async function deleteUserProfile(id) {
+  return json(await fetch(`${BASE}/users/${encodeURIComponent(id)}/profile`, {
+    method: 'DELETE', credentials: 'same-origin',
   }))
 }

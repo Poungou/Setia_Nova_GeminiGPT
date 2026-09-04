@@ -16,7 +16,6 @@ import archivesJson from '../../src/data/archives.json' with { type: 'json' }
 import postsJson from '../../src/data/posts.json' with { type: 'json' }
 import aetherJson from '../../src/data/aether.json' with { type: 'json' }
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
-import { creatorProfile, normalizeCreatorProfile } from '../../src/data/creator.js'
 
 // `clans` a ete retire de STATIC_COLLECTIONS : les clans peuvent desormais
 // etre crees/modifies par un compte joueur (D1), voir listClansWithFallback
@@ -411,34 +410,4 @@ export async function listLocationsWithFallback(env) {
     if (!byId.has(location.id)) byId.set(location.id, location)
   }
   return [...byId.values()]
-}
-
-export async function getSiteSetting(env, key, fallback = null) {
-  const row = await env.WOLTAR_DB.prepare('SELECT data FROM site_settings WHERE key = ?').bind(key).first()
-  if (!row) return fallback
-  return JSON.parse(row.data)
-}
-
-export async function upsertSiteSetting(env, key, data) {
-  const now = new Date().toISOString()
-  await env.WOLTAR_DB.prepare(
-    'INSERT INTO site_settings (key, data, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(key) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at',
-  )
-    .bind(key, JSON.stringify(data), now, now)
-    .run()
-}
-
-export async function getCreatorProfile(env) {
-  try {
-    return normalizeCreatorProfile(await getSiteSetting(env, 'creator_profile', creatorProfile))
-  } catch (err) {
-    console.error('[contentStore] lecture D1 (profil createur) impossible, repli statique', err)
-    return creatorProfile
-  }
-}
-
-export async function saveCreatorProfile(env, profile) {
-  const clean = normalizeCreatorProfile(profile)
-  await upsertSiteSetting(env, 'creator_profile', clean)
-  return clean
 }

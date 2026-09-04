@@ -20,7 +20,6 @@ import { useEffect, useState } from 'react'
 import { allCharacters as staticCharacters, characters as staticPublicCharacters } from '../data/characters.js'
 import { clans as staticClans, getClanById as getStaticClanById } from '../data/clans.js'
 import { locations as staticLocations, getLocationById as getStaticLocationById } from '../data/locations.js'
-import { creatorProfile as staticCreatorProfile, normalizeCreatorProfile } from '../data/creator.js'
 
 const BASE = '/__public/api'
 
@@ -115,24 +114,6 @@ export function usePublicClan(id) {
   }, [id])
 
   return clan
-}
-
-export function useCreatorProfile() {
-  const [profile, setProfile] = useState(staticCreatorProfile)
-
-  useEffect(() => {
-    let alive = true
-    getJson(`${BASE}/creator-profile`)
-      .then((data) => {
-        if (alive) setProfile(normalizeCreatorProfile(data))
-      })
-      .catch(() => {})
-    return () => {
-      alive = false
-    }
-  }, [])
-
-  return profile
 }
 
 export function usePublicPlayers() {

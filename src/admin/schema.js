@@ -84,34 +84,6 @@ export const SCHEMA = {
     ],
   },
 
-  creator: {
-    label: 'Profil du créateur',
-    singular: 'profil',
-    icon: 'UserRound',
-    order: 0,
-    singleton: true,
-    title: () => 'Profil du créateur',
-    subtitle: (r) => r.displayName || '',
-    makeId: () => 'creator',
-    defaults: {
-      id: 'creator',
-      displayName: 'Poungou',
-      photo: { src: '/media/fudo-presentation-mtg1r17u.webp', focus: '50% 18%' },
-      bio: 'Je rassemble ici mes personnages, leurs liens, leurs lieux et les fragments RP qui composent mon coin de Woltar. Nova-Setia est mon carnet vivant : une vitrine personnelle pour retrouver les histoires, garder les sources sous la main et ouvrir de nouvelles pistes de jeu.',
-    },
-    fields: [
-      { key: 'displayName', label: 'Pseudo affiché', type: 'text', group: 'Qui suis-je ?' },
-      {
-        key: 'photo',
-        label: 'Photo de profil',
-        type: 'image',
-        group: 'Qui suis-je ?',
-        hint: 'Si ce champ est vide, la photo actuelle reste utilisée comme image par défaut.',
-      },
-      { key: 'bio', label: 'Texte “Qui suis-je ?”', type: 'textarea', group: 'Qui suis-je ?' },
-    ],
-  },
-
   characters: {
     label: 'Personnages',
     singular: 'personnage',

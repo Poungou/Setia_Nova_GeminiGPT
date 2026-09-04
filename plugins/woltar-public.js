@@ -59,11 +59,6 @@ export default function woltarPublic() {
             return send(200, { data: characters })
           }
 
-          if (parts[0] === 'creator-profile' && parts.length === 1) {
-            const profiles = await readCollection('creator')
-            return send(200, { data: profiles[0] || null })
-          }
-
           if (parts[0] === 'players' && parts.length === 1) return send(200, { data: await listPublicPlayerProfiles(root) })
 
           if (parts[0] === 'clans' && parts.length === 1) {

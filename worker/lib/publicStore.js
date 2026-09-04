@@ -16,7 +16,6 @@
 import {
   getCharacterWithFallback,
   getClanWithFallback,
-  getCreatorProfile,
   getLocationWithFallback,
   listCharactersWithFallback,
   listClansWithFallback,
@@ -42,10 +41,6 @@ export async function listPublicCharacters(env) {
 export async function getPublicCharacter(env, id) {
   const character = await getCharacterWithFallback(env, id)
   return isPublished(character) ? publicCharacter(character) : null
-}
-
-export async function getPublicCreatorProfile(env) {
-  return getCreatorProfile(env)
 }
 
 // Un clan de compte peut rester "draft" (visibility) tant que sa proprietaire

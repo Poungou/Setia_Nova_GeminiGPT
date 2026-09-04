@@ -309,6 +309,28 @@ export async function updateUser(root, id, patch, actor) {
   return publicUser(next)
 }
 
+export async function deleteUser(root, id, actor) {
+  if (!isAdmin(actor)) throw httpError(403, 'Reserve admin.')
+  if (actor.id === id) throw httpError(400, 'Impossible de supprimer le compte admin connecte.')
+  const users = await loadUsers(root)
+  const existing = users.find((user) => user.id === id)
+  if (!existing) throw httpError(404, 'Utilisateur introuvable.')
+  const dataDir = path.join(root, 'src', 'data')
+  for (const name of ['characters', 'clans', 'locations']) {
+    try {
+      const rows = JSON.parse(await readFile(path.join(dataDir, `${name}.json`), 'utf8'))
+      if (rows.some((row) => row.ownerUserId === id)) {
+        throw httpError(409, 'Ce compte possède encore du contenu. Désactive-le plutôt que de le supprimer.')
+      }
+    } catch (error) {
+      if (error?.status) throw error
+    }
+  }
+  users.splice(users.findIndex((user) => user.id === id), 1)
+  await saveUsers(root, users)
+  return { ok: true }
+}
+
 function sign(secret, payload) {
   return createHmac('sha256', secret).update(payload).digest('base64url')
 }

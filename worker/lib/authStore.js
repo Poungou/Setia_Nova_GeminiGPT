@@ -366,6 +366,29 @@ export async function updateUser(env, id, patch, actor) {
   return publicUser(next)
 }
 
+export async function deleteUser(env, id, actor) {
+  if (!isAdmin(actor)) throw httpError(403, 'Réservé admin.')
+  if (actor.id === id) throw httpError(400, 'Impossible de supprimer le compte admin connecté.')
+  const db = env.WOLTAR_DB
+  const existing = await findUserById(db, id)
+  if (!existing) throw httpError(404, 'Utilisateur introuvable.')
+  const counts = await Promise.all([
+    db.prepare('SELECT COUNT(*) AS count FROM characters WHERE owner_user_id = ?').bind(id).first(),
+    db.prepare('SELECT COUNT(*) AS count FROM clans WHERE owner_user_id = ?').bind(id).first(),
+    db.prepare('SELECT COUNT(*) AS count FROM locations WHERE owner_user_id = ?').bind(id).first(),
+  ])
+  if (counts.some((row) => Number(row?.count || 0) > 0)) {
+    throw httpError(409, 'Ce compte possède encore du contenu. Désactive-le plutôt que de le supprimer.')
+  }
+  await db.batch([
+    db.prepare('DELETE FROM user_profiles WHERE user_id = ?').bind(id),
+    db.prepare('DELETE FROM user_permissions WHERE user_id = ?').bind(id),
+    db.prepare('DELETE FROM account_tokens WHERE user_id = ?').bind(id),
+    db.prepare('DELETE FROM users WHERE id = ?').bind(id),
+  ])
+  return { ok: true }
+}
+
 function sign(secret, payload) {
   return createHmac('sha256', secret).update(payload).digest('base64url')
 }
