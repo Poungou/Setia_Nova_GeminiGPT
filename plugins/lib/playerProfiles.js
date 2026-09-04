@@ -22,7 +22,7 @@ export async function createPlayerProfile(root, userId, payload) {
   if (!users.some((user) => user.id === userId)) { const error = new Error('Ce compte est introuvable.'); error.status = 404; throw error }
   const all = await load(root); if (all[userId]) { const error = new Error('Ce compte possède déjà un profil joueur.'); error.status = 409; throw error } return savePlayerProfile(root, userId, payload)
 }
-export async function savePlayerProfile(root, userId, payload) { const all = await load(root); const characters = JSON.parse(await readFile(path.join(root, 'src', 'data', 'characters.json'), 'utf8')); const owned = new Set(characters.filter((character) => character.ownerUserId === userId).map((character) => character.id)); all[userId] = { ...normalizePlayerProfile(payload), linked_character_ids: parseIds(payload.linked_character_ids).filter((id) => owned.has(id)) }; await save(root, all); return getPlayerProfile(root, userId) }
+export async function savePlayerProfile(root, userId, payload, { allowSystemCharacters = false } = {}) { const all = await load(root); const characters = JSON.parse(await readFile(path.join(root, 'src', 'data', 'characters.json'), 'utf8')); const owned = new Set(characters.filter((character) => character.ownerUserId === userId || (allowSystemCharacters && character.ownerUserId === 'system')).map((character) => character.id)); all[userId] = { ...normalizePlayerProfile(payload), linked_character_ids: parseIds(payload.linked_character_ids).filter((id) => owned.has(id)) }; await save(root, all); return getPlayerProfile(root, userId) }
 export async function deletePlayerProfile(root, userId) { const all = await load(root); delete all[userId]; await save(root, all) }
 export async function listPublicPlayerProfiles(root) {
   const users = await loadUsers(root); const profiles = await load(root); const characters = JSON.parse(await readFile(path.join(root, 'src', 'data', 'characters.json'), 'utf8'))
@@ -30,6 +30,6 @@ export async function listPublicPlayerProfiles(root) {
     const profile = profiles[user.id]
     const linkedIds = parseIds(profile.linked_character_ids)
     const selectedIds = linkedIds.length > 0 ? linkedIds : characters.filter((character) => character.ownerUserId === user.id).map((character) => character.id)
-    return { userId: user.id, name: user.name, status: user.status || 'Membre', profile: { userId: user.id, ...normalizePlayerProfile(profile), linked_character_ids: linkedIds }, characters: characters.filter((character) => character.ownerUserId === user.id && selectedIds.includes(character.id)).map((character) => ({ id: character.id, name: [character.firstName, character.lastName].filter(Boolean).join(' ') || character.id })) }
+    return { userId: user.id, name: user.name, status: user.status || 'Membre', profile: { userId: user.id, ...normalizePlayerProfile(profile), linked_character_ids: linkedIds }, characters: characters.filter((character) => selectedIds.includes(character.id)).map((character) => ({ id: character.id, name: [character.firstName, character.lastName].filter(Boolean).join(' ') || character.id })) }
   })
 }

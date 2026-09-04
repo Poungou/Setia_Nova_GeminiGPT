@@ -311,14 +311,14 @@ export async function handleAccount(request, env, parts) {
     if (parts[0] === 'profile' && parts.length === 1) {
       assertCanManagePlayerProfile(user)
       if (method === 'GET') return json({ profile: await getPlayerProfile(env, user.id) })
-      if (method === 'PUT') return json({ profile: await savePlayerProfile(env, user.id, await readJson(request)) })
+      if (method === 'PUT') return json({ profile: await savePlayerProfile(env, user.id, await readJson(request), { allowSystemCharacters: isAdmin(user) }) })
     }
 
     if (parts[0] === 'bootstrap' && method === 'GET') {
       const characters = await listCharacters(env)
       const clans = await listClans(env)
       const data = {
-        characters: visibleRows(characters, user),
+        characters: isAdmin(user) ? characters : visibleRows(characters, user),
         clans: visibleRows(clans, user),
         locations: visibleRows(await listLocations(env), user),
         posts: visibleRows(await listPosts(env), user),

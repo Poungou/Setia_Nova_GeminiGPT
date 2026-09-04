@@ -257,7 +257,7 @@ export default function woltarAccount() {
           if (parts[0] === 'profile' && parts.length === 1) {
             assertCanManagePlayerProfile(user)
             if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, user.id) })
-            if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, user.id, await readJson(req)) })
+            if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, user.id, await readJson(req), { allowSystemCharacters: isAdmin(user) }) })
           }
 
           if (parts[0] === 'bootstrap' && req.method === 'GET') {
@@ -265,7 +265,7 @@ export default function woltarAccount() {
             const clans = await readCollection(dataDir, 'clans')
             const locations = await readCollection(dataDir, 'locations')
             const data = {
-              characters: visibleRows(characters, user),
+              characters: isAdmin(user) ? characters : visibleRows(characters, user),
               clans: visibleRows(clans, user),
               locations: visibleRows(locations, user),
               posts: visibleRows(await readCollection(dataDir, 'posts'), user),

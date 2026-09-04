@@ -553,7 +553,7 @@ function PlayerProfileSection() {
     Promise.all([getPlayerProfile(), getAccountBootstrap()])
       .then(([profileBody, accountBody]) => {
         setProfile(profileBody.profile)
-        setCharacters((accountBody.data?.characters || []).filter((character) => character.ownerUserId === accountBody.user.id))
+        setCharacters((accountBody.data?.characters || []).filter((character) => accountBody.user.role === 'admin' || character.ownerUserId === accountBody.user.id))
       })
       .catch((error) => setFlash(`error:${error.message || error}`))
   }, [])

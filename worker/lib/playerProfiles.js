@@ -65,11 +65,15 @@ export async function createPlayerProfile(env, userId, payload) {
   return savePlayerProfile(env, userId, payload)
 }
 
-export async function savePlayerProfile(env, userId, payload) {
+export async function savePlayerProfile(env, userId, payload, { allowSystemCharacters = false } = {}) {
   const profile = normalizePlayerProfile(payload)
   const requestedIds = parseIds(payload.linked_character_ids)
   const { results: ownedCharacters } = await env.WOLTAR_DB.prepare('SELECT id FROM characters WHERE owner_user_id = ?').bind(userId).all()
   const ownedIds = new Set((ownedCharacters || []).map((row) => row.id))
+  if (allowSystemCharacters) {
+    const { results: systemCharacters } = await env.WOLTAR_DB.prepare("SELECT id FROM characters WHERE owner_user_id = 'system'").all()
+    ;(systemCharacters || []).forEach((row) => ownedIds.add(row.id))
+  }
   const linkedCharacterIds = requestedIds.filter((id) => ownedIds.has(id))
   const now = new Date().toISOString()
   await env.WOLTAR_DB.prepare(
@@ -93,10 +97,11 @@ export async function listPublicPlayerProfiles(env) {
      WHERE p.profile_public = 1 AND u.disabled = 0 ORDER BY lower(u.name) ASC`,
   ).all()
   return Promise.all((results || []).map(async (row) => {
-    const { results: characters } = await env.WOLTAR_DB.prepare(
-      `SELECT id, data FROM characters WHERE owner_user_id = ? ORDER BY created_at ASC`,
-    ).bind(row.id).all()
     const linkedIds = parseIds(row.linked_character_ids)
+    const characterQuery = linkedIds.length > 0
+      ? `SELECT id, data FROM characters WHERE id IN (${linkedIds.map(() => '?').join(',')}) ORDER BY created_at ASC`
+      : 'SELECT id, data FROM characters WHERE owner_user_id = ? ORDER BY created_at ASC'
+    const { results: characters } = await env.WOLTAR_DB.prepare(characterQuery).bind(...(linkedIds.length > 0 ? linkedIds : [row.id])).all()
     const selectedIds = linkedIds.length > 0 ? linkedIds : (characters || []).map((character) => character.id)
     return {
       userId: row.id,
