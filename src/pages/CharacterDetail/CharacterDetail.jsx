@@ -1,15 +1,16 @@
-import { useParams, Link, Navigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { getRelationTargets, getRelationNetwork } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
 import { getClanByCharacter } from '../../data/clans.js'
 import { events } from '../../data/events.js'
-import { usePublicCharacter, usePublicClans } from '../../lib/publicData.js'
+import { usePublicCharacter, usePublicClans, usePublicPlayers } from '../../lib/publicData.js'
 import { imgSrc, imgFocus, imgCredit } from '../../lib/image.js'
 import RelationGraph from '../../components/RelationGraph/RelationGraph.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
+import NotFound from '../NotFound/NotFound.jsx'
 import { GlyphRelations, GlyphLocation, GlyphEvents } from '../../components/PixelIcons/PixelGlyphs.jsx'
 import './CharacterDetail.css'
 
@@ -65,17 +66,33 @@ export default function CharacterDetail() {
   const { id } = useParams()
   // Fiche « live » : D1 (via /compte, /admin) si disponible, sinon repli sur
   // les données statiques du bundle — voir src/lib/publicData.js.
-  const character = usePublicCharacter(id)
+  const { character, loading, error } = usePublicCharacter(id)
   // Clans « live » (D1 + canon) pour résoudre le lien vers la fiche clan —
   // voir getClanByCharacter(character, clans) ci-dessous et
   // src/lib/publicData.js.
   const clans = usePublicClans()
+  const players = usePublicPlayers()
   const reduce = useReducedMotion()
 
-  if (!character || character.visibility === 'draft') {
-    return <Navigate to="/personnages" replace />
+  if (loading) {
+    return <section className="container character-section" role="status" aria-live="polite">Chargement de la fiche…</section>
   }
 
+  if (!character && error) {
+    return (
+      <section className="container character-section" role="alert">
+        <h1 className="section-title">La fiche n’a pas pu être chargée.</h1>
+        <p>Veuillez réessayer dans quelques instants.</p>
+        <button type="button" className="btn" onClick={() => window.location.reload()}>Réessayer</button>
+      </section>
+    )
+  }
+
+  if (!character || character.visibility === 'draft') {
+    return <NotFound />
+  }
+
+  const owner = players.find((player) => player.userId === character.ownerUserId)
   const relations = getRelationTargets(character)
   const relationNetwork = getRelationNetwork(character)
   const associatedLocations = (character.locations || [])
@@ -151,6 +168,11 @@ export default function CharacterDetail() {
               {character.shortDescription && (
                 <motion.p className="character-hero__summary" {...itemMotion}>
                   {character.shortDescription}
+                </motion.p>
+              )}
+              {owner && (
+                <motion.p className="character-hero__summary" {...itemMotion}>
+                  Propriétaire : <Link to="/personnages#players-title">{owner.name}</Link>
                 </motion.p>
               )}
               {character.clan && (

@@ -17,7 +17,7 @@
 // d'un personnage) a été retiré — le système de Personas est supprimé.
 
 import { useEffect, useState } from 'react'
-import { allCharacters as staticCharacters, characters as staticPublicCharacters } from '../data/characters.js'
+import { characters as staticPublicCharacters } from '../data/characters.js'
 import { clans as staticClans, getClanById as getStaticClanById } from '../data/clans.js'
 import { locations as staticLocations, getLocationById as getStaticLocationById } from '../data/locations.js'
 import { getPostById as getStaticPostById, posts as staticPosts } from '../data/posts.js'
@@ -26,7 +26,11 @@ const BASE = '/__public/api'
 
 async function getJson(url) {
   const res = await fetch(url, { credentials: 'omit' })
-  if (!res.ok) throw new Error(`Erreur ${res.status}`)
+  if (!res.ok) {
+    const error = new Error(`Erreur ${res.status}`)
+    error.status = res.status
+    throw error
+  }
   const body = await res.json().catch(() => ({}))
   return body.data
 }
@@ -55,23 +59,30 @@ export function usePublicCharacters() {
 
 // Une fiche personnage précise (pour /personnages/:id).
 export function usePublicCharacter(id) {
-  const [character, setCharacter] = useState(() => staticCharacters.find((c) => c.id === id) || null)
+  const fallback = staticPublicCharacters.find((c) => c.id === id) || null
+  const [result, setResult] = useState({ id: null, character: null, loading: true, error: false })
 
   useEffect(() => {
-    setCharacter(staticCharacters.find((c) => c.id === id) || null)
     if (!id) return undefined
     let alive = true
+    const staticCharacter = staticPublicCharacters.find((c) => c.id === id) || null
     getJson(`${BASE}/characters/${encodeURIComponent(id)}`)
       .then((data) => {
-        if (alive && data) setCharacter(data)
+        if (alive) setResult({ id, character: data || null, loading: false, error: false })
       })
-      .catch(() => {})
+      .catch((error) => {
+        if (!alive) return
+        // A public 404 also invalidates the canon fallback (e.g. a hidden D1 override).
+        const notFound = error.status === 404
+        setResult({ id, character: notFound ? null : staticCharacter, loading: false, error: !notFound })
+      })
     return () => {
       alive = false
     }
   }, [id])
 
-  return character
+  // Never render the previous character while a new route is being fetched.
+  return result.id === id ? result : { character: fallback, loading: Boolean(id), error: false }
 }
 
 // Liste des clans publiés (pour /univers, /clans) — inclut le clan canon
