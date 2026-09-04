@@ -13,7 +13,7 @@ import './LocationDetail.css'
 
 function Field({ label, value }) {
   return (
-    <div className="identity-field">
+    <div className="location-detail__field">
       <dt>{label}</dt>
       <dd>{value ? value : <span className="dash">—</span>}</dd>
     </div>
@@ -38,113 +38,121 @@ export default function LocationDetail() {
     .filter(Boolean)
   const gallery = (location.gallery || []).filter((v) => imgSrc(v))
 
+  const heroImage = imgSrc(location.image) ? location.image : gallery[0]
+  const badges = [...new Set([location.type, location.location, location.faction || location.owner, location.status].filter(Boolean))]
+
   return (
     <PageTransition>
       <article className="location-detail">
-        {imgSrc(location.image) && (
-          <Reveal className="location-detail__banner" y={0}>
-            <img
-              src={imgSrc(location.image)}
-              alt={location.name}
-              style={{ objectPosition: imgFocus(location.image) }}
-            />
+        <header className="location-hero">
+          {imgSrc(heroImage) && (
+            <img className="location-hero__image" src={imgSrc(heroImage)} alt={location.name}
+              style={{ objectPosition: imgFocus(heroImage) }} fetchPriority="high" />
+          )}
+          <div className="location-hero__content container">
+            <nav className="location-hero__breadcrumb" aria-label="Fil d’Ariane">
+              <Link to="/lieux">Lieux</Link>
+              {parent && <><span aria-hidden="true">/</span><Link to={`/lieux/${parent.id}`}>{parent.name}</Link></>}
+            </nav>
+            <span className="eyebrow">Lieu</span>
+            <h1>{location.name}</h1>
+            {location.shortDescription && <p className="location-hero__lead">{location.shortDescription}</p>}
+            {badges.length > 0 && <ul className="location-hero__badges" aria-label="Informations principales">
+              {badges.map((badge) => <li key={badge}>{badge}</li>)}
+            </ul>}
+          </div>
+        </header>
+
+        <div className="location-detail__layout container">
+          <aside className="location-detail__landmarks" aria-label="Repères du lieu">
+            <details className="location-detail__facts" open>
+              <summary>Repères</summary>
+              <dl>
+                <Field label="Type" value={location.type} />
+                <Field label="Lieu parent" value={parent && <Link to={`/lieux/${parent.id}`}>{parent.name}</Link>} />
+                <Field label="Aile / zone" value={placement} />
+                <Field label="Étage" value={location.floor} />
+                <Field label="Localisation" value={location.location} />
+                <Field label="Propriétaire" value={location.owner} />
+                <Field label="Faction" value={location.faction} />
+                <Field label="Statut" value={location.status} />
+              </dl>
+            </details>
+          </aside>
+          <div className="location-detail__editorial">
+            <Reveal as="section" className="location-detail__section">
+              <h2>À propos du lieu</h2>
+              {location.description ? (
+                <Prose markdown={location.description} />
+              ) : (
+                <div className="empty-state">
+                  <strong>À compléter</strong>
+                  La description de ce lieu n&rsquo;a pas encore été renseignée.
+                </div>
+              )}
+            </Reveal>
+
+            <Reveal as="section" className="location-detail__section">
+              <h2>Ambiance &amp; lore</h2>
+              {location.lore ? (
+                <Prose markdown={location.lore} />
+              ) : (
+                <div className="empty-state">
+                  <strong>Espace prêt pour le lore</strong>
+                  Notes d&rsquo;ambiance, secrets, habitudes du lieu ou détails RP pourront être posés ici.
+                </div>
+              )}
+            </Reveal>
+
+            {location.history && (
+              <Reveal as="section" className="location-detail__section">
+                <h2>Histoire</h2>
+                <Prose markdown={location.history} />
+              </Reveal>
+            )}
+
+          </div>
+        </div>
+        <div className="container location-detail__collections">
+          {children.length > 0 && (
+            <Reveal as="section" className="location-detail__section">
+              <h2>Sous-lieux</h2>
+              <div className="location-detail__children">
+                {children.map((child, i) => (
+                  <LocationCard key={child.id} location={child} index={i} />
+                ))}
+              </div>
+            </Reveal>
+          )}
+
+          <Reveal as="section" className="location-detail__section">
+            <h2>Personnages associés</h2>
+            {associatedCharacters.length > 0 ? (
+              <div className="relations-grid">
+                {associatedCharacters.map((c) => (
+                  <RelationCard key={c.id} relation={{ character: c, type: c.title }} />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <strong>Aucun personnage associé pour l&rsquo;instant</strong>
+              </div>
+            )}
           </Reveal>
-        )}
 
-        <Reveal as="section" className="location-hero container" y={16}>
-          {location.type && <span className="eyebrow">{location.type}</span>}
-          <h1 className="section-title">{location.name}</h1>
-          {location.shortDescription && (
-            <p className="location-hero__lead">{location.shortDescription}</p>
-          )}
-        </Reveal>
-
-        <Reveal as="section" className="container character-section">
-          <h2 className="eyebrow">Repères</h2>
-          <dl className="identity-grid">
-            <Field label="Type" value={location.type} />
-            <Field
-              label="Lieu parent"
-              value={parent && <Link to={`/lieux/${parent.id}`}>{parent.name}</Link>}
-            />
-            <Field label="Aile / zone" value={placement} />
-            <Field label="Étage" value={location.floor} />
-            <Field label="Localisation" value={location.location} />
-            <Field label="Propriétaire" value={location.owner} />
-            <Field label="Faction" value={location.faction} />
-            <Field label="Statut" value={location.status} />
-          </dl>
-        </Reveal>
-
-        <Reveal as="section" className="container character-section">
-          <h2 className="eyebrow">Description</h2>
-          {location.description ? (
-            <Prose markdown={location.description} className="prose--tight" />
-          ) : (
-            <div className="empty-state">
-              <strong>À compléter</strong>
-              La description de ce lieu n&rsquo;a pas encore été renseignée.
-            </div>
-          )}
-        </Reveal>
-
-        <Reveal as="section" className="container character-section">
-          <h2 className="eyebrow">Lore libre</h2>
-          {location.lore ? (
-            <Prose markdown={location.lore} className="prose--tight" />
-          ) : (
-            <div className="empty-state">
-              <strong>Espace prêt pour le lore</strong>
-              Notes d&rsquo;ambiance, secrets, habitudes du lieu ou détails RP pourront être posés ici.
-            </div>
-          )}
-        </Reveal>
-
-        {location.history && (
-          <Reveal as="section" className="container character-section">
-            <h2 className="eyebrow">Histoire</h2>
-            <Prose markdown={location.history} className="prose--tight" />
+          <Reveal as="section" className="location-detail__section">
+            <h2>Galerie</h2>
+            {gallery.length > 0 ? (
+              <Lightbox images={gallery.map((v) => ({ src: imgSrc(v), alt: location.name }))} />
+            ) : (
+              <div className="empty-state">
+                <strong>Aucune image pour l&rsquo;instant</strong>
+              </div>
+            )}
           </Reveal>
-        )}
 
-        {children.length > 0 && (
-          <Reveal as="section" className="container character-section">
-            <h2 className="eyebrow">Sous-lieux</h2>
-            <div className="location-detail__children">
-              {children.map((child, i) => (
-                <LocationCard key={child.id} location={child} index={i} />
-              ))}
-            </div>
-          </Reveal>
-        )}
-
-        <Reveal as="section" className="container character-section">
-          <h2 className="eyebrow">Personnages associés</h2>
-          {associatedCharacters.length > 0 ? (
-            <div className="relations-grid">
-              {associatedCharacters.map((c) => (
-                <RelationCard key={c.id} relation={{ character: c, type: c.title }} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <strong>Aucun personnage associé pour l&rsquo;instant</strong>
-            </div>
-          )}
-        </Reveal>
-
-        <Reveal as="section" className="container character-section">
-          <h2 className="eyebrow">Galerie</h2>
-          {gallery.length > 0 ? (
-            <Lightbox images={gallery.map((v) => ({ src: imgSrc(v), alt: location.name }))} />
-          ) : (
-            <div className="empty-state">
-              <strong>Aucune image pour l&rsquo;instant</strong>
-            </div>
-          )}
-        </Reveal>
-
-        <p className="container">
+        </div>
+        <p className="container location-detail__back">
           <Link to="/lieux" className="btn">
             ← Retour aux lieux
           </Link>
