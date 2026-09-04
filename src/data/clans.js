@@ -31,15 +31,19 @@ function slugify(input) {
 // Retourne `null` si aucun clan correspondant n'existe encore — dans ce cas
 // l'UI doit afficher le nom du clan en texte simple plutôt que de créer un
 // lien vers une page inexistante.
-export function getClanByCharacter(character) {
+// `clanList` : liste de clans à utiliser (par défaut le bundle statique).
+// Permet aux pages qui lisent les clans "live" (usePublicClans, voir
+// src/lib/publicData.js) de résoudre le lien vers un clan créé depuis un
+// compte joueur, pas seulement les clans connus au build.
+export function getClanByCharacter(character, clanList = clans) {
   if (!character) return null
   if (character.clanId) {
-    const byId = getClanById(character.clanId)
+    const byId = clanList.find((c) => c.id === character.clanId)
     if (byId) return byId
   }
   if (character.clan) {
     const target = slugify(character.clan)
-    return clans.find((c) => slugify(c.name).includes(target) || target.includes(slugify(c.name))) || null
+    return clanList.find((c) => slugify(c.name).includes(target) || target.includes(slugify(c.name))) || null
   }
   return null
 }

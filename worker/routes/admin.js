@@ -14,14 +14,14 @@ import {
   saveCreatorProfile,
   updateRow,
 } from '../lib/contentStore.js'
-import homeJson from '../../src/data/home.json'
-import locationsJson from '../../src/data/locations.json'
-import clansJson from '../../src/data/clans.json'
-import eventsJson from '../../src/data/events.json'
-import archivesJson from '../../src/data/archives.json'
-import postsJson from '../../src/data/posts.json'
-import aetherJson from '../../src/data/aether.json'
-import staticCharactersJson from '../../src/data/characters.json'
+import homeJson from '../../src/data/home.json' with { type: 'json' }
+import locationsJson from '../../src/data/locations.json' with { type: 'json' }
+import clansJson from '../../src/data/clans.json' with { type: 'json' }
+import eventsJson from '../../src/data/events.json' with { type: 'json' }
+import archivesJson from '../../src/data/archives.json' with { type: 'json' }
+import postsJson from '../../src/data/posts.json' with { type: 'json' }
+import aetherJson from '../../src/data/aether.json' with { type: 'json' }
+import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
 
 const STATIC_COLLECTIONS = {
   home: homeJson,

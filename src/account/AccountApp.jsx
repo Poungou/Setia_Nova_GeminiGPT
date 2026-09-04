@@ -1,11 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, LogOut, Plus, Save, Trash2, UserRound } from 'lucide-react'
-import { accountBackendAvailable, loginAccount, logoutAccount, registerAccount } from '../lib/authApi.js'
+import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, Lock, LogOut, MapPin, Plus, Save, Shield, Trash2, UserRound } from 'lucide-react'
 import {
+  accountBackendAvailable,
+  confirmEmail,
+  forgotPassword,
+  loginAccount,
+  logoutAccount,
+  registerAccount,
+  resetPassword as resetPasswordRequest,
+} from '../lib/authApi.js'
+import {
+  addClanMember,
+  changeEmail,
+  changePassword,
   createAccountRow,
   deleteAccountRow,
   getAccountBootstrap,
+  getClanMembers,
+  removeClanMember,
   updateAccountRow,
 } from '../lib/accountApi.js'
 import { SCHEMA } from '../admin/schema.js'
@@ -15,6 +28,18 @@ import '../admin/admin.css'
 
 const SECTIONS = {
   personnages: { collection: 'characters', label: 'Mes personnages', singular: 'personnage' },
+  clans: { collection: 'clans', label: 'Mes clans', singular: 'clan' },
+  lieux: { collection: 'locations', label: 'Mes lieux', singular: 'lieu' },
+}
+
+const CREATE_PERMISSION_BY_COLLECTION = {
+  characters: 'create_character',
+  clans: 'create_clan',
+  locations: 'create_location',
+}
+
+function canCreate(user, collection) {
+  return user?.role === 'admin' || user?.permissions?.[CREATE_PERMISSION_BY_COLLECTION[collection]] === true
 }
 
 function AccountBackendUnavailable() {
@@ -90,9 +115,9 @@ function AuthGate({ onSession }) {
         )}
         <input
           className="adm-input"
-          type="email"
+          type={mode === 'register' ? 'email' : 'text'}
           autoComplete="email"
-          placeholder="Email"
+          placeholder={mode === 'register' ? 'Email (facultatif)' : 'Email ou pseudo'}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -105,7 +130,12 @@ function AuthGate({ onSession }) {
           onChange={(e) => setPassword(e.target.value)}
         />
         {mode === 'register' && (
-          <p className="adm-hint">Les nouveaux comptes sont créés avec le rôle user.</p>
+          <p className="adm-hint">Les nouveaux comptes sont créés avec le rôle user. L’email est facultatif.</p>
+        )}
+        {mode === 'login' && (
+          <Link to="/compte/mot-de-passe-oublie" className="adm-hint">
+            Mot de passe oublié ?
+          </Link>
         )}
         {error && <p className="adm-error">{error}</p>}
         <button className="adm-btn adm-btn--primary" type="submit" disabled={busy}>
@@ -119,18 +149,385 @@ function AuthGate({ onSession }) {
   )
 }
 
-function Dashboard({ data }) {
+// Mot de passe oublié — accessible sans session (voir AccountApp ci-dessous
+// et worker/routes/auth.js#forgot-password). Réponse toujours identique que
+// l'adresse existe ou non : le message affiché ne change jamais selon la
+// réalité du compte, pour ne rien révéler.
+function ForgotPasswordPage() {
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const submit = async (e) => {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    try {
+      await forgotPassword(email)
+      setSent(true)
+    } catch (err) {
+      setError(String(err.message || err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="adm-gate">
+      <form className="adm-gate__card" onSubmit={submit}>
+        <h1>Mot de passe oublié</h1>
+        {sent ? (
+          <p className="adm-hint">
+            Si un compte existe avec cette adresse, un email de réinitialisation vient d’être envoyé. Vérifie ta
+            boîte de réception (et tes spams).
+          </p>
+        ) : (
+          <>
+            <p className="adm-hint">
+              Indique l’adresse email de ton compte : tu recevras un lien pour choisir un nouveau mot de passe.
+            </p>
+            <input
+              className="adm-input"
+              type="email"
+              autoComplete="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            {error && <p className="adm-error">{error}</p>}
+            <button className="adm-btn adm-btn--primary" type="submit" disabled={busy}>
+              {busy ? 'Envoi...' : 'Envoyer le lien'}
+            </button>
+          </>
+        )}
+        <Link to="/compte" className="adm-btn adm-btn--ghost">
+          Retour à la connexion
+        </Link>
+      </form>
+    </div>
+  )
+}
+
+// Page ouverte depuis le lien envoyé par email (?token=...) — jamais de
+// session exigée ici, le jeton à usage unique prouve l'identité (voir
+// worker/lib/authStore.js#resetPassword).
+function ResetPasswordPage() {
+  const [params] = useSearchParams()
+  const token = params.get('token') || ''
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmValue, setConfirmValue] = useState('')
+  const [done, setDone] = useState(false)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const submit = async (e) => {
+    e.preventDefault()
+    setError('')
+    if (newPassword !== confirmValue) {
+      setError('Les deux mots de passe ne correspondent pas.')
+      return
+    }
+    setBusy(true)
+    try {
+      await resetPasswordRequest(token, newPassword)
+      setDone(true)
+    } catch (err) {
+      setError(String(err.message || err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!token) {
+    return (
+      <div className="adm-gate">
+        <div className="adm-gate__card">
+          <h1>Lien invalide</h1>
+          <p className="adm-hint">Ce lien de réinitialisation est incomplet ou invalide.</p>
+          <Link to="/compte" className="adm-btn adm-btn--ghost">
+            Retour à la connexion
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="adm-gate">
+      <form className="adm-gate__card" onSubmit={submit}>
+        <h1>Nouveau mot de passe</h1>
+        {done ? (
+          <>
+            <p className="adm-hint">Ton mot de passe a été mis à jour. Tu peux te reconnecter.</p>
+            <Link to="/compte" className="adm-btn adm-btn--primary">
+              Se connecter
+            </Link>
+          </>
+        ) : (
+          <>
+            <input
+              className="adm-input"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Nouveau mot de passe"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+            <input
+              className="adm-input"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Confirmer le mot de passe"
+              value={confirmValue}
+              onChange={(e) => setConfirmValue(e.target.value)}
+              required
+            />
+            {error && <p className="adm-error">{error}</p>}
+            <button className="adm-btn adm-btn--primary" type="submit" disabled={busy}>
+              {busy ? 'Patiente...' : 'Choisir ce mot de passe'}
+            </button>
+          </>
+        )}
+      </form>
+    </div>
+  )
+}
+
+// Page ouverte depuis le lien de confirmation envoyé à la NOUVELLE adresse
+// (voir worker/routes/account.js#change-email). Pas de session exigée : le
+// jeton suffit, et la personne peut ne plus être connectée sur cet appareil.
+function ConfirmEmailPage() {
+  const [params] = useSearchParams()
+  const token = params.get('token') || ''
+  const [status, setStatus] = useState('pending')
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!token) {
+      setStatus('error')
+      setError('Ce lien de confirmation est incomplet ou invalide.')
+      return undefined
+    }
+    let alive = true
+    confirmEmail(token)
+      .then(() => {
+        if (alive) setStatus('ok')
+      })
+      .catch((err) => {
+        if (alive) {
+          setStatus('error')
+          setError(String(err.message || err))
+        }
+      })
+    return () => {
+      alive = false
+    }
+  }, [token])
+
+  return (
+    <div className="adm-gate">
+      <div className="adm-gate__card">
+        <h1>Confirmation d’adresse email</h1>
+        {status === 'pending' && <p className="adm-hint">Vérification en cours...</p>}
+        {status === 'ok' && <p className="adm-hint">Ta nouvelle adresse email est confirmée.</p>}
+        {status === 'error' && <p className="adm-error">{error}</p>}
+        <Link to="/compte" className="adm-btn adm-btn--ghost">
+          Retour à l’espace compte
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// Section "Sécurité du compte" de l'espace connecté : changer l'email,
+// changer le mot de passe, se déconnecter. Le mot de passe actuel est
+// toujours revérifié côté serveur (worker/routes/account.js /
+// plugins/woltar-account.js) — jamais seulement ici.
+function SecuritySection({ user, onLogout }) {
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [pwBusy, setPwBusy] = useState(false)
+  const [pwFlash, setPwFlash] = useState('')
+
+  const [emailPassword, setEmailPassword] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [emailBusy, setEmailBusy] = useState(false)
+  const [emailFlash, setEmailFlash] = useState('')
+
+  const onChangePassword = async (e) => {
+    e.preventDefault()
+    setPwFlash('')
+    if (newPassword !== confirmPassword) {
+      setPwFlash('error:Les deux mots de passe ne correspondent pas.')
+      return
+    }
+    setPwBusy(true)
+    try {
+      await changePassword({ currentPassword, newPassword })
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setPwFlash('ok:Mot de passe mis à jour. Tes autres sessions ouvertes ailleurs ont été déconnectées.')
+    } catch (err) {
+      setPwFlash(`error:${err.message || err}`)
+    } finally {
+      setPwBusy(false)
+    }
+  }
+
+  const onChangeEmail = async (e) => {
+    e.preventDefault()
+    setEmailFlash('')
+    setEmailBusy(true)
+    try {
+      await changeEmail({ newEmail, currentPassword: emailPassword })
+      setEmailPassword('')
+      setNewEmail('')
+      setEmailFlash(
+        'ok:Un email de confirmation vient d’être envoyé à la nouvelle adresse. Le changement ne sera effectif qu’après avoir cliqué sur le lien reçu.',
+      )
+    } catch (err) {
+      setEmailFlash(`error:${err.message || err}`)
+    } finally {
+      setEmailBusy(false)
+    }
+  }
+
+  return (
+    <div className="adm-edit">
+      <header className="adm-edit__head">
+        <div className="adm-edit__title">
+          <h1>Sécurité du compte</h1>
+          <code>{user.email || 'Aucune adresse email'}</code>
+        </div>
+      </header>
+
+      <form className="adm-form" onSubmit={onChangeEmail}>
+        <fieldset className="adm-fieldset">
+          <legend>Modifier mon adresse email</legend>
+          <p className="adm-hint">
+            Adresse actuelle : {user.email || 'Aucune adresse email associée'}
+            {user.pendingEmail
+              ? ` — changement en attente vers ${user.pendingEmail} (vérifie tes emails pour confirmer)`
+              : ''}
+          </p>
+          <div className="adm-field">
+            <label htmlFor="sec-new-email">Nouvelle adresse</label>
+            <input
+              id="sec-new-email"
+              className="adm-input"
+              type="email"
+              autoComplete="email"
+              placeholder="Nouvelle adresse email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="adm-field">
+            <label htmlFor="sec-email-password">Mot de passe actuel</label>
+            <input
+              id="sec-email-password"
+              className="adm-input"
+              type="password"
+              autoComplete="current-password"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
+              required
+            />
+          </div>
+          {emailFlash.startsWith('ok:') && <div className="adm-banner adm-banner--ok">{emailFlash.slice(3)}</div>}
+          {emailFlash.startsWith('error:') && (
+            <div className="adm-banner adm-banner--error">{emailFlash.slice(6)}</div>
+          )}
+          <button type="submit" className="adm-btn adm-btn--primary" disabled={emailBusy}>
+            {emailBusy ? 'Envoi...' : 'Modifier mon adresse email'}
+          </button>
+        </fieldset>
+      </form>
+
+      <form className="adm-form" onSubmit={onChangePassword}>
+        <fieldset className="adm-fieldset">
+          <legend>Modifier mon mot de passe</legend>
+          <div className="adm-field">
+            <label htmlFor="sec-current-password">Mot de passe actuel</label>
+            <input
+              id="sec-current-password"
+              className="adm-input"
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="adm-field">
+            <label htmlFor="sec-new-password">Nouveau mot de passe</label>
+            <input
+              id="sec-new-password"
+              className="adm-input"
+              type="password"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="adm-field">
+            <label htmlFor="sec-confirm-password">Confirmer le nouveau mot de passe</label>
+            <input
+              id="sec-confirm-password"
+              className="adm-input"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+          {pwFlash.startsWith('ok:') && <div className="adm-banner adm-banner--ok">{pwFlash.slice(3)}</div>}
+          {pwFlash.startsWith('error:') && <div className="adm-banner adm-banner--error">{pwFlash.slice(6)}</div>}
+          <button type="submit" className="adm-btn adm-btn--primary" disabled={pwBusy}>
+            {pwBusy ? 'Mise à jour...' : 'Modifier mon mot de passe'}
+          </button>
+        </fieldset>
+      </form>
+
+      <fieldset className="adm-fieldset">
+        <legend>Déconnexion</legend>
+        <button
+          type="button"
+          className="adm-btn adm-btn--danger"
+          onClick={async () => {
+            await logoutAccount().catch(() => {})
+            onLogout()
+          }}
+        >
+          <LogOut size={15} /> Déconnexion
+        </button>
+      </fieldset>
+    </div>
+  )
+}
+
+function Dashboard({ data, user }) {
   const characters = data?.characters || []
+  const clans = data?.clans || []
+  const locations = data?.locations || []
   return (
     <div className="adm-list">
       <header className="adm-list__head">
         <div>
           <h1>Mon espace</h1>
-          <p className="adm-muted">Tes personnages.</p>
+          <p className="adm-muted">Statut : {user.status || 'Membre'}</p>
         </div>
       </header>
       <ul className="adm-cards">
-        <li>
+        {(canCreate(user, 'characters') || characters.length > 0) && <li>
           <Link to="/compte/personnages" className="adm-card">
             <div className="adm-card__body">
               <strong>Mes personnages</strong>
@@ -138,13 +535,31 @@ function Dashboard({ data }) {
             </div>
             <Plus size={16} />
           </Link>
-        </li>
+        </li>}
+        {(canCreate(user, 'clans') || clans.length > 0) && <li>
+          <Link to="/compte/clans" className="adm-card">
+            <div className="adm-card__body">
+              <strong>Mes clans</strong>
+              <span className="adm-muted">{clans.length} fiche(s)</span>
+            </div>
+            <Plus size={16} />
+          </Link>
+        </li>}
+        {(canCreate(user, 'locations') || locations.length > 0) && <li>
+          <Link to="/compte/lieux" className="adm-card">
+            <div className="adm-card__body">
+              <strong>Mes lieux</strong>
+              <span className="adm-muted">{locations.length} fiche(s)</span>
+            </div>
+            <MapPin size={16} />
+          </Link>
+        </li>}
       </ul>
     </div>
   )
 }
 
-function AccountList({ data }) {
+function AccountList({ data, user }) {
   const { section } = useParams()
   const config = SECTIONS[section]
   const rows = data?.[config?.collection] || []
@@ -159,9 +574,11 @@ function AccountList({ data }) {
           <h1>{config.label}</h1>
           <p className="adm-muted">{rows.length} fiche(s)</p>
         </div>
-        <Link to={`/compte/${section}/new`} className="adm-btn adm-btn--primary">
-          <Plus size={16} /> Creer un {config.singular}
-        </Link>
+        {canCreate(user, config.collection) && (
+          <Link to={`/compte/${section}/new`} className="adm-btn adm-btn--primary">
+            <Plus size={16} /> Creer un {config.singular}
+          </Link>
+        )}
       </header>
       <ul className="adm-cards">
         {rows.map((row) => (
@@ -169,7 +586,10 @@ function AccountList({ data }) {
             <Link to={`/compte/${section}/${encodeURIComponent(row.id)}`} className="adm-card">
               <div className="adm-card__body">
                 <strong>{schema.title(row)}</strong>
-              <span className="adm-muted">{schema.subtitle(row) || '—'}</span>
+                <span className="adm-muted">{schema.subtitle(row) || '—'}</span>
+                {user?.role === 'admin' && row.ownerUserId && row.ownerUserId !== user.id && (
+                  <span className="adm-muted">Propriétaire : {row.ownerUserId}</span>
+                )}
               </div>
               <code className="adm-card__id">{row.id}</code>
             </Link>
@@ -181,7 +601,118 @@ function AccountList({ data }) {
   )
 }
 
-function AccountEdit({ data, reload }) {
+// Gestion des membres d'un clan de compte (POST/DELETE sur
+// /collections/clans/:id/members) — séparée du formulaire générique
+// ci-dessus car ça touche une table à part (clan_members), pas le champ
+// `members` de la fiche clan elle-même. Un membre ne peut être choisi que
+// parmi SES propres personnages (ou tous, pour une administratrice) — le
+// serveur revérifie de toute façon (voir worker/routes/account.js).
+function ClanMembersEditor({ clanId, data, user }) {
+  const [members, setMembers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [selected, setSelected] = useState('')
+
+  const load = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      setMembers(await getClanMembers(clanId))
+    } catch (e) {
+      setError(String(e.message || e))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clanId])
+
+  const nameFor = (characterId) => {
+    const c = (data?.characters || []).find((x) => x.id === characterId)
+    return c ? [c.firstName, c.lastName].filter(Boolean).join(' ') || characterId : characterId
+  }
+
+  const candidates = (data?.characters || []).filter(
+    (c) => (user.role === 'admin' || c.ownerUserId === user.id) && !members.some((m) => m.characterId === c.id),
+  )
+
+  const onAdd = async () => {
+    if (!selected) return
+    try {
+      setError('')
+      await addClanMember(clanId, { characterId: selected, order: members.length })
+      setSelected('')
+      await load()
+    } catch (e) {
+      setError(String(e.message || e))
+    }
+  }
+
+  const onRemove = async (characterId) => {
+    try {
+      setError('')
+      await removeClanMember(clanId, characterId)
+      await load()
+    } catch (e) {
+      setError(String(e.message || e))
+    }
+  }
+
+  return (
+    <fieldset className="adm-fieldset">
+      <legend>Membres du clan</legend>
+      {error && <div className="adm-banner adm-banner--error">{error}</div>}
+      {loading ? (
+        <p className="adm-muted">Chargement...</p>
+      ) : (
+        <ul className="adm-cards">
+          {members.map((m) => (
+            <li key={m.characterId} className="adm-card">
+              <div className="adm-card__body">
+                <strong>{nameFor(m.characterId)}</strong>
+                {m.role && <span className="adm-muted">{m.role}</span>}
+              </div>
+              <button
+                type="button"
+                className="adm-btn adm-btn--danger"
+                onClick={() => onRemove(m.characterId)}
+                aria-label={`Retirer ${nameFor(m.characterId)} du clan`}
+              >
+                <Trash2 size={15} />
+              </button>
+            </li>
+          ))}
+          {members.length === 0 && <li className="adm-muted">Aucun membre pour le moment.</li>}
+        </ul>
+      )}
+      <div className="adm-field">
+        <select className="adm-input" value={selected} onChange={(e) => setSelected(e.target.value)}>
+          <option value="">— Choisir un personnage —</option>
+          {candidates.map((c) => (
+            <option key={c.id} value={c.id}>
+              {[c.firstName, c.lastName].filter(Boolean).join(' ') || c.id}
+            </option>
+          ))}
+        </select>
+        <button type="button" className="adm-btn adm-btn--primary" onClick={onAdd} disabled={!selected}>
+          <Plus size={15} /> Ajouter au clan
+        </button>
+        {candidates.length === 0 && (
+          <p className="adm-hint">
+            {user.role === 'admin'
+              ? 'Aucun autre personnage disponible.'
+              : 'Crée d’abord un personnage dans « Mes personnages » pour pouvoir l’ajouter à ce clan.'}
+          </p>
+        )}
+      </div>
+    </fieldset>
+  )
+}
+
+function AccountEdit({ data, reload, user }) {
   const { section, id } = useParams()
   const navigate = useNavigate()
   const config = SECTIONS[section]
@@ -320,6 +851,8 @@ function AccountEdit({ data, reload }) {
           </fieldset>
         ))}
       </form>
+
+      {collection === 'clans' && !isNew && <ClanMembersEditor clanId={existing.id} data={data} user={user} />}
     </div>
   )
 }
@@ -360,6 +893,17 @@ function Workspace({ user, onLogout }) {
           <NavLink to="/compte/personnages" className="adm-nav__link">
             <UserRound size={16} /> Mes personnages
           </NavLink>
+          <NavLink to="/compte/clans" className="adm-nav__link">
+            <Shield size={16} /> Mes clans
+          </NavLink>
+          {(canCreate(user, 'locations') || data?.locations?.length > 0) && (
+            <NavLink to="/compte/lieux" className="adm-nav__link">
+              <MapPin size={16} /> Mes lieux
+            </NavLink>
+          )}
+          <NavLink to="/compte/securite" className="adm-nav__link">
+            <Lock size={16} /> Sécurité
+          </NavLink>
           {user.role === 'admin' && (
             <NavLink to="/admin" className="adm-nav__link">
               Admin
@@ -387,9 +931,10 @@ function Workspace({ user, onLogout }) {
         {error && <div className="adm-banner adm-banner--error">{error}</div>}
         {data && (
           <Routes>
-            <Route index element={<Dashboard data={data} />} />
-            <Route path=":section" element={<AccountList data={data} />} />
-            <Route path=":section/:id" element={<AccountEdit data={data} reload={load} />} />
+            <Route index element={<Dashboard data={data} user={user} />} />
+            <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
+            <Route path=":section" element={<AccountList data={data} user={user} />} />
+            <Route path=":section/:id" element={<AccountEdit data={data} reload={load} user={user} />} />
           </Routes>
         )}
       </main>
@@ -397,7 +942,7 @@ function Workspace({ user, onLogout }) {
   )
 }
 
-export default function AccountApp() {
+function AuthenticatedAccountApp() {
   const [session, setSession] = useState(null)
   const [checking, setChecking] = useState(accountBackendAvailable)
 
@@ -422,4 +967,21 @@ export default function AccountApp() {
   if (checking) return <div className="adm-loading">Vérification de la session...</div>
   if (!session) return <AuthGate onSession={setSession} />
   return <Workspace user={session} onLogout={() => setSession(null)} />
+}
+
+// Trois pages restent accessibles SANS session (liens ouverts depuis un
+// email, potentiellement sur un autre appareil que celui connecté) : mot de
+// passe oublié, choix du nouveau mot de passe, confirmation de nouvelle
+// adresse email. Elles sont donc routées ICI, avant le contrôle de session
+// d'AuthenticatedAccountApp ci-dessus — tout le reste de /compte/* continue
+// de passer par la connexion habituelle.
+export default function AccountApp() {
+  return (
+    <Routes>
+      <Route path="mot-de-passe-oublie" element={<ForgotPasswordPage />} />
+      <Route path="reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
+      <Route path="confirmer-email" element={<ConfirmEmailPage />} />
+      <Route path="*" element={<AuthenticatedAccountApp />} />
+    </Routes>
+  )
 }

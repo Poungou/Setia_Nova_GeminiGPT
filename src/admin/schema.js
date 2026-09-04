@@ -7,7 +7,13 @@
 // Types de champ : text | textarea | prose | markdown | number | date | select
 //                  | boolean | tags | image | gallery | refs | relations
 //   refs      -> liste d'ids pointant vers une autre collection (`ref`)
-//   relations -> spécifique aux personnages : [{ characterId, type, description }]
+//   relations -> spécifique aux personnages :
+//                [{ characterId, type, description, nature, intensity }]
+//                `nature`/`intensity` sont facultatifs (voir src/lib/relations.js
+//                pour le vocabulaire) : ils affinent uniquement le rendu du
+//                sociogramme public (couleur/épaisseur du lien, Phase 22) et
+//                n'ont aucune valeur par défaut inventée tant que l'admin ne
+//                les renseigne pas — voir RelationGraph.jsx
 
 import { slug } from './slug.js'
 import { POST_CATEGORIES } from '../data/posts.js'
@@ -246,17 +252,34 @@ export const SCHEMA = {
     makeId: (r) => slug(r.name),
     defaults: {
       name: '', canon: 'draft', emblem: '', description: '', history: '',
-      residence: '', locations: [], members: [], events: [],
+      residence: '', locations: [], members: [], events: [], centerCharacterId: '',
+      ownerUserId: 'system', visibility: 'published',
     },
     fields: [
+      { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
+      {
+        key: 'ownerUserId', label: 'Propriétaire', type: 'text', group: 'Publication',
+        hint: 'system = clan historique/admin protégé. Les comptes joueurs sont assignés côté serveur.',
+      },
       { key: 'name', label: 'Nom', type: 'text', group: 'Identité' },
       { key: 'canon', label: 'Fiabilité', type: 'select', options: CANON, group: 'Identité' },
       { key: 'residence', label: 'Résidence', type: 'text', group: 'Identité' },
       { key: 'emblem', label: 'Emblème', type: 'image', group: 'Images' },
       { key: 'description', label: 'Description', type: 'prose', group: 'Textes' },
       { key: 'history', label: 'Histoire', type: 'prose', group: 'Textes' },
-      { key: 'members', label: 'Membres', type: 'refs', ref: 'characters', group: 'Liens' },
+      {
+        key: 'members', label: 'Membres', type: 'refs', ref: 'characters', group: 'Liens',
+        accountHidden: true,
+        hint: 'Depuis /compte, les membres s’ajoutent via la section « Membres du clan » de la fiche, pas ici.',
+      },
       { key: 'locations', label: 'Lieux', type: 'refs', ref: 'locations', group: 'Liens' },
+      {
+        key: 'centerCharacterId',
+        label: 'Personnage central du sociogramme',
+        type: 'characterSelect',
+        group: 'Liens',
+        hint: 'Affiché au centre du schéma « Liens du clan ». Si vide, le personnage ayant le plus de liens renseignés est choisi automatiquement.',
+      },
     ],
   },
 

@@ -63,17 +63,32 @@
       },
       {
         "characterId": "fudo-nakamura",
-        "type": "Tante",
+        "type": "Neveu",
         "description": ""
       },
       {
         "characterId": "calion",
-        "type": "Tante",
+        "type": "Neveu",
         "description": ""
       },
       {
-        "characterId": "",
-        "type": "",
+        "characterId": "salut-nakamura",
+        "type": "Père",
+        "description": ""
+      },
+      {
+        "characterId": "marie-chat-nakamura",
+        "type": "Mère",
+        "description": ""
+      },
+      {
+        "characterId": "kumiko-lolita",
+        "type": "Nièce",
+        "description": ""
+      },
+      {
+        "characterId": "shizuka-nakamura",
+        "type": "Nièce",
         "description": ""
       }
     ],

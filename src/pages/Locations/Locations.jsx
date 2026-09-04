@@ -1,11 +1,14 @@
-import { getLocationChildren, isTopLevelLocation, locations } from '../../data/locations.js'
+import { isTopLevelLocation } from '../../data/locations.js'
+import { usePublicLocations } from '../../lib/publicData.js'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import './Locations.css'
 
 export default function Locations() {
+  const locations = usePublicLocations()
   const topLevel = locations.filter(isTopLevelLocation)
+  const childrenOf = (parentId) => locations.filter((location) => location.parentId === parentId)
   const known = topLevel.filter((l) => l.canon === 'confirmed')
   const upcoming = topLevel.filter((l) => l.canon !== 'confirmed')
 
@@ -24,7 +27,7 @@ export default function Locations() {
         </div>
 
         {known.map((parent) => {
-          const children = getLocationChildren(parent.id)
+          const children = childrenOf(parent.id)
           if (children.length === 0) return null
           return (
             <Reveal key={parent.id} className="locations-page__children">

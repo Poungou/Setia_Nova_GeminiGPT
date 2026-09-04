@@ -304,6 +304,21 @@
   border-bottom: none;
 }
 
+/* « Liens du clan » (RelationGraph) : section pleine largeur — l'ancienne
+   colonne latérale (320px) était trop étroite pour un sociogramme lisible,
+   voir Phase 22. */
+.character-section--relations h2.eyebrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.character-section--relations .pixel-glyph {
+  color: var(--ivory-faint);
+}
+
 /* --- Cartes Caractère/Apparence + Histoire ------------------------------
    Même langage visuel que les blocs latéraux (.character-aside-block) :
    fond légèrement teinté, fine bordure interne en plus de la bordure

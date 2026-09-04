@@ -40,7 +40,7 @@ export default [
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {
         ecmaFeatures: { jsx: true },
@@ -68,7 +68,7 @@ export default [
     // Fichiers Node : plugin Vite, scripts, config
     files: ['plugins/**/*.js', 'scripts/**/*.{js,mjs}', '*.config.js', 'vite.config.js'],
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       globals: nodeGlobals,
     },
@@ -79,7 +79,7 @@ export default [
   {
     files: ['worker/**/*.js'],
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       globals: workerGlobals,
     },

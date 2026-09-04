@@ -55,8 +55,54 @@ export async function logoutAccount() {
   )
 }
 
+// Mot de passe oublié — réponse toujours neutre (voir worker/lib/authStore.js
+// #requestPasswordReset), qu'un compte existe ou non pour cette adresse.
+export async function forgotPassword(email) {
+  return json(
+    await fetch(`${BASE}/forgot-password`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }),
+  )
+}
+
+export async function resetPassword(token, newPassword) {
+  return json(
+    await fetch(`${BASE}/reset-password`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword }),
+    }),
+  )
+}
+
+export async function confirmEmail(token) {
+  return json(
+    await fetch(`${BASE}/confirm-email`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    }),
+  )
+}
+
 export async function listUsers() {
   return json(await fetch(`${BASE}/users`, { credentials: 'same-origin' }))
+}
+
+export async function createUser(payload) {
+  return json(
+    await fetch(`${BASE}/users`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }),
+  )
 }
 
 export async function updateUser(id, patch) {

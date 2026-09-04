@@ -1,12 +1,12 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { getRelationTargets } from '../../data/characters.js'
+import { getRelationTargets, getRelationNetwork } from '../../data/characters.js'
 import { getLocationById } from '../../data/locations.js'
 import { getClanByCharacter } from '../../data/clans.js'
 import { events } from '../../data/events.js'
-import { usePublicCharacter } from '../../lib/publicData.js'
+import { usePublicCharacter, usePublicClans } from '../../lib/publicData.js'
 import { imgSrc, imgFocus, imgCredit } from '../../lib/image.js'
-import RelationCard from '../../components/RelationCard/RelationCard.jsx'
+import RelationGraph from '../../components/RelationGraph/RelationGraph.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
@@ -66,6 +66,10 @@ export default function CharacterDetail() {
   // Fiche « live » : D1 (via /compte, /admin) si disponible, sinon repli sur
   // les données statiques du bundle — voir src/lib/publicData.js.
   const character = usePublicCharacter(id)
+  // Clans « live » (D1 + canon) pour résoudre le lien vers la fiche clan —
+  // voir getClanByCharacter(character, clans) ci-dessous et
+  // src/lib/publicData.js.
+  const clans = usePublicClans()
   const reduce = useReducedMotion()
 
   if (!character || character.visibility === 'draft') {
@@ -73,20 +77,21 @@ export default function CharacterDetail() {
   }
 
   const relations = getRelationTargets(character)
+  const relationNetwork = getRelationNetwork(character)
   const associatedLocations = (character.locations || [])
     .map((locId) => getLocationById(locId))
     .filter(Boolean)
   const personalEvents = events.filter((e) => (e.characters || []).includes(character.id))
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
   const hasCharacterOrAppearance = Boolean(character.character || character.appearance)
-  const clanRecord = getClanByCharacter(character)
+  const clanRecord = getClanByCharacter(character, clans)
   const portraitSource = imgCredit(character.portrait, character.image_source)
 
   // Nav interne : ne pointe que vers les sections réellement affichées.
   const sectionsNav = [
     { id: 'identite', label: 'Identité', show: true },
     { id: 'histoire', label: 'Histoire', show: true },
-    { id: 'relations', label: 'Relations', show: relations.length > 0 },
+    { id: 'relations', label: 'Liens du clan', show: relations.length > 0 },
     { id: 'chronologie', label: 'Chronologie', show: personalEvents.length > 0 },
     { id: 'galerie', label: 'Galerie', show: character.gallery?.length > 0 },
   ].filter((s) => s.show)
@@ -250,20 +255,6 @@ export default function CharacterDetail() {
           </div>
 
           <aside className="character-body__aside">
-            {relations.length > 0 && (
-              <Reveal as="section" id="relations" className="character-aside-block">
-                <h2 className="eyebrow aside-heading">
-                  <GlyphRelations />
-                  Relations
-                </h2>
-                <div className="relations-grid">
-                  {relations.map((rel) => (
-                    <RelationCard key={rel.characterId} relation={rel} />
-                  ))}
-                </div>
-              </Reveal>
-            )}
-
             {associatedLocations.length > 0 && (
               <Reveal as="section" className="character-aside-block">
                 <h2 className="eyebrow aside-heading">
@@ -300,6 +291,16 @@ export default function CharacterDetail() {
             )}
           </aside>
         </div>
+
+        {relations.length > 0 && (
+          <Reveal as="section" id="relations" className="container character-section character-section--relations">
+            <h2 className="eyebrow aside-heading">
+              <GlyphRelations />
+              Liens du clan
+            </h2>
+            <RelationGraph members={relationNetwork.members} centerId={character.id} />
+          </Reveal>
+        )}
 
         {character.gallery?.length > 0 && (
           <Reveal as="section" id="galerie" className="container character-section">

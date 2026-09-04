@@ -18,6 +18,8 @@
 
 import { useEffect, useState } from 'react'
 import { allCharacters as staticCharacters, characters as staticPublicCharacters } from '../data/characters.js'
+import { clans as staticClans, getClanById as getStaticClanById } from '../data/clans.js'
+import { locations as staticLocations, getLocationById as getStaticLocationById } from '../data/locations.js'
 import { creatorProfile as staticCreatorProfile, normalizeCreatorProfile } from '../data/creator.js'
 
 const BASE = '/__public/api'
@@ -72,6 +74,49 @@ export function usePublicCharacter(id) {
   return character
 }
 
+// Liste des clans publiés (pour /univers, /clans) — inclut le clan canon
+// (Nakamura) et les clans créés depuis un compte joueur, une fois publiés.
+export function usePublicClans() {
+  const [clans, setClans] = useState(staticClans)
+
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/clans`)
+      .then((data) => {
+        if (alive && Array.isArray(data)) setClans(data)
+      })
+      .catch(() => {
+        // pas de backend joignable : on garde les données statiques.
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  return clans
+}
+
+// Une fiche clan précise (pour /clans/:id).
+export function usePublicClan(id) {
+  const [clan, setClan] = useState(() => getStaticClanById(id) || null)
+
+  useEffect(() => {
+    setClan(getStaticClanById(id) || null)
+    if (!id) return undefined
+    let alive = true
+    getJson(`${BASE}/clans/${encodeURIComponent(id)}`)
+      .then((data) => {
+        if (alive && data) setClan(data)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [id])
+
+  return clan
+}
+
 export function useCreatorProfile() {
   const [profile, setProfile] = useState(staticCreatorProfile)
 
@@ -88,4 +133,42 @@ export function useCreatorProfile() {
   }, [])
 
   return profile
+}
+
+export function usePublicLocations() {
+  const [locations, setLocations] = useState(staticLocations)
+
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/locations`)
+      .then((data) => {
+        if (alive && Array.isArray(data)) setLocations(data)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  return locations
+}
+
+export function usePublicLocation(id) {
+  const [location, setLocation] = useState(() => getStaticLocationById(id) || null)
+
+  useEffect(() => {
+    setLocation(getStaticLocationById(id) || null)
+    if (!id) return undefined
+    let alive = true
+    getJson(`${BASE}/locations/${encodeURIComponent(id)}`)
+      .then((data) => {
+        if (alive && data) setLocation(data)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [id])
+
+  return location
 }

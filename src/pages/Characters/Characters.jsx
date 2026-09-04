@@ -40,6 +40,44 @@ function compareByName(a, b) {
   return nameA.localeCompare(nameB, 'fr')
 }
 
+// Découpe le texte "Qui suis-je ?" (creator.bio, une seule chaîne libre) en
+// un intro court, des rubriques (une par ligne entièrement en MAJUSCULES
+// suivie de son texte) et une note de fin. Pure présentation : le texte
+// source n'est jamais modifié, réordonné ni tronqué — seule sa mise en page
+// change. Générique : toute nouvelle rubrique tout-en-majuscules ajoutée
+// plus tard dans le texte devient automatiquement une carte, sans changement
+// de code.
+function parseCreatorBio(bio) {
+  const blocks = String(bio || '')
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean)
+
+  const sections = []
+  let intro = ''
+  let outro = ''
+
+  blocks.forEach((block) => {
+    const [firstLine, ...rest] = block.split('\n')
+    const heading = firstLine.trim()
+    const isHeading =
+      heading.length > 0 &&
+      heading.length <= 40 &&
+      heading === heading.toLocaleUpperCase('fr-FR') &&
+      /[A-ZÀ-ÖØ-Þ]/.test(heading)
+
+    if (isHeading) {
+      sections.push({ title: heading, body: rest.join('\n').trim() })
+    } else if (sections.length === 0) {
+      intro = intro ? `${intro}\n\n${block}` : block
+    } else {
+      outro = outro ? `${outro}\n\n${block}` : block
+    }
+  })
+
+  return { intro, sections, outro }
+}
+
 function matchesQuery(character, query) {
   if (!query) return true
   const haystack = [
@@ -95,6 +133,7 @@ export default function Characters() {
     [characters],
   )
   const creatorPhoto = imgSrc(creator.photo)
+  const creatorBio = useMemo(() => parseCreatorBio(creator.bio), [creator.bio])
 
   return (
     <PageTransition>
@@ -108,17 +147,47 @@ export default function Characters() {
         </Reveal>
 
         <Reveal as="section" className="creator-profile" aria-labelledby="creator-profile-title">
-          <figure className="creator-profile__photo">
-            {creatorPhoto ? (
-              <img src={creatorPhoto} alt={creator.displayName} style={{ objectPosition: imgFocus(creator.photo) }} />
-            ) : (
-              <span>{creator.displayName?.[0] || 'N'}</span>
+          <div className="creator-profile__inner">
+            <div className="creator-header">
+              <figure className="creator-header__avatar">
+                {creatorPhoto ? (
+                  <img
+                    src={creatorPhoto}
+                    alt={creator.displayName}
+                    style={{ objectPosition: imgFocus(creator.photo) }}
+                  />
+                ) : (
+                  <span>{creator.displayName?.[0] || 'N'}</span>
+                )}
+              </figure>
+              <div className="creator-header__text">
+                <span className="eyebrow">Qui suis-je ?</span>
+                <h2 id="creator-profile-title">{creator.displayName}</h2>
+                {creatorBio.intro && <p className="creator-header__intro">{creatorBio.intro}</p>}
+              </div>
+            </div>
+
+            {creatorBio.sections.length > 0 && (
+              <div className="creator-rules">
+                {creatorBio.sections.map((rule, i) => (
+                  <Reveal key={rule.title} delay={Math.min(i * 0.05, 0.2)} y={12}>
+                    <details className="rule-card">
+                      <summary className="rule-card__summary">
+                        <span className="rule-card__title">{rule.title}</span>
+                        <span className="rule-card__marker" aria-hidden="true" />
+                      </summary>
+                      {rule.body && (
+                        <div className="rule-card__content">
+                          <p>{rule.body}</p>
+                        </div>
+                      )}
+                    </details>
+                  </Reveal>
+                ))}
+              </div>
             )}
-          </figure>
-          <div className="creator-profile__body">
-            <span className="eyebrow">Qui suis-je ?</span>
-            <h2 id="creator-profile-title">{creator.displayName}</h2>
-            <p>{creator.bio}</p>
+
+            {creatorBio.outro && <p className="creator-footer-note">{creatorBio.outro}</p>}
           </div>
         </Reveal>
 

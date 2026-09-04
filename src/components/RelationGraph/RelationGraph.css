@@ -1,52 +1,372 @@
+/* Sociogramme / affinity chart du clan — Phase 22. Diagramme radial en
+   HTML+CSS pour les portraits (mêmes cadres que CharacterCard, cohérents
+   avec la DA Nova-Setia/Kingdom Hearts) superposé à un calque SVG qui ne
+   dessine QUE les liaisons courbes : les deux calques partagent le même
+   espace de coordonnées (voir --rg-w/--rg-h posés en inline style depuis
+   RelationGraph.jsx, aspect-ratio identique au viewBox du SVG), donc rien
+   ne se désynchronise en changeant la taille de l'écran. */
+
 .relation-graph {
-  width: 100%;
-  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
-.relation-graph svg {
+
+.relation-graph__stage {
+  position: relative;
   width: 100%;
-  min-width: 320px;
-  max-width: 640px;
-  height: auto;
-  display: block;
+  max-width: 720px;
   margin: 0 auto;
 }
 
-.relation-graph__edge line {
-  stroke: var(--line-strong);
-  stroke-width: 1.5;
+.relation-graph__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-.relation-graph__edge text {
-  fill: var(--ivory-faint);
+
+.relation-graph__edge path {
+  transition: stroke-opacity 0.25s ease, stroke-width 0.25s ease;
+}
+
+.relation-graph__edge.is-dimmed path:nth-child(2) {
+  stroke-opacity: 0.15 !important;
+}
+
+.relation-graph__edge.is-active path:nth-child(2) {
+  stroke-opacity: 1 !important;
+}
+
+.relation-graph__cartouches,
+.relation-graph__nodes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* --- cartouche de type de relation, posée sur la liaison ---------------- */
+.relation-graph__pill {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  background: var(--bg-base);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.62rem;
   letter-spacing: 0.04em;
-  paint-order: stroke;
-  stroke: var(--bg-base);
-  stroke-width: 4px;
+  text-transform: uppercase;
+  color: var(--ivory-dim);
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.relation-graph__pill:hover,
+.relation-graph__pill:focus-visible {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.relation-graph__pill.is-dimmed {
+  opacity: 0.2;
+}
+
+/* --- nœuds (portraits) --------------------------------------------------- */
+.relation-graph__node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  pointer-events: auto;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.relation-graph__node.is-dimmed {
+  opacity: 0.25;
+}
+
+.relation-graph__node.is-active {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.relation-graph__halo {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--wine-soft), transparent 70%);
+  filter: blur(4px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.relation-graph__name {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--ivory);
+  text-shadow: 0 0 6px var(--bg-base), 0 0 6px var(--bg-base), 0 1px 2px var(--bg-base);
+  text-align: center;
+  max-width: 6.5rem;
+}
+
+.relation-graph__node--center .relation-graph__name {
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+/* --- portrait / cadre (repris de CharacterCard pour rester cohérent) --- */
+.relation-graph__portrait {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.relation-graph__portrait--sm {
+  width: 42px;
+}
+.relation-graph__portrait--md {
+  width: 58px;
+}
+.relation-graph__portrait--lg {
+  width: 88px;
 }
 
 .relation-graph__disc {
-  fill: var(--bg-raised-2);
-  stroke: var(--line-strong);
-  stroke-width: 1.5;
-  transition: stroke 0.2s ease;
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-raised-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.relation-graph__node {
+
+.relation-graph__disc img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.relation-graph__initials {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--ivory-dim);
+}
+
+.relation-graph__frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(12, 13, 22, 0.55));
+}
+
+/* --- légende, discrète ---------------------------------------------------- */
+.relation-graph__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--ivory-faint);
+}
+
+.relation-graph__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.relation-graph__legend-swatch {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* --- panneau latéral de détail (au clic sur une liaison) ------------------ */
+.relation-graph__panel {
+  position: relative;
+  max-width: 560px;
+  margin: 0 auto;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-m);
+  background: var(--gradient-card), var(--bg-raised);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 10px 28px -18px rgba(0, 0, 0, 0.65);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  animation: relation-panel-in 0.2s ease;
+}
+
+@keyframes relation-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.relation-graph__panel-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ivory-dim);
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
 }
-.relation-graph__node:hover .relation-graph__disc {
-  stroke: var(--wine-bright);
+
+.relation-graph__panel-close:hover {
+  color: var(--ivory);
+  border-color: var(--ivory-dim);
 }
-.relation-graph__initials {
-  fill: var(--ivory-dim);
-  font-family: var(--font-display);
-  font-size: 18px;
+
+.relation-graph__panel-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
 }
-.relation-graph__name {
-  fill: var(--ivory);
+
+.relation-graph__panel-versus {
+  color: var(--ivory-faint);
   font-family: var(--font-display);
-  font-size: 15px;
-  paint-order: stroke;
-  stroke: var(--bg-base);
-  stroke-width: 5px;
+}
+
+.relation-graph__panel-row {
+  margin: 0;
+  color: var(--ivory-dim);
+  font-family: var(--font-reading);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.relation-graph__panel-row a {
+  color: var(--ivory);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.relation-graph__panel-row strong {
+  color: var(--ivory);
+}
+
+.relation-graph__panel-empty {
+  margin: 0;
+  text-align: center;
+  color: var(--ivory-faint);
+}
+
+.relation-graph__panel-tags {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-left: 0.4rem;
+}
+
+.relation-graph__tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--ivory-dim);
+}
+
+.relation-graph__tag--ghost {
+  color: var(--ivory-faint);
+  border-style: dashed;
+}
+
+/* --- variante mobile : liste verticale, plus de sociogramme radial ------- */
+.relation-graph--mobile {
+  gap: var(--space-2);
+}
+
+.relation-graph__mobile-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: var(--space-1);
+}
+
+.relation-graph__mobile-center strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.relation-graph__mobile-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.relation-graph__mobile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 0.5rem 0.7rem;
+  background: var(--gradient-card);
+}
+
+.relation-graph__mobile-portrait-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--ivory);
+  min-width: 0;
+}
+
+.relation-graph__mobile-portrait-link span:last-child {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relation-graph--mobile .relation-graph__pill {
+  position: static;
+  transform: none;
+  flex-shrink: 0;
+}
+
+.relation-graph--mobile .relation-graph__pill:hover,
+.relation-graph--mobile .relation-graph__pill:focus-visible {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relation-graph__panel {
+    animation: none;
+  }
 }

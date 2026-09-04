@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { clans } from '../../data/clans.js'
+import { usePublicClans } from '../../lib/publicData.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import '../Universe/Universe.css'
@@ -8,6 +8,11 @@ import '../Universe/Universe.css'
 const MotionLink = motion(Link)
 
 export default function Clans() {
+  // Clans « live » : D1 (via /compte) si disponible, sinon repli sur les
+  // données statiques du bundle — voir src/lib/publicData.js. C'est ce qui
+  // permet à un clan créé depuis un compte joueur d'apparaître ici sans
+  // reconstruire le site.
+  const clans = usePublicClans()
   const reduce = useReducedMotion()
   const motionProps = reduce
     ? {}

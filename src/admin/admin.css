@@ -388,6 +388,28 @@ textarea.adm-input {
 .adm-relation {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr auto;
+  grid-template-areas: 'char type desc del' 'meta meta meta meta';
+  gap: 0.4rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.2rem;
+  border-bottom: 1px dashed var(--line);
+}
+.adm-relation > select:first-child {
+  grid-area: char;
+}
+.adm-relation > input:nth-of-type(1) {
+  grid-area: type;
+}
+.adm-relation > input:nth-of-type(2) {
+  grid-area: desc;
+}
+.adm-relation > button {
+  grid-area: del;
+}
+.adm-relation__meta {
+  grid-area: meta;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.4rem;
 }
 
@@ -651,6 +673,10 @@ textarea.adm-input {
 
   .adm-relation {
     grid-template-columns: 1fr;
+    grid-template-areas: 'char' 'type' 'desc' 'del' 'meta';
+  }
+  .adm-relation__meta {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { getLocationById, getLocationChildren, getLocationParent } from '../../data/locations.js'
+import { getLocationById, getLocationParent } from '../../data/locations.js'
+import { usePublicLocation, usePublicLocations } from '../../lib/publicData.js'
 import { characters } from '../../data/characters.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
@@ -21,14 +22,16 @@ function Field({ label, value }) {
 
 export default function LocationDetail() {
   const { id } = useParams()
-  const location = getLocationById(id)
+  const liveLocations = usePublicLocations()
+  const liveLocation = usePublicLocation(id)
+  const location = liveLocation || getLocationById(id)
 
   if (!location) {
     return <Navigate to="/lieux" replace />
   }
 
-  const parent = getLocationParent(location)
-  const children = getLocationChildren(location.id)
+  const parent = liveLocations.find((item) => item.id === location.parentId) || getLocationParent(location)
+  const children = liveLocations.filter((item) => item.parentId === location.id)
   const placement = [location.wing, location.zone].filter(Boolean).join(' · ')
   const associatedCharacters = (location.characters || [])
     .map((cid) => characters.find((c) => c.id === cid))

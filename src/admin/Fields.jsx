@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { X, Plus, Upload, Move } from 'lucide-react'
 import { uploadImage, adminAvailable } from './adminApi.js'
 import { imgSrc, imgFocus, makeImageValue } from '../lib/image.js'
+import { RELATION_NATURES, RELATION_INTENSITIES } from '../lib/relations.js'
 import Prose from '../components/Prose/Prose.jsx'
 import { SCHEMA } from './schema.js'
 
@@ -459,13 +460,45 @@ function RelationsInput({ value, onChange, allData, disabled }) {
           >
             <X size={14} />
           </button>
+          <div className="adm-relation__meta">
+            <select
+              className="adm-input"
+              value={rel.nature || ''}
+              disabled={disabled}
+              onChange={(e) => set(i, { nature: e.target.value })}
+              title="Nature du lien (facultatif) — affecte la couleur du lien dans le sociogramme public"
+            >
+              <option value="">Nature — non précisée</option>
+              {RELATION_NATURES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <select
+              className="adm-input"
+              value={rel.intensity || ''}
+              disabled={disabled}
+              onChange={(e) => set(i, { intensity: e.target.value })}
+              title="Intensité du lien (facultatif) — affecte l'épaisseur du lien dans le sociogramme public"
+            >
+              <option value="">Intensité — non précisée</option>
+              {RELATION_INTENSITIES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       ))}
       <button
         type="button"
         className="adm-btn"
         disabled={disabled}
-        onClick={() => onChange([...value, { characterId: '', type: '', description: '' }])}
+        onClick={() =>
+          onChange([...value, { characterId: '', type: '', description: '', nature: '', intensity: '' }])
+        }
       >
         <Plus size={14} /> Ajouter une relation
       </button>

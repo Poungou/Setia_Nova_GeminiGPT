@@ -3,11 +3,19 @@
 // Auth locale pour le serveur Vite de developpement. Les comptes reels sont
 // stockes cote serveur dans plugins/data/users.json (ignore par Git), jamais
 // dans le bundle navigateur.
+//
+// Historique — sécurisation du compte : forgot-password/reset-password/
+// confirm-email + rate limiting sur /login — voir worker/routes/auth.js
+// (port Cloudflare) pour le détail des intentions de sécurité ; ce fichier
+// applique la même logique via plugins/lib/authStore.js (fichiers JSON) et
+// plugins/lib/rateLimit.js (compteur en mémoire, pas de D1 en local).
 
 import { loadEnv } from 'vite'
 import {
   LOCAL_ADMIN_USER,
   clearSessionCookie,
+  confirmEmailChange,
+  createUser,
   createSessionToken,
   getRequestUser,
   httpError,
@@ -16,9 +24,12 @@ import {
   loginUser,
   publicUser,
   registerUser,
+  requestPasswordReset,
+  resetPassword,
   setSessionCookie,
   updateUser,
 } from './lib/authStore.js'
+import { checkRateLimit, clientIp } from './lib/rateLimit.js'
 
 const MAX_BODY_BYTES = 64 * 1024
 const DEFAULT_LOCAL_ADMIN_PASSPHRASE = 'woltar'
@@ -72,7 +83,13 @@ export default function woltarAuth() {
           }
 
           if (parts[0] === 'login' && req.method === 'POST') {
-            const user = await loginUser(root, await readJson(req))
+            const body = await readJson(req)
+            checkRateLimit(`login:identifier:${String(body?.identifier ?? body?.email ?? '').toLowerCase()}`, {
+              max: 8,
+              windowMs: 10 * 60 * 1000,
+            })
+            checkRateLimit(`login:ip:${clientIp(req)}`, { max: 20, windowMs: 10 * 60 * 1000 })
+            const user = await loginUser(root, body)
             setSessionCookie(res, await createSessionToken(root, user))
             return send(200, { user })
           }
@@ -80,6 +97,34 @@ export default function woltarAuth() {
           if (parts[0] === 'logout' && req.method === 'POST') {
             clearSessionCookie(res)
             return send(200, { ok: true })
+          }
+
+          if (parts[0] === 'forgot-password' && req.method === 'POST') {
+            const body = await readJson(req)
+            checkRateLimit(`reset:email:${String(body?.email || '').toLowerCase()}`, {
+              max: 4,
+              windowMs: 30 * 60 * 1000,
+            })
+            checkRateLimit(`reset:ip:${clientIp(req)}`, { max: 10, windowMs: 30 * 60 * 1000 })
+            await requestPasswordReset(root, { email: body?.email, origin: url.origin })
+            return send(200, {
+              ok: true,
+              message: 'Si un compte existe avec cette adresse, un email de réinitialisation vient d’être envoyé.',
+            })
+          }
+
+          if (parts[0] === 'reset-password' && req.method === 'POST') {
+            const body = await readJson(req)
+            checkRateLimit(`reset-consume:ip:${clientIp(req)}`, { max: 10, windowMs: 15 * 60 * 1000 })
+            await resetPassword(root, { token: body?.token, newPassword: body?.newPassword })
+            return send(200, { ok: true })
+          }
+
+          if (parts[0] === 'confirm-email' && req.method === 'POST') {
+            const body = await readJson(req)
+            checkRateLimit(`confirm-email:ip:${clientIp(req)}`, { max: 10, windowMs: 15 * 60 * 1000 })
+            const user = await confirmEmailChange(root, { token: body?.token })
+            return send(200, { ok: true, user })
           }
 
           if (parts[0] === 'local-admin' && req.method === 'POST') {
@@ -96,6 +141,10 @@ export default function woltarAuth() {
 
             if (req.method === 'GET' && parts.length === 1) {
               return send(200, { users: await listPublicUsers(root) })
+            }
+
+            if (req.method === 'POST' && parts.length === 1) {
+              return send(201, { user: await createUser(root, await readJson(req), actor) })
             }
 
             if (req.method === 'PATCH' && parts[1]) {

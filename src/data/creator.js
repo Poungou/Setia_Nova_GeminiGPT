@@ -1,4 +1,4 @@
-import creatorData from './creator.json'
+import creatorData from './creator.json' with { type: 'json' }
 
 export const DEFAULT_CREATOR_PROFILE = {
   id: 'creator',

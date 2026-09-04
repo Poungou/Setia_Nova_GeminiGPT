@@ -9,7 +9,15 @@
 // supprimé au profit d'AETHER, l'assistant IA central unique du site (voir
 // worker/routes/aether.js, branché sur /__aether, pas /__public).
 
-import { getPublicCharacter, getPublicCreatorProfile, listPublicCharacters } from '../lib/publicStore.js'
+import {
+  getPublicCharacter,
+  getPublicClan,
+  getPublicCreatorProfile,
+  getPublicLocation,
+  listPublicCharacters,
+  listPublicClans,
+  listPublicLocations,
+} from '../lib/publicStore.js'
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -35,10 +43,30 @@ export async function handlePublic(request, env, parts) {
       return json({ data: await getPublicCreatorProfile(env) })
     }
 
+    if (parts[0] === 'clans' && parts.length === 1) {
+      return json({ data: await listPublicClans(env) })
+    }
+
+    if (parts[0] === 'locations' && parts.length === 1) {
+      return json({ data: await listPublicLocations(env) })
+    }
+
+    if (parts[0] === 'clans' && parts[1]) {
+      const clan = await getPublicClan(env, decodeURIComponent(parts[1]))
+      if (!clan) return json({ error: 'Clan introuvable.' }, { status: 404 })
+      return json({ data: clan })
+    }
+
     if (parts[0] === 'characters' && parts[1]) {
       const character = await getPublicCharacter(env, decodeURIComponent(parts[1]))
       if (!character) return json({ error: 'Personnage introuvable.' }, { status: 404 })
       return json({ data: character })
+    }
+
+    if (parts[0] === 'locations' && parts[1]) {
+      const location = await getPublicLocation(env, decodeURIComponent(parts[1]))
+      if (!location) return json({ error: 'Lieu introuvable.' }, { status: 404 })
+      return json({ data: location })
     }
 
     return json({ error: 'Route inconnue' }, { status: 404 })

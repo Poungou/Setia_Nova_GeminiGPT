@@ -1,6 +1,5 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { getClanById } from '../../data/clans.js'
-import { characters } from '../../data/characters.js'
+import { usePublicClan, usePublicCharacters } from '../../lib/publicData.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
@@ -10,7 +9,10 @@ import './ClanDetail.css'
 
 export default function ClanDetail() {
   const { id } = useParams()
-  const clan = getClanById(id)
+  // Fiche « live » : D1 (via /compte) si disponible, sinon repli sur les
+  // données statiques du bundle — voir src/lib/publicData.js.
+  const clan = usePublicClan(id)
+  const characters = usePublicCharacters()
 
   if (!clan) {
     return <Navigate to="/univers" replace />
@@ -42,7 +44,7 @@ export default function ClanDetail() {
         {members.length > 1 && (
           <Reveal as="section" className="character-section">
             <h2 className="eyebrow">Liens du clan</h2>
-            <RelationGraph members={members} />
+            <RelationGraph members={members} centerId={clan.centerCharacterId} />
           </Reveal>
         )}
 

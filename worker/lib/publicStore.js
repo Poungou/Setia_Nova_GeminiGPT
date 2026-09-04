@@ -13,7 +13,15 @@
 // l'assistant IA central unique du site, qui n'est pas exposé via cette API
 // publique (il a sa propre route, /__aether).
 
-import { getCharacterWithFallback, getCreatorProfile, listCharactersWithFallback } from './contentStore.js'
+import {
+  getCharacterWithFallback,
+  getClanWithFallback,
+  getCreatorProfile,
+  getLocationWithFallback,
+  listCharactersWithFallback,
+  listClansWithFallback,
+  listLocationsWithFallback,
+} from './contentStore.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
@@ -38,4 +46,35 @@ export async function getPublicCharacter(env, id) {
 
 export async function getPublicCreatorProfile(env) {
   return getCreatorProfile(env)
+}
+
+// Un clan de compte peut rester "draft" (visibility) tant que sa proprietaire
+// ne l'a pas publie -- meme logique que les personnages. Un clan canon
+// (Nakamura) n'a pas ce champ dans clans.json : il reste donc public par
+// defaut (visibility !== 'draft' est vrai pour undefined).
+function isPublishedClan(clan) {
+  return Boolean(clan) && clan.visibility !== 'draft'
+}
+
+export async function listPublicClans(env) {
+  const all = await listClansWithFallback(env)
+  return all.filter(isPublishedClan)
+}
+
+export async function getPublicClan(env, id) {
+  const clan = await getClanWithFallback(env, id)
+  return isPublishedClan(clan) ? clan : null
+}
+
+function isPublishedLocation(location) {
+  return Boolean(location) && location.visibility !== 'draft'
+}
+
+export async function listPublicLocations(env) {
+  return (await listLocationsWithFallback(env)).filter(isPublishedLocation)
+}
+
+export async function getPublicLocation(env, id) {
+  const location = await getLocationWithFallback(env, id)
+  return isPublishedLocation(location) ? location : null
 }

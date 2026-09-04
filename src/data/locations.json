@@ -26,7 +26,6 @@
     "gallery": []
   },
   {
-    "id": "bibliotheque-omoikane",
     "name": "Bibliothèque d’Omoikane",
     "type": "Bibliothèque",
     "canon": "draft",
@@ -42,13 +41,17 @@
     "shortDescription": "Bibliothèque monumentale sur plusieurs niveaux, cœur calme et presque sacré du manoir.",
     "description": "La Bibliothèque d’Omoikane concentre l’image la plus majestueuse du manoir : bois sombre sculpté, grandes hauteurs sous plafond, escaliers massifs et rayonnages qui montent sur plusieurs niveaux.",
     "lore": "C’est l’un des lieux les plus silencieux et les plus chargés du domaine. On peut y imaginer les après-midi de Fudo enfant, les recherches patientes du clan, les ouvrages occultes trop bien rangés et les zones encore interdites au regard des visiteurs.\n\nElle doit rester impressionnante sans devenir froide : un espace ancien, dense, précieux, mais encore vivant.",
-    "history": "",
+    "history": "Image temporaire - Généré par IA ",
+    "image": {
+      "src": "/media/image-codex-3-sept.-2026-19-59-56-mtltz9wh.webp",
+      "focus": "49% 93%"
+    },
     "characters": [],
     "events": [],
-    "gallery": []
+    "gallery": [],
+    "id": "bibliotheque-omoikane"
   },
   {
-    "id": "cuisine-manoir-setia",
     "name": "Cuisine",
     "type": "Pièce du manoir",
     "canon": "draft",
@@ -64,13 +67,17 @@
     "shortDescription": "Pièce de vie chaleureuse, pensée pour les scènes simples, familiales ou imprévues.",
     "description": "La cuisine tranche avec l’image imposante du domaine. Elle fait partie des pièces de vie plus simples, plus chaleureuses, où le manoir cesse d’être un décor noble pour redevenir une maison habitée.",
     "lore": "C’est un bon point d’ancrage pour les scènes de respiration : repas tardifs, conversations à demi-mot, habitudes domestiques, tensions qui retombent ou qui remontent autour d’un détail banal.",
-    "history": "",
+    "history": "Image temporaire - Généré par IA ",
+    "image": {
+      "src": "/media/image-codex-3-sept.-2026-19-59-45-mtlu01zg.webp",
+      "focus": "48% 26%"
+    },
     "characters": [],
     "events": [],
-    "gallery": []
+    "gallery": [],
+    "id": "cuisine-manoir-setia"
   },
   {
-    "id": "serres-manoir-setia",
     "name": "Serres",
     "type": "Serres",
     "canon": "draft",
@@ -86,10 +93,15 @@
     "shortDescription": "Grande verrière ancienne, presque un petit monde végétal autonome.",
     "description": "Les serres forment une immense verrière rattachée au manoir. Elles gardent une présence à part : végétale, calme, lumineuse, comme un lieu où le domaine respire autrement.",
     "lore": "Elles peuvent accueillir autant des plantes rares que des rituels discrets, des refuges silencieux ou des souvenirs d’enfance. Atheleen y passait beaucoup de temps, ce qui en fait aussi un lieu sensible dans la mémoire des Nakamura.",
-    "history": "",
+    "history": "Image temporaire - Généré par IA ",
+    "image": {
+      "src": "/media/image-codex-3-sept.-2026-19-59-10-mtlu0vsm.webp",
+      "focus": "61% 37%"
+    },
     "characters": [],
     "events": [],
-    "gallery": []
+    "gallery": [],
+    "id": "serres-manoir-setia"
   },
   {
     "id": "veranda-manoir-setia",
@@ -114,7 +126,6 @@
     "gallery": []
   },
   {
-    "id": "chambres-manoir-setia",
     "name": "Chambres",
     "type": "Aile privée",
     "canon": "draft",
@@ -130,10 +141,12 @@
     "shortDescription": "Étage privé du manoir, réservé aux chambres et aux scènes plus intimes.",
     "description": "Les chambres appartiennent à la partie la plus privée du domaine. Pierre, bois, confort ancien et espaces protégés rappellent que le manoir n’est pas seulement un symbole de clan, mais aussi un foyer.",
     "lore": "Cette aile doit pouvoir accueillir les scènes plus personnelles : repos, enfance protégée, secrets gardés derrière les portes, ou contrastes entre la chaleur du quotidien et la violence du canon Nakamura.",
-    "history": "",
+    "history": "Image temporaire - Généré par IA ",
+    "image": "/media/image-codex-3-sept.-2026-19-59-30-mtlu0h9g.webp",
     "characters": [],
     "events": [],
-    "gallery": []
+    "gallery": [],
+    "id": "chambres-manoir-setia"
   },
   {
     "id": "joyeux-lutin",

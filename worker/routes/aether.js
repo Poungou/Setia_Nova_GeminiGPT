@@ -14,7 +14,7 @@
 import OpenAI from 'openai'
 import { buildAetherSystemPrompt } from '../../plugins/lib/aetherPrompt.js'
 import { getRequestUser, isAdmin } from '../lib/authStore.js'
-import { STATIC_COLLECTIONS, getAetherConfig, listCharactersWithFallback } from '../lib/contentStore.js'
+import { STATIC_COLLECTIONS, getAetherConfig, listCharactersWithFallback, listClansWithFallback } from '../lib/contentStore.js'
 
 const MAX_MESSAGE_LEN = 4000
 const MAX_HISTORY = 20
@@ -140,11 +140,14 @@ export async function handleAether(request, env, parts) {
     }
 
     const characters = await listCharactersWithFallback(env)
+    // Les clans crees par un compte joueur (D1) doivent aussi etre connus
+    // d'Aether, pas seulement le clan canon Nakamura -- voir contentStore.js.
+    const clans = await listClansWithFallback(env)
     const system = buildAetherSystemPrompt({
       config,
       characters,
       locations: STATIC_COLLECTIONS.locations,
-      clans: STATIC_COLLECTIONS.clans,
+      clans,
       context: context && typeof context.characterId === 'string' ? context : null,
     })
     const model = env.OPENAI_MODEL || DEFAULT_MODEL
