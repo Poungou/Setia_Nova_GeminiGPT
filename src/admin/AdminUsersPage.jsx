@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { KeyRound, Plus, RefreshCw, ShieldCheck } from 'lucide-react'
-import { createUser, listUsers, updateUser } from '../lib/authApi.js'
+import { createUser, getUserProfile, listUsers, updateUser, updateUserProfile } from '../lib/authApi.js'
 
 const PERMISSIONS = [
   ['create_character', 'Personnages'],
@@ -20,6 +20,8 @@ export default function AdminUsersPage() {
     name: '', email: '', password: '', passwordConfirmation: '', role: 'user', status: 'Membre', active: true,
     permissions: { create_character: false, create_clan: false, create_location: false },
   })
+  const [profileUser, setProfileUser] = useState(null)
+  const [profile, setProfile] = useState(null)
 
   const load = async () => {
     setLoading(true)
@@ -59,6 +61,9 @@ export default function AdminUsersPage() {
       setError(String(e.message || e))
     }
   }
+
+  const editProfile = async (user) => { setProfileUser(user); try { setProfile((await getUserProfile(user.id)).profile) } catch (e) { setError(String(e.message || e)) } }
+  const saveProfile = async () => { try { await updateUserProfile(profileUser.id, profile); setFlash('Profil RP mis à jour.'); setProfileUser(null) } catch (e) { setError(String(e.message || e)) } }
 
   const setFormValue = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const setPermission = (key, value) =>
@@ -206,6 +211,8 @@ export default function AdminUsersPage() {
               >
                 <KeyRound size={14} /> Réinitialiser le mot de passe
               </button>
+              <button type="button" className="adm-btn adm-btn--ghost" onClick={() => editProfile(user)}>Profil RP</button>
+              {profileUser?.id === user.id && profile && <div className="adm-user-profile-editor"><label>Avatar<input className="adm-input" value={profile.avatar} onChange={(e) => setProfile({ ...profile, avatar: e.target.value })} /></label><label>Source / crédit image<input className="adm-input" value={profile.image_source} onChange={(e) => setProfile({ ...profile, image_source: e.target.value })} /></label><label>Quelques mots<textarea className="adm-input" value={profile.player_intro} onChange={(e) => setProfile({ ...profile, player_intro: e.target.value })} /></label><label>Style d’écriture<textarea className="adm-input" value={profile.writing_style} onChange={(e) => setProfile({ ...profile, writing_style: e.target.value })} /></label><label>Univers<textarea className="adm-input" value={profile.univers} onChange={(e) => setProfile({ ...profile, univers: e.target.value })} /></label><label>TW<textarea className="adm-input" value={profile.tw} onChange={(e) => setProfile({ ...profile, tw: e.target.value })} /></label><label>Rythme<textarea className="adm-input" value={profile.rhythm} onChange={(e) => setProfile({ ...profile, rhythm: e.target.value })} /></label><label>Pseudo IG<input className="adm-input" value={profile.ig_username} onChange={(e) => setProfile({ ...profile, ig_username: e.target.value })} /></label><label className="adm-check"><input type="checkbox" checked={profile.profile_public} onChange={(e) => setProfile({ ...profile, profile_public: e.target.checked })} />Profil public</label><button type="button" className="adm-btn adm-btn--primary" onClick={saveProfile}>Enregistrer le profil</button></div>}
             </article>
           </li>
         ))}

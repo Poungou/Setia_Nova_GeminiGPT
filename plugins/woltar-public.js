@@ -15,6 +15,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { resolveClanMembers } from './lib/clanMembers.js'
+import { listPublicPlayerProfiles } from './lib/playerProfiles.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
@@ -62,6 +63,8 @@ export default function woltarPublic() {
             const profiles = await readCollection('creator')
             return send(200, { data: profiles[0] || null })
           }
+
+          if (parts[0] === 'players' && parts.length === 1) return send(200, { data: await listPublicPlayerProfiles(root) })
 
           if (parts[0] === 'clans' && parts.length === 1) {
             const clans = (await readCollection('clans')).filter(isPublishedClan)

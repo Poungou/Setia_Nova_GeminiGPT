@@ -115,3 +115,13 @@ export async function updateUser(id, patch) {
     }),
   )
 }
+
+export async function getUserProfile(id) {
+  return json(await fetch(`${BASE}/users/${encodeURIComponent(id)}/profile`, { credentials: 'same-origin' }))
+}
+
+export async function updateUserProfile(id, profile) {
+  return json(await fetch(`${BASE}/users/${encodeURIComponent(id)}/profile`, {
+    method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile),
+  }))
+}

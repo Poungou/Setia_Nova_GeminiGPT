@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { useCreatorProfile, usePublicCharacters } from '../../lib/publicData.js'
-import { imgFocus, imgSrc } from '../../lib/image.js'
+import { usePublicCharacters, usePublicPlayers } from '../../lib/publicData.js'
+import { imgSrc } from '../../lib/image.js'
+import { Link } from 'react-router-dom'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
@@ -40,42 +41,21 @@ function compareByName(a, b) {
   return nameA.localeCompare(nameB, 'fr')
 }
 
-// Découpe le texte "Qui suis-je ?" (creator.bio, une seule chaîne libre) en
-// un intro court, des rubriques (une par ligne entièrement en MAJUSCULES
-// suivie de son texte) et une note de fin. Pure présentation : le texte
-// source n'est jamais modifié, réordonné ni tronqué — seule sa mise en page
-// change. Générique : toute nouvelle rubrique tout-en-majuscules ajoutée
-// plus tard dans le texte devient automatiquement une carte, sans changement
-// de code.
-function parseCreatorBio(bio) {
-  const blocks = String(bio || '')
-    .split(/\n{2,}/)
-    .map((b) => b.trim())
-    .filter(Boolean)
+const PROFILE_SECTIONS = [['player_intro', 'Quelques mots'], ['writing_style', 'Style d’écriture'], ['univers', 'Univers'], ['tw', 'TW'], ['rhythm', 'Rythme']]
 
-  const sections = []
-  let intro = ''
-  let outro = ''
-
-  blocks.forEach((block) => {
-    const [firstLine, ...rest] = block.split('\n')
-    const heading = firstLine.trim()
-    const isHeading =
-      heading.length > 0 &&
-      heading.length <= 40 &&
-      heading === heading.toLocaleUpperCase('fr-FR') &&
-      /[A-ZÀ-ÖØ-Þ]/.test(heading)
-
-    if (isHeading) {
-      sections.push({ title: heading, body: rest.join('\n').trim() })
-    } else if (sections.length === 0) {
-      intro = intro ? `${intro}\n\n${block}` : block
-    } else {
-      outro = outro ? `${outro}\n\n${block}` : block
-    }
-  })
-
-  return { intro, sections, outro }
+function PlayerCard({ player }) {
+  const avatar = imgSrc(player.profile?.avatar)
+  return <details className="player-card">
+    <summary className="player-card__summary">
+      <span className="player-card__avatar">{avatar ? <img src={avatar} alt="" /> : player.name?.[0] || 'N'}</span>
+      <span><strong>{player.name}</strong>{player.status === 'RPiste' && <small>RPiste</small>}</span>
+      <span className="player-card__marker" aria-hidden="true" />
+    </summary>
+    <div className="player-card__content">
+      {PROFILE_SECTIONS.map(([key, label]) => player.profile?.[key] && <section key={key}><h3>{label}</h3><p>{player.profile[key]}</p></section>)}
+      <section><h3>Pseudo IG &amp; Personnages</h3>{player.profile?.ig_username && <p>Pseudo IG : {player.profile.ig_username}</p>}<ul>{(player.characters || []).map((character) => <li key={character.id}><Link to={`/personnages/${character.id}`}>{character.name}</Link></li>)}</ul></section>
+    </div>
+  </details>
 }
 
 function matchesQuery(character, query) {
@@ -103,7 +83,7 @@ function matchesQuery(character, query) {
 
 export default function Characters() {
   const characters = usePublicCharacters()
-  const creator = useCreatorProfile()
+  const players = usePublicPlayers()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [clan, setClan] = useState('all')
@@ -132,9 +112,6 @@ export default function Characters() {
     () => characters.filter((c) => c.is_featured === true).sort(compareByNumber),
     [characters],
   )
-  const creatorPhoto = imgSrc(creator.photo)
-  const creatorBio = useMemo(() => parseCreatorBio(creator.bio), [creator.bio])
-
   return (
     <PageTransition>
       <section className="container characters-page">
@@ -146,49 +123,9 @@ export default function Characters() {
           </p>
         </Reveal>
 
-        <Reveal as="section" className="creator-profile" aria-labelledby="creator-profile-title">
-          <div className="creator-profile__inner">
-            <div className="creator-header">
-              <figure className="creator-header__avatar">
-                {creatorPhoto ? (
-                  <img
-                    src={creatorPhoto}
-                    alt={creator.displayName}
-                    style={{ objectPosition: imgFocus(creator.photo) }}
-                  />
-                ) : (
-                  <span>{creator.displayName?.[0] || 'N'}</span>
-                )}
-              </figure>
-              <div className="creator-header__text">
-                <span className="eyebrow">Qui suis-je ?</span>
-                <h2 id="creator-profile-title">{creator.displayName}</h2>
-                {creatorBio.intro && <p className="creator-header__intro">{creatorBio.intro}</p>}
-              </div>
-            </div>
-
-            {creatorBio.sections.length > 0 && (
-              <div className="creator-rules">
-                {creatorBio.sections.map((rule, i) => (
-                  <Reveal key={rule.title} delay={Math.min(i * 0.05, 0.2)} y={12}>
-                    <details className="rule-card">
-                      <summary className="rule-card__summary">
-                        <span className="rule-card__title">{rule.title}</span>
-                        <span className="rule-card__marker" aria-hidden="true" />
-                      </summary>
-                      {rule.body && (
-                        <div className="rule-card__content">
-                          <p>{rule.body}</p>
-                        </div>
-                      )}
-                    </details>
-                  </Reveal>
-                ))}
-              </div>
-            )}
-
-            {creatorBio.outro && <p className="creator-footer-note">{creatorBio.outro}</p>}
-          </div>
+        <Reveal as="section" className="players-section" aria-labelledby="players-title">
+          <div className="characters-page__section-head"><span className="eyebrow">Communauté RP</span><h2 id="players-title">Les joueurs — qui sont-ils ?</h2></div>
+          <div className="players-grid">{players.map((player) => <PlayerCard key={player.userId} player={player} />)}</div>
         </Reveal>
 
         <Reveal as="section" className="characters-featured" aria-labelledby="characters-featured-title">

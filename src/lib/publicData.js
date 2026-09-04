@@ -135,6 +135,16 @@ export function useCreatorProfile() {
   return profile
 }
 
+export function usePublicPlayers() {
+  const [players, setPlayers] = useState([])
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/players`).then((data) => { if (alive && Array.isArray(data)) setPlayers(data) }).catch(() => {})
+    return () => { alive = false }
+  }, [])
+  return players
+}
+
 export function usePublicLocations() {
   const [locations, setLocations] = useState(staticLocations)
 

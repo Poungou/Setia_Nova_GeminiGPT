@@ -104,3 +104,13 @@ export async function changeEmail({ newEmail, currentPassword }) {
     }),
   )
 }
+
+export async function getPlayerProfile() {
+  return json(await fetch(`${BASE}/profile`, { credentials: 'same-origin' }))
+}
+
+export async function savePlayerProfile(profile) {
+  return json(await fetch(`${BASE}/profile`, {
+    method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile),
+  }))
+}

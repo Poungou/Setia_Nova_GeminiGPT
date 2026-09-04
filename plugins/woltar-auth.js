@@ -30,6 +30,7 @@ import {
   updateUser,
 } from './lib/authStore.js'
 import { checkRateLimit, clientIp } from './lib/rateLimit.js'
+import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
 
 const MAX_BODY_BYTES = 64 * 1024
 const DEFAULT_LOCAL_ADMIN_PASSPHRASE = 'woltar'
@@ -150,6 +151,11 @@ export default function woltarAuth() {
             if (req.method === 'PATCH' && parts[1]) {
               const user = await updateUser(root, parts[1], await readJson(req), actor)
               return send(200, { user })
+            }
+
+            if (parts[1] && parts[2] === 'profile') {
+              if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, parts[1]) })
+              if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, parts[1], await readJson(req)) })
             }
           }
 

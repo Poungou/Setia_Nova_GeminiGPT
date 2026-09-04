@@ -18,6 +18,7 @@ import {
   listPublicClans,
   listPublicLocations,
 } from '../lib/publicStore.js'
+import { listPublicPlayerProfiles } from '../lib/playerProfiles.js'
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -41,6 +42,10 @@ export async function handlePublic(request, env, parts) {
 
     if (parts[0] === 'creator-profile' && parts.length === 1) {
       return json({ data: await getPublicCreatorProfile(env) })
+    }
+
+    if (parts[0] === 'players' && parts.length === 1) {
+      return json({ data: await listPublicPlayerProfiles(env) })
     }
 
     if (parts[0] === 'clans' && parts.length === 1) {

@@ -57,6 +57,7 @@ import {
   updateRow,
 } from '../lib/contentStore.js'
 import { canCreate, CREATE_PERMISSIONS } from '../lib/permissions.js'
+import { getPlayerProfile, savePlayerProfile } from '../lib/playerProfiles.js'
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
 import staticClansJson from '../../src/data/clans.json' with { type: 'json' }
 import staticLocationsJson from '../../src/data/locations.json' with { type: 'json' }
@@ -283,6 +284,11 @@ export async function handleAccount(request, env, parts) {
 
     if (parts[0] === 'security') {
       return await handleSecurity(request, env, user, parts[1], method)
+    }
+
+    if (parts[0] === 'profile') {
+      if (method === 'GET') return json({ profile: await getPlayerProfile(env, user.id) })
+      if (method === 'PUT') return json({ profile: await savePlayerProfile(env, user.id, await readJson(request)) })
     }
 
     if (parts[0] === 'bootstrap' && method === 'GET') {

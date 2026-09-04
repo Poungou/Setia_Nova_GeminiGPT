@@ -18,8 +18,10 @@ import {
   deleteAccountRow,
   getAccountBootstrap,
   getClanMembers,
+  getPlayerProfile,
   removeClanMember,
   updateAccountRow,
+  savePlayerProfile,
 } from '../lib/accountApi.js'
 import { SCHEMA } from '../admin/schema.js'
 import { Field } from '../admin/Fields.jsx'
@@ -537,6 +539,17 @@ function SecuritySection({ user, onLogout }) {
   )
 }
 
+function PlayerProfileSection() {
+  const [profile, setProfile] = useState(null)
+  const [flash, setFlash] = useState('')
+  useEffect(() => { getPlayerProfile().then((body) => setProfile(body.profile)).catch((error) => setFlash(`error:${error.message || error}`)) }, [])
+  if (!profile) return <div className="adm-banner">Chargement du profil...</div>
+  const set = (key, value) => setProfile((current) => ({ ...current, [key]: value }))
+  const save = async (event) => { event.preventDefault(); setFlash(''); try { const body = await savePlayerProfile(profile); setProfile(body.profile); setFlash('ok:Profil RP enregistré.') } catch (error) { setFlash(`error:${error.message || error}`) } }
+  const fields = [['player_intro', 'Quelques mots'], ['writing_style', 'Style d’écriture'], ['univers', 'Univers'], ['tw', 'TW'], ['rhythm', 'Rythme']]
+  return <div className="adm-edit"><header className="adm-edit__head"><div className="adm-edit__title"><h1>Mon profil RP</h1><p className="adm-muted">Les personnages liés sont déduits automatiquement de tes fiches.</p></div></header><form className="adm-form" onSubmit={save}><fieldset className="adm-fieldset"><legend>Profil public</legend><div className="adm-field"><label htmlFor="profile-avatar">Photo de profil</label><input id="profile-avatar" className="adm-input" value={profile.avatar} onChange={(e) => set('avatar', e.target.value)} placeholder="URL ou chemin /media/..." /></div><div className="adm-field"><label htmlFor="profile-image-source">Source / crédit image</label><input id="profile-image-source" className="adm-input" value={profile.image_source} onChange={(e) => set('image_source', e.target.value)} /></div>{fields.map(([key, label]) => <div className="adm-field" key={key}><label htmlFor={`profile-${key}`}>{label}</label><textarea id={`profile-${key}`} className="adm-input" rows="4" value={profile[key]} onChange={(e) => set(key, e.target.value)} /></div>)}<div className="adm-field"><label htmlFor="profile-ig">Pseudo IG</label><input id="profile-ig" className="adm-input" value={profile.ig_username} onChange={(e) => set('ig_username', e.target.value)} /></div><label className="adm-check"><input type="checkbox" checked={profile.profile_public} onChange={(e) => set('profile_public', e.target.checked)} />Profil public</label>{flash.startsWith('ok:') && <div className="adm-banner adm-banner--ok">{flash.slice(3)}</div>}{flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}<button type="submit" className="adm-btn adm-btn--primary">Enregistrer</button></fieldset></form></div>
+}
+
 function Dashboard({ data, user }) {
   const characters = data?.characters || []
   const clans = data?.clans || []
@@ -927,6 +940,9 @@ function Workspace({ user, onLogout }) {
           <NavLink to="/compte/securite" className="adm-nav__link">
             <Lock size={16} /> Sécurité
           </NavLink>
+          <NavLink to="/compte/profil" className="adm-nav__link">
+            <UserRound size={16} /> Mon profil RP
+          </NavLink>
           {user.role === 'admin' && (
             <NavLink to="/admin" className="adm-nav__link">
               Admin
@@ -956,6 +972,7 @@ function Workspace({ user, onLogout }) {
           <Routes>
             <Route index element={<Dashboard data={data} user={user} />} />
             <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
+            <Route path="profil" element={<PlayerProfileSection />} />
             <Route path=":section" element={<AccountList data={data} user={user} />} />
             <Route path=":section/:id" element={<AccountEdit data={data} reload={load} user={user} />} />
           </Routes>

@@ -37,6 +37,7 @@ import {
   updateUser,
 } from '../lib/authStore.js'
 import { checkRateLimit, clientIp } from '../lib/rateLimit.js'
+import { getPlayerProfile, savePlayerProfile } from '../lib/playerProfiles.js'
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -132,6 +133,11 @@ export async function handleAuth(request, env, parts) {
       if (method === 'PATCH' && parts[1]) {
         const user = await updateUser(env, parts[1], await readJson(request), actor)
         return json({ user })
+      }
+
+      if (parts[1] && parts[2] === 'profile') {
+        if (method === 'GET') return json({ profile: await getPlayerProfile(env, parts[1]) })
+        if (method === 'PUT') return json({ profile: await savePlayerProfile(env, parts[1], await readJson(request)) })
       }
     }
 

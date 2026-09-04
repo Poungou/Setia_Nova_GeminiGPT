@@ -38,6 +38,7 @@ import {
 } from './lib/authStore.js'
 import { addClanMember, listClanMembers, removeClan, removeClanMember } from './lib/clanMembers.js'
 import { canCreate, CREATE_PERMISSIONS } from '../worker/lib/permissions.js'
+import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
 
 const MAX_BODY_BYTES = 1024 * 1024
 const REFERENCE_COLLECTIONS = ['events', 'archives', 'posts']
@@ -245,6 +246,11 @@ export default function woltarAccount() {
           if (parts[0] === 'security') {
             const result = await handleSecurity(req, res, root, user, parts[1], req.method)
             return send(result.code, result.body)
+          }
+
+          if (parts[0] === 'profile') {
+            if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, user.id) })
+            if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, user.id, await readJson(req)) })
           }
 
           if (parts[0] === 'bootstrap' && req.method === 'GET') {
