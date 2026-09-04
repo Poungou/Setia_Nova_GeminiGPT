@@ -72,6 +72,9 @@ assert(!JSON.stringify(createdBody).includes('passwordHash') && !JSON.stringify(
 
 const tallouna = await loginUser(env, { identifier: 'Tallouna', password: 'TallounaTemp123' })
 assert(tallouna.role === 'user' && tallouna.permissions.create_location === true, 'Tallouna peut se connecter avec le mot de passe temporaire')
+assert((await loginUser(env, { identifier: 'tallouna', password: 'TallounaTemp123' })).id === tallouna.id, 'la connexion pseudo est insensible à la casse')
+try { await loginUser(env, { identifier: 'Poungou', password: 'TallounaTemp123' }); assert(false, 'un pseudo inconnu est refuse') } catch (error) { assert(error.status === 401, 'un pseudo inconnu est refuse') }
+try { await loginUser(env, { identifier: 'Tallouna', password: 'MauvaisPass123' }); assert(false, 'un mauvais mot de passe est refuse') } catch (error) { assert(error.status === 401, 'un mauvais mot de passe est refuse') }
 const tallounaSession = createSessionToken(env, tallouna)
 const forbiddenAdmin = await handleAuth(authRequest('/__auth/api/users', 'GET', null, tallounaSession), env, ['users'])
 assert(forbiddenAdmin.status === 403, 'Tallouna ne peut pas accéder à la route admin')
@@ -90,6 +93,10 @@ const duplicate = await handleAuth(authRequest('/__auth/api/users', 'POST', {
   name: 'Autre', email: 'tallouna-added@test.local', password: 'ValidPass123', passwordConfirmation: 'ValidPass123',
 }, adminSession), env, ['users'])
 assert(duplicate.status === 409, 'un email déjà utilisé est refusé')
+const duplicateName = await handleAuth(authRequest('/__auth/api/users', 'POST', {
+  name: 'tALLOUNA', password: 'ValidPass123', passwordConfirmation: 'ValidPass123',
+}, adminSession), env, ['users'])
+assert(duplicateName.status === 409, 'un pseudo déjà utilisé est refusé sans tenir compte de la casse')
 
 const removedEmail = await handleAuth(authRequest(`/__auth/api/users/${tallouna.id}`, 'PATCH', { email: '' }, adminSession), env, ['users', tallouna.id])
 assert(removedEmail.status === 200 && (await removedEmail.clone().json()).user.email === null, 'admin peut supprimer complètement l’email')

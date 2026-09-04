@@ -63,6 +63,7 @@ function AuthGate({ onSession }) {
   const [mode, setMode] = useState('login')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -74,7 +75,7 @@ function AuthGate({ onSession }) {
       const body =
         mode === 'register'
           ? await registerAccount({ name, email, password })
-          : await loginAccount({ email, password })
+          : await loginAccount({ identifier, password })
       onSession(body.user)
     } catch (e) {
       setError(String(e.message || e))
@@ -113,13 +114,18 @@ function AuthGate({ onSession }) {
             onChange={(e) => setName(e.target.value)}
           />
         )}
+        <label htmlFor="account-identifier" className="adm-field__label">
+          {mode === 'register' ? 'Adresse email (facultatif)' : 'Pseudo'}
+        </label>
         <input
+          id="account-identifier"
           className="adm-input"
           type={mode === 'register' ? 'email' : 'text'}
-          autoComplete="email"
-          placeholder={mode === 'register' ? 'Email (facultatif)' : 'Email ou pseudo'}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          autoComplete={mode === 'register' ? 'email' : 'username'}
+          aria-label={mode === 'register' ? 'Adresse email facultative' : 'Pseudo'}
+          placeholder={mode === 'register' ? 'Email (facultatif)' : 'Poungou'}
+          value={mode === 'register' ? email : identifier}
+          onChange={(e) => (mode === 'register' ? setEmail(e.target.value) : setIdentifier(e.target.value))}
         />
         <input
           className="adm-input"
@@ -133,9 +139,10 @@ function AuthGate({ onSession }) {
           <p className="adm-hint">Les nouveaux comptes sont créés avec le rôle user. L’email est facultatif.</p>
         )}
         {mode === 'login' && (
-          <Link to="/compte/mot-de-passe-oublie" className="adm-hint">
-            Mot de passe oublié ?
-          </Link>
+          <>
+            <p className="adm-hint">Pseudo. Tu peux aussi utiliser ton adresse email si elle est associée à ton compte.</p>
+            <Link to="/compte/mot-de-passe-oublie" className="adm-hint">Mot de passe oublié ?</Link>
+          </>
         )}
         {error && <p className="adm-error">{error}</p>}
         <button className="adm-btn adm-btn--primary" type="submit" disabled={busy}>

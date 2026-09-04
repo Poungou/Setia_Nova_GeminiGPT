@@ -169,8 +169,14 @@ async function findUserByIdentifier(db, identifier) {
   if (!value) return null
   const byEmail = await findUserByEmail(db, normalizeEmail(value))
   if (byEmail) return byEmail
-  const row = await db.prepare('SELECT * FROM users WHERE lower(name) = lower(?)').bind(value).first()
-  return hydrateUser(db, row)
+  const { results } = await db.prepare('SELECT * FROM users WHERE lower(name) = lower(?)').bind(value).all()
+  if (results.length > 1) throw httpError(409, 'Ce pseudo est ambigu, contacte une administratrice.')
+  return hydrateUser(db, results[0])
+}
+
+async function assertAvailableName(db, name, id = null) {
+  const { results } = await db.prepare('SELECT id FROM users WHERE lower(name) = lower(?)').bind(name).all()
+  if (results.some((row) => row.id !== id)) throw httpError(409, 'Ce pseudo est déjà utilisé.')
 }
 
 async function findUserById(db, id) {
@@ -187,6 +193,7 @@ export async function registerUser(env, payload) {
   if (!name) throw httpError(400, 'Le pseudo est obligatoire.')
   if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
   assertPassword(password)
+  await assertAvailableName(db, name)
 
   if (await findUserByEmail(db, email)) {
     throw httpError(409, 'Un compte existe déjà avec cette adresse.')
@@ -266,6 +273,7 @@ export async function createUser(env, payload, actor) {
   if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
   assertPassword(password)
   if (password !== confirmation) throw httpError(400, 'La confirmation du mot de passe ne correspond pas.')
+  await assertAvailableName(db, name)
   if (await findUserByEmail(db, email)) throw httpError(409, 'Cette adresse e-mail est déjà utilisée.')
 
   const permissions = normalizePermissions(payload?.permissions)
@@ -303,7 +311,11 @@ export async function updateUser(env, id, patch, actor) {
   if (!existing) throw httpError(404, 'Utilisateur introuvable.')
 
   const next = { ...existing }
-  if (typeof patch?.name === 'string') next.name = patch.name.trim() || next.name
+  if (typeof patch?.name === 'string') {
+    const name = patch.name.trim() || next.name
+    await assertAvailableName(db, name, id)
+    next.name = name
+  }
   if (Object.prototype.hasOwnProperty.call(patch || {}, 'email')) {
     const email = optionalEmail(patch.email)
     if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')

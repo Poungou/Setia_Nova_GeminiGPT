@@ -163,6 +163,9 @@ export async function registerUser(root, payload) {
   assertPassword(password)
 
   const users = await loadUsers(root)
+  if (users.some((user) => String(user.name || '').toLowerCase() === name.toLowerCase())) {
+    throw httpError(409, 'Ce pseudo est deja utilise.')
+  }
   if (users.some((u) => normalizeEmail(u.email) === email)) {
     throw httpError(409, 'Un compte existe deja avec cette adresse.')
   }
@@ -190,8 +193,10 @@ export async function loginUser(root, payload) {
   const identifier = String(payload?.identifier ?? payload?.email ?? '').trim()
   const password = String(payload?.password || '')
   const users = await loadUsers(root)
-  const user = users.find((u) => normalizeEmail(u.email) === normalizeEmail(identifier)) ||
-    users.find((u) => String(u.name || '').toLowerCase() === identifier.toLowerCase())
+  const userByEmail = users.find((u) => u.email && normalizeEmail(u.email) === normalizeEmail(identifier))
+  const usersByName = users.filter((u) => String(u.name || '').toLowerCase() === identifier.toLowerCase())
+  if (!userByEmail && usersByName.length > 1) throw httpError(409, 'Ce pseudo est ambigu, contacte une administratrice.')
+  const user = userByEmail || usersByName[0]
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     throw httpError(401, 'Identifiants invalides.')
   }
@@ -235,6 +240,9 @@ export async function createUser(root, payload, actor) {
   if (users.some((user) => normalizeEmail(user.email) === email)) {
     throw httpError(409, 'Cette adresse e-mail est deja utilisee.')
   }
+  if (users.some((user) => String(user.name || '').toLowerCase() === name.toLowerCase())) {
+    throw httpError(409, 'Ce pseudo est deja utilise.')
+  }
   const now = new Date().toISOString()
   const user = {
     id: `user_${randomUUID()}`,
@@ -261,7 +269,13 @@ export async function updateUser(root, id, patch, actor) {
   if (index < 0) throw httpError(404, 'Utilisateur introuvable.')
 
   const next = { ...users[index] }
-  if (typeof patch?.name === 'string') next.name = patch.name.trim() || next.name
+  if (typeof patch?.name === 'string') {
+    const name = patch.name.trim() || next.name
+    if (users.some((user) => user.id !== id && String(user.name || '').toLowerCase() === name.toLowerCase())) {
+      throw httpError(409, 'Ce pseudo est deja utilise.')
+    }
+    next.name = name
+  }
   if (Object.prototype.hasOwnProperty.call(patch || {}, 'email')) {
     const email = optionalEmail(patch.email)
     if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
