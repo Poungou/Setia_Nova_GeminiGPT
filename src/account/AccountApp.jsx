@@ -114,19 +114,35 @@ function AuthGate({ onSession }) {
             onChange={(e) => setName(e.target.value)}
           />
         )}
-        <label htmlFor="account-identifier" className="adm-field__label">
-          {mode === 'register' ? 'Adresse email (facultatif)' : 'Pseudo'}
-        </label>
-        <input
-          id="account-identifier"
-          className="adm-input"
-          type={mode === 'register' ? 'email' : 'text'}
-          autoComplete={mode === 'register' ? 'email' : 'username'}
-          aria-label={mode === 'register' ? 'Adresse email facultative' : 'Pseudo'}
-          placeholder={mode === 'register' ? 'Email (facultatif)' : 'Poungou'}
-          value={mode === 'register' ? email : identifier}
-          onChange={(e) => (mode === 'register' ? setEmail(e.target.value) : setIdentifier(e.target.value))}
-        />
+        {mode === 'register' ? (
+          <>
+            <label htmlFor="account-email" className="adm-field__label">Adresse email (facultatif)</label>
+            <input
+              id="account-email"
+              className="adm-input"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="Email (facultatif)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            <label htmlFor="account-identifier" className="adm-field__label">Pseudo</label>
+            <input
+              id="account-identifier"
+              className="adm-input"
+              type="text"
+              name="identifier"
+              autoComplete="username"
+              placeholder="Poungou"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+            />
+          </>
+        )}
         <input
           className="adm-input"
           type="password"
