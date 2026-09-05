@@ -1,0 +1,20 @@
+.spoiler-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-m);
+  padding: var(--space-3);
+  background: var(--gradient-card);
+}
+
+.spoiler-gate__message {
+  margin: 0;
+  color: var(--ivory-dim);
+  max-width: 60ch;
+}
+
+.spoiler-gate__btn {
+  padding: 0.6rem 1.2rem;
+}

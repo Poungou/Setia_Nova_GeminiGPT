@@ -21,6 +21,7 @@ import { characters as staticPublicCharacters } from '../data/characters.js'
 import { clans as staticClans, getClanById as getStaticClanById } from '../data/clans.js'
 import { locations as staticLocations, getLocationById as getStaticLocationById } from '../data/locations.js'
 import { getPostById as getStaticPostById, posts as staticPosts } from '../data/posts.js'
+import { getTimelineById as getStaticTimelineById, timelines as staticTimelines } from '../data/timelines.js'
 
 const BASE = '/__public/api'
 
@@ -216,4 +217,51 @@ export function usePublicLocation(id) {
   }, [id])
 
   return location
+}
+
+// Liste des chronologies publiées (pour /chronologie) — inclut la
+// chronologie canon (clan Nakamura) et celles créées depuis un compte
+// joueur, une fois publiées. Voir src/lib/timelineEvents.js pour la
+// résolution des événements (repli sur events.json pour la chronologie
+// canon tant qu'elle n'a pas son propre tableau `events`).
+export function usePublicTimelines() {
+  const [timelines, setTimelines] = useState(staticTimelines)
+
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/timelines`)
+      .then((data) => {
+        if (alive && Array.isArray(data)) setTimelines(data)
+      })
+      .catch(() => {
+        // pas de backend joignable : on garde les données statiques.
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  return timelines
+}
+
+// Une chronologie précise (pas encore utilisée par une page dédiée, mais
+// suit le même contrat que usePublicClan pour rester cohérent).
+export function usePublicTimeline(id) {
+  const [timeline, setTimeline] = useState(() => getStaticTimelineById(id) || null)
+
+  useEffect(() => {
+    setTimeline(getStaticTimelineById(id) || null)
+    if (!id) return undefined
+    let alive = true
+    getJson(`${BASE}/timelines/${encodeURIComponent(id)}`)
+      .then((data) => {
+        if (alive && data) setTimeline(data)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [id])
+
+  return timeline
 }

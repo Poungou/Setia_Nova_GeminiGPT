@@ -14,6 +14,7 @@ import eventsJson from '../../src/data/events.json' with { type: 'json' }
 import archivesJson from '../../src/data/archives.json' with { type: 'json' }
 import postsJson from '../../src/data/posts.json' with { type: 'json' }
 import aetherJson from '../../src/data/aether.json' with { type: 'json' }
+import timelinesJson from '../../src/data/timelines.json' with { type: 'json' }
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
 
 const STATIC_COLLECTIONS = {
@@ -24,6 +25,7 @@ const STATIC_COLLECTIONS = {
   archives: archivesJson,
   posts: postsJson,
   aether: aetherJson,
+  timelines: timelinesJson,
 }
 
 const COLLECTIONS = new Set(['characters', ...Object.keys(STATIC_COLLECTIONS)])

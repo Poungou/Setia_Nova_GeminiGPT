@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarClock, ChevronDown, ChevronUp, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound, X } from 'lucide-react'
 import {
   accountBackendAvailable,
   confirmEmail,
@@ -35,6 +35,7 @@ const SECTIONS = {
   clans: { collection: 'clans', label: 'Mes clans', singular: 'clan' },
   lieux: { collection: 'locations', label: 'Mes lieux', singular: 'lieu' },
   articles: { collection: 'posts', label: 'Mes articles', singular: 'article' },
+  chronologies: { collection: 'timelines', label: 'Mes chronologies', singular: 'chronologie' },
 }
 
 const CREATE_PERMISSION_BY_COLLECTION = {
@@ -42,6 +43,7 @@ const CREATE_PERMISSION_BY_COLLECTION = {
   clans: 'create_clan',
   locations: 'create_location',
   posts: 'create_journal_article',
+  timelines: 'create_timeline',
 }
 
 function canCreate(user, collection) {
@@ -590,6 +592,7 @@ function Dashboard({ data, user }) {
   const clans = data?.clans || []
   const locations = data?.locations || []
   const posts = data?.posts || []
+  const timelines = data?.timelines || []
   return (
     <div className="adm-list">
       <header className="adm-list__head">
@@ -636,6 +639,12 @@ function Dashboard({ data, user }) {
           <Link to="/compte/articles" className="adm-card">
             <div className="adm-card__body"><strong>Mes articles</strong><span className="adm-muted">{posts.length} fiche(s)</span></div>
             <PenLine size={16} />
+          </Link>
+        </li>}
+        {(canCreate(user, 'timelines') || timelines.length > 0) && <li>
+          <Link to="/compte/chronologies" className="adm-card">
+            <div className="adm-card__body"><strong>Mes chronologies</strong><span className="adm-muted">{timelines.length} fiche(s)</span></div>
+            <CalendarClock size={16} />
           </Link>
         </li>}
       </ul>
@@ -820,6 +829,158 @@ function ClanMembersEditor({ clanId, data, user }) {
   )
 }
 
+// Éditeur des événements d'une chronologie de compte. Contrairement aux
+// membres d'un clan (ClanMembersEditor ci-dessus, table clan_members à
+// part), les événements d'une chronologie sont un simple tableau embarqué
+// dans sa propre fiche JSON (voir migrations/0012_timelines.sql et
+// src/lib/timelineEvents.js) : pas d'appel serveur ici, juste un état local
+// propagé par `onChange` vers le formulaire générique (form.events),
+// enregistré avec le reste de la fiche au clic sur « Enregistrer ». Le
+// réordonnancement se fait par boutons haut/bas plutôt que par glisser-
+// déposer, pour rester simple et accessible au clavier.
+function emptyTimelineEvent() {
+  return { id: '', title: '', dateRP: '', description: '', characters: [], locations: [], importance: '' }
+}
+
+function TimelineEventsEditor({ events, onChange, data, disabled }) {
+  const list = Array.isArray(events) ? events : []
+
+  const updateEvent = (index, patch) => {
+    onChange(list.map((event, i) => (i === index ? { ...event, ...patch } : event)))
+  }
+
+  const addEvent = () => {
+    onChange([...list, emptyTimelineEvent()])
+  }
+
+  const removeEvent = (index) => {
+    if (!window.confirm('Supprimer cet événement de la chronologie ?')) return
+    onChange(list.filter((_, i) => i !== index))
+  }
+
+  const moveEvent = (index, direction) => {
+    const target = index + direction
+    if (target < 0 || target >= list.length) return
+    const next = [...list]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    onChange(next)
+  }
+
+  return (
+    <fieldset className="adm-fieldset">
+      <legend>Événements de la chronologie</legend>
+      <p className="adm-hint">
+        L’ordre ci-dessous est celui affiché sur le site. La date/période RP est un texte libre — utile pour un
+        calendrier propre à l’univers (« an 12 », « avant le Sceau »...), sans format imposé.
+      </p>
+      <ul className="adm-cards">
+        {list.map((event, index) => (
+          <li key={index} className="adm-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.75rem' }}>
+            <div className="adm-edit__actions">
+              <button
+                type="button"
+                className="adm-btn adm-btn--ghost"
+                disabled={disabled || index === 0}
+                onClick={() => moveEvent(index, -1)}
+                aria-label="Monter l’événement"
+              >
+                <ChevronUp size={15} />
+              </button>
+              <button
+                type="button"
+                className="adm-btn adm-btn--ghost"
+                disabled={disabled || index === list.length - 1}
+                onClick={() => moveEvent(index, 1)}
+                aria-label="Descendre l’événement"
+              >
+                <ChevronDown size={15} />
+              </button>
+              <button
+                type="button"
+                className="adm-btn adm-btn--danger"
+                disabled={disabled}
+                onClick={() => removeEvent(index)}
+                aria-label="Supprimer l’événement"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <div className="adm-field">
+              <label htmlFor={`event-${index}-title`}>Titre</label>
+              <input
+                id={`event-${index}-title`}
+                className="adm-input"
+                value={event.title || ''}
+                disabled={disabled}
+                onChange={(e) => updateEvent(index, { title: e.target.value })}
+              />
+            </div>
+            <div className="adm-field">
+              <label htmlFor={`event-${index}-date`}>Date / période RP</label>
+              <input
+                id={`event-${index}-date`}
+                className="adm-input"
+                value={event.dateRP || ''}
+                disabled={disabled}
+                onChange={(e) => updateEvent(index, { dateRP: e.target.value })}
+              />
+            </div>
+            <div className="adm-field">
+              <label htmlFor={`event-${index}-importance`}>Importance</label>
+              <select
+                id={`event-${index}-importance`}
+                className="adm-input"
+                value={event.importance || ''}
+                disabled={disabled}
+                onChange={(e) => updateEvent(index, { importance: e.target.value })}
+              >
+                <option value="">—</option>
+                <option value="majeur">Majeur</option>
+                <option value="mineur">Mineur</option>
+              </select>
+            </div>
+            <div className="adm-field">
+              <label htmlFor={`event-${index}-description`}>Résumé</label>
+              <textarea
+                id={`event-${index}-description`}
+                className="adm-input"
+                rows="3"
+                value={event.description || ''}
+                disabled={disabled}
+                onChange={(e) => updateEvent(index, { description: e.target.value })}
+              />
+            </div>
+            <div className="adm-field">
+              <label htmlFor={`event-${index}-characters`}>Personnages liés</label>
+              <Field
+                field={{ key: `event-${index}-characters`, type: 'refs', ref: 'characters' }}
+                value={event.characters}
+                allData={data}
+                disabled={disabled}
+                onChange={(value) => updateEvent(index, { characters: value })}
+              />
+            </div>
+            <div className="adm-field">
+              <label htmlFor={`event-${index}-locations`}>Lieux liés</label>
+              <Field
+                field={{ key: `event-${index}-locations`, type: 'refs', ref: 'locations' }}
+                value={event.locations}
+                allData={data}
+                disabled={disabled}
+                onChange={(value) => updateEvent(index, { locations: value })}
+              />
+            </div>
+          </li>
+        ))}
+        {list.length === 0 && <li className="adm-muted">Aucun événement pour le moment.</li>}
+      </ul>
+      <button type="button" className="adm-btn adm-btn--primary" disabled={disabled} onClick={addEvent}>
+        <Plus size={15} /> Ajouter un événement
+      </button>
+    </fieldset>
+  )
+}
+
 function AccountEdit({ data, reload, user }) {
   const { section, id } = useParams()
   const navigate = useNavigate()
@@ -829,7 +990,11 @@ function AccountEdit({ data, reload, user }) {
   const rows = data?.[collection] || []
   const isNew = id === 'new'
   const existing = isNew ? null : rows.find((row) => row.id === decodeURIComponent(id || ''))
-  const [form, setForm] = useState(() => ({ ...(schema?.defaults || {}), ...(collection === 'posts' && isNew ? { visibility: 'draft', author: user.name || '' } : {}), ...(existing || {}) }))
+  const newRowDefaults = () => ({
+    ...(collection === 'posts' && isNew ? { visibility: 'draft', author: user.name || '' } : {}),
+    ...(collection === 'timelines' && isNew ? { visibility: 'draft' } : {}),
+  })
+  const [form, setForm] = useState(() => ({ ...(schema?.defaults || {}), ...newRowDefaults(), ...(existing || {}) }))
   const [saving, setSaving] = useState(false)
   const [flash, setFlash] = useState('')
   const skipReset = useRef(false)
@@ -839,8 +1004,9 @@ function AccountEdit({ data, reload, user }) {
       skipReset.current = false
       return
     }
-    setForm({ ...(schema?.defaults || {}), ...(collection === 'posts' && isNew ? { visibility: 'draft', author: user.name || '' } : {}), ...(existing || {}) })
+    setForm({ ...(schema?.defaults || {}), ...newRowDefaults(), ...(existing || {}) })
     setFlash('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schema, existing, collection, id, isNew, user.name])
 
   const fields = useMemo(() => {
@@ -969,6 +1135,14 @@ function AccountEdit({ data, reload, user }) {
       </form>
 
       {collection === 'clans' && !isNew && <ClanMembersEditor clanId={existing.id} data={data} user={user} />}
+      {collection === 'timelines' && (
+        <TimelineEventsEditor
+          events={form.events || []}
+          onChange={(events) => setField('events', events)}
+          data={data}
+          disabled={saving}
+        />
+      )}
     </div>
   )
 }
@@ -1020,6 +1194,11 @@ function Workspace({ user, onLogout }) {
           {(canCreate(user, 'posts') || data?.posts?.length > 0) && (
             <NavLink to="/compte/articles" className="adm-nav__link">
               <PenLine size={16} /> Mes articles
+            </NavLink>
+          )}
+          {(canCreate(user, 'timelines') || data?.timelines?.length > 0) && (
+            <NavLink to="/compte/chronologies" className="adm-nav__link">
+              <CalendarClock size={16} /> Mes chronologies
             </NavLink>
           )}
           <NavLink to="/compte/securite" className="adm-nav__link">

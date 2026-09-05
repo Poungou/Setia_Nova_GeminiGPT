@@ -18,10 +18,12 @@ import {
   getClanWithFallback,
   getLocationWithFallback,
   getPostWithFallback,
+  getTimelineWithFallback,
   listCharactersWithFallback,
   listClansWithFallback,
   listLocationsWithFallback,
   listPostsWithFallback,
+  listTimelinesWithFallback,
 } from './contentStore.js'
 
 function isPublished(character) {
@@ -106,4 +108,21 @@ export async function listPublicPosts(env) {
 export async function getPublicPost(env, id) {
   const post = await getPostWithFallback(env, id)
   return isPublishedPost(post) ? post : null
+}
+
+// Une chronologie de compte peut rester "draft" tant que sa proprietaire ne
+// l'a pas publiee — meme logique que les personnages/clans/lieux/articles.
+// La chronologie canon (Nakamura) n'a pas ce champ : elle reste donc
+// publique par defaut (visibility !== 'draft' est vrai pour undefined).
+function isPublishedTimeline(timeline) {
+  return Boolean(timeline) && timeline.visibility !== 'draft'
+}
+
+export async function listPublicTimelines(env) {
+  return (await listTimelinesWithFallback(env)).filter(isPublishedTimeline)
+}
+
+export async function getPublicTimeline(env, id) {
+  const timeline = await getTimelineWithFallback(env, id)
+  return isPublishedTimeline(timeline) ? timeline : null
 }

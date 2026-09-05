@@ -13,6 +13,7 @@ import archivesJson from '../data/archives.json'
 import postsJson from '../data/posts.json'
 import aetherJson from '../data/aether.json'
 import homeJson from '../data/home.json'
+import timelinesJson from '../data/timelines.json'
 
 const BUNDLED = {
   home: homeJson,
@@ -23,6 +24,7 @@ const BUNDLED = {
   archives: archivesJson,
   posts: postsJson,
   aether: aetherJson,
+  timelines: timelinesJson,
 }
 
 export function AdminProvider({ children, currentUser = null }) {

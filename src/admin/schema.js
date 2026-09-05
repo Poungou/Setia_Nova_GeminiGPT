@@ -255,8 +255,45 @@ export const SCHEMA = {
     ],
   },
 
+  // Une chronologie (timeline) est un CONTENEUR d'événements — voir
+  // src/lib/timelineEvents.js. Ici, l'admin ne gère que les métadonnées
+  // (titre, description, spoiler, personnages liés) d'une chronologie ;
+  // les événements eux-mêmes ne sont PAS un champ générique de ce
+  // formulaire : pour la chronologie canon Nakamura, ils continuent de
+  // vivre dans la collection « Chronologie » (events) ci-dessous, éditée
+  // comme avant. Les chronologies créées depuis /compte embarquent leur
+  // tableau `events` directement (voir TimelineEventsEditor côté compte) —
+  // ce champ n'apparaît donc pas non plus ici pour rester cohérent.
+  timelines: {
+    label: 'Chronologies',
+    singular: 'chronologie',
+    icon: 'History',
+    order: 3.5,
+    title: (r) => r.title || r.id,
+    subtitle: (r) => r.description || '',
+    makeId: (r) => slug(r.title),
+    defaults: {
+      title: '', description: '', spoiler: false, characters: [],
+      ownerUserId: 'system', visibility: 'published',
+    },
+    fields: [
+      { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
+      {
+        key: 'ownerUserId', label: 'Propriétaire', type: 'text', group: 'Publication',
+        hint: 'system = chronologie historique/admin protégée (ex. le clan Nakamura). Les comptes joueurs sont assignés côté serveur.',
+      },
+      { key: 'title', label: 'Titre', type: 'text', group: 'Identité' },
+      { key: 'description', label: 'Description courte', type: 'textarea', group: 'Identité' },
+      {
+        key: 'spoiler', label: 'Contient des spoilers', type: 'boolean', group: 'Identité',
+        hint: 'Affiche un avertissement avec bouton « Afficher quand même » avant les événements de cette chronologie.',
+      },
+      { key: 'characters', label: 'Personnages liés', type: 'refs', ref: 'characters', group: 'Liens' },
+    ],
+  },
+
   events: {
-    label: 'Chronologie',
+    label: 'Chronologie (événements Nakamura)',
     singular: 'événement',
     icon: 'CalendarClock',
     order: 4,

@@ -14,11 +14,13 @@ import {
   getPublicClan,
   getPublicLocation,
   getPublicPost,
+  getPublicTimeline,
   listPublicCharacterOwners,
   listPublicCharacters,
   listPublicClans,
   listPublicLocations,
   listPublicPosts,
+  listPublicTimelines,
 } from '../lib/publicStore.js'
 import { listPublicPlayerProfiles } from '../lib/playerProfiles.js'
 
@@ -62,6 +64,10 @@ export async function handlePublic(request, env, parts) {
       return json({ data: await listPublicPosts(env) })
     }
 
+    if (parts[0] === 'timelines' && parts.length === 1) {
+      return json({ data: await listPublicTimelines(env) })
+    }
+
     if (parts[0] === 'clans' && parts[1]) {
       const clan = await getPublicClan(env, decodeURIComponent(parts[1]))
       if (!clan) return json({ error: 'Clan introuvable.' }, { status: 404 })
@@ -84,6 +90,12 @@ export async function handlePublic(request, env, parts) {
       const post = await getPublicPost(env, decodeURIComponent(parts[1]))
       if (!post) return json({ error: 'Article introuvable.' }, { status: 404 })
       return json({ data: post })
+    }
+
+    if (parts[0] === 'timelines' && parts[1]) {
+      const timeline = await getPublicTimeline(env, decodeURIComponent(parts[1]))
+      if (!timeline) return json({ error: 'Chronologie introuvable.' }, { status: 404 })
+      return json({ data: timeline })
     }
 
     return json({ error: 'Route inconnue' }, { status: 404 })

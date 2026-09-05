@@ -39,10 +39,11 @@ import {
 import { addClanMember, listClanMembers, removeClan, removeClanMember } from './lib/clanMembers.js'
 import { canCreate, CREATE_PERMISSIONS } from '../worker/lib/permissions.js'
 import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
+import { normalizeTimelineEvents } from '../src/lib/timelineEvents.js'
 
 const MAX_BODY_BYTES = 1024 * 1024
 const REFERENCE_COLLECTIONS = ['events', 'archives']
-const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts'])
+const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts', 'timelines'])
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -143,8 +144,29 @@ function sanitizeOwnedClanRow(row, user, existing = null) {
   return clean
 }
 
+// Miroir de worker/routes/account.js#sanitizeOwnedTimelineRow — même
+// normalisation des champs propres à une chronologie (titre/description
+// courts, spoiler booléen, personnages liés dédupliqués, tableau `events`
+// via normalizeTimelineEvents), pour un comportement identique en dev.
+// `author` (ajouté par sanitizeOwnedRow, pensé pour les articles) n'a pas de
+// sens ici et est retiré.
+function sanitizeOwnedTimelineRow(row, user, existing = null) {
+  const clean = sanitizeOwnedRow(row, user, existing)
+  delete clean.author
+  clean.title = String(clean.title || '').trim().slice(0, 200)
+  clean.description = String(clean.description || '').trim().slice(0, 4000)
+  clean.spoiler = clean.spoiler === true
+  clean.characters = Array.isArray(clean.characters)
+    ? [...new Set(clean.characters.filter((id) => typeof id === 'string' && id.trim()))]
+    : []
+  clean.events = normalizeTimelineEvents(clean.events)
+  return clean
+}
+
 function sanitizeRow(name, row, user, existing = null) {
-  return name === 'clans' ? sanitizeOwnedClanRow(row, user, existing) : sanitizeOwnedRow(row, user, existing)
+  if (name === 'clans') return sanitizeOwnedClanRow(row, user, existing)
+  if (name === 'timelines') return sanitizeOwnedTimelineRow(row, user, existing)
+  return sanitizeOwnedRow(row, user, existing)
 }
 
 // Un personnage canon ne peut jamais rejoindre un clan de compte, et un
@@ -269,6 +291,7 @@ export default function woltarAccount() {
               clans: visibleRows(clans, user),
               locations: visibleRows(locations, user),
               posts: visibleRows(await readCollection(dataDir, 'posts'), user),
+              timelines: visibleRows(await readCollection(dataDir, 'timelines'), user),
             }
             for (const name of REFERENCE_COLLECTIONS) data[name] = await readCollection(dataDir, name)
             return send(200, { user, data })

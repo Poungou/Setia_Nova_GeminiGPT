@@ -16,6 +16,8 @@ import archivesJson from '../../src/data/archives.json' with { type: 'json' }
 import postsJson from '../../src/data/posts.json' with { type: 'json' }
 import aetherJson from '../../src/data/aether.json' with { type: 'json' }
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
+import timelinesJson from '../../src/data/timelines.json' with { type: 'json' }
+import { normalizeTimelineEvents, resolveTimelineEvents } from '../../src/lib/timelineEvents.js'
 
 // `clans` a ete retire de STATIC_COLLECTIONS : les clans peuvent desormais
 // etre crees/modifies par un compte joueur (D1), voir listClansWithFallback
@@ -462,3 +464,99 @@ export async function listPostsWithFallback(env) {
   for (const post of await listPosts(env)) if (!byId.has(post.id)) byId.set(post.id, post)
   return [...byId.values()]
 }
+
+// --- Chronologies (timelines) de comptes ------------------------------------
+//
+// Meme schema de stockage que locations/posts : id, owner_user_id, data JSON,
+// horodatage. La chronologie canon (Nakamura) n'a PAS de ligne ici tant
+// qu'aucun compte ne la revendique — voir timelinesJson (metadonnees) et
+// resolveTimelineEvents (src/lib/timelineEvents.js) pour ses evenements, qui
+// restent ceux de src/data/events.json, jamais dupliques ici.
+
+function timelineDataForStorage(row, id) {
+  const data = { ...row, id }
+  delete data.ownerUserId
+  return data
+}
+
+function timelineRowToRecord(row) {
+  if (!row) return null
+  return { ...JSON.parse(row.data), id: row.id, ownerUserId: row.owner_user_id }
+}
+
+export async function listTimelines(env) {
+  const { results } = await env.WOLTAR_DB.prepare('SELECT * FROM timelines ORDER BY created_at ASC').all()
+  return (results || []).map(timelineRowToRecord)
+}
+
+export async function getTimeline(env, id) {
+  if (!id) return null
+  const row = await env.WOLTAR_DB.prepare('SELECT * FROM timelines WHERE id = ?').bind(id).first()
+  return timelineRowToRecord(row)
+}
+
+export async function insertTimeline(env, row) {
+  const now = new Date().toISOString()
+  const data = JSON.stringify(timelineDataForStorage(row, row.id))
+  await env.WOLTAR_DB.prepare(
+    'INSERT INTO timelines (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+  )
+    .bind(row.id, row.ownerUserId || 'system', data, now, now)
+    .run()
+}
+
+export async function updateTimeline(env, id, row) {
+  const now = new Date().toISOString()
+  await env.WOLTAR_DB.prepare('UPDATE timelines SET owner_user_id = ?, data = ?, updated_at = ? WHERE id = ?')
+    .bind(row.ownerUserId || 'system', JSON.stringify(timelineDataForStorage(row, id)), now, id)
+    .run()
+}
+
+export async function deleteTimeline(env, id) {
+  await env.WOLTAR_DB.prepare('DELETE FROM timelines WHERE id = ?').bind(id).run()
+}
+
+async function safeListTimelines(env) {
+  try {
+    return await listTimelines(env)
+  } catch (err) {
+    console.error('[contentStore] liste D1 (chronologies) impossible, repli sur le canon', err)
+    return []
+  }
+}
+
+async function safeGetTimeline(env, id) {
+  try {
+    return await getTimeline(env, id)
+  } catch (err) {
+    console.error('[contentStore] lecture D1 (chronologie) impossible, repli sur le canon', err)
+    return null
+  }
+}
+
+export async function getTimelineWithFallback(env, id) {
+  if (!id) return null
+  const staticRow = timelinesJson.find((timeline) => timeline.id === id)
+  const d1Row = staticRow ? null : await safeGetTimeline(env, id)
+  const timeline = staticRow || d1Row
+  if (!timeline) return null
+  return { ...timeline, events: resolveTimelineEvents(timeline, eventsJson) }
+}
+
+export async function listTimelinesWithFallback(env) {
+  const staticIds = new Set(timelinesJson.map((timeline) => timeline.id))
+  const d1Rows = await safeListTimelines(env)
+  const byId = new Map()
+
+  for (const timeline of timelinesJson) byId.set(timeline.id, timeline)
+  for (const timeline of d1Rows) {
+    // Le canon reste prioritaire ; une chronologie D1 ne peut pas usurper un
+    // id canon (deja bloque cote ecriture, voir worker/routes/account.js).
+    if (staticIds.has(timeline.id)) continue
+    byId.set(timeline.id, timeline)
+  }
+
+  return [...byId.values()].map((timeline) => ({ ...timeline, events: resolveTimelineEvents(timeline, eventsJson) }))
+}
+
+export { normalizeTimelineEvents }

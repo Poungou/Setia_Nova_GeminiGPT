@@ -1,0 +1,11 @@
+[
+  {
+    "id": "nakamura",
+    "title": "Le clan Nakamura",
+    "description": "Histoire et événements majeurs de la famille Nakamura.",
+    "ownerUserId": "system",
+    "visibility": "published",
+    "spoiler": true,
+    "characters": []
+  }
+]

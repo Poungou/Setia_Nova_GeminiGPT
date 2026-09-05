@@ -3,6 +3,7 @@ export const CREATE_PERMISSIONS = {
   clans: 'create_clan',
   locations: 'create_location',
   posts: 'create_journal_article',
+  timelines: 'create_timeline',
 }
 
 export const PERMISSION_LABELS = {
@@ -10,6 +11,7 @@ export const PERMISSION_LABELS = {
   create_clan: 'Créer des clans',
   create_location: 'Créer des lieux',
   create_journal_article: 'Créer des articles de journal',
+  create_timeline: 'Créer des chronologies',
 }
 
 export function canCreate(user, permission) {

@@ -40,14 +40,18 @@ import {
   addClanMember,
   deleteClan,
   deleteRow,
+  deleteTimeline,
   getCharacter,
   getClan,
+  getTimeline,
   insertClan,
   insertRow,
+  insertTimeline,
   listCharacters,
   listClanMembers,
   listClans,
   listLocations,
+  listTimelines,
   getLocation,
   insertLocation,
   updateLocation,
@@ -60,15 +64,18 @@ import {
   removeClanMember,
   updateClan,
   updateRow,
+  updateTimeline,
 } from '../lib/contentStore.js'
 import { canCreate, CREATE_PERMISSIONS } from '../lib/permissions.js'
 import { getPlayerProfile, savePlayerProfile } from '../lib/playerProfiles.js'
+import { normalizeTimelineEvents } from '../../src/lib/timelineEvents.js'
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
 import staticClansJson from '../../src/data/clans.json' with { type: 'json' }
 import staticLocationsJson from '../../src/data/locations.json' with { type: 'json' }
+import staticTimelinesJson from '../../src/data/timelines.json' with { type: 'json' }
 
 const REFERENCE_COLLECTIONS = Object.keys(STATIC_COLLECTIONS).filter((name) => name !== 'locations')
-const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts'])
+const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts', 'timelines'])
 
 // Un compte ne peut jamais créer une fiche qui porte l'id d'une entrée
 // canon (src/data/characters.json, src/data/clans.json) — même si D1 ne
@@ -80,6 +87,7 @@ const CANON_CHARACTER_IDS = new Set(staticCharactersJson.map((c) => c.id))
 const CANON_CLAN_IDS = new Set(staticClansJson.map((c) => c.id))
 const CANON_LOCATION_IDS = new Set(staticLocationsJson.map((l) => l.id))
 const CANON_POST_IDS = new Set((await import('../../src/data/posts.json', { with: { type: 'json' } })).default.map((post) => post.id))
+const CANON_TIMELINE_IDS = new Set(staticTimelinesJson.map((timeline) => timeline.id))
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -174,6 +182,26 @@ function sanitizeOwnedClanRow(row, user, existing = null) {
   return clean
 }
 
+// Une chronologie de compte réutilise le sanitize générique (ownerUserId,
+// updatedAt...) puis normalise ses propres champs : titre/description
+// courts, spoiler booléen, personnages liés dédupliqués, et surtout le
+// tableau `events` (voir src/lib/timelineEvents.js#normalizeTimelineEvents —
+// même normalisation utilisée par le plugin de dev, pour un comportement
+// identique). `author` (ajouté par sanitizeOwnedRow, pensé pour les
+// articles) n'a pas de sens ici et est retiré.
+function sanitizeOwnedTimelineRow(row, user, existing = null) {
+  const clean = sanitizeOwnedRow(row, user, existing)
+  delete clean.author
+  clean.title = String(clean.title || '').trim().slice(0, 200)
+  clean.description = String(clean.description || '').trim().slice(0, 4000)
+  clean.spoiler = clean.spoiler === true
+  clean.characters = Array.isArray(clean.characters)
+    ? [...new Set(clean.characters.filter((id) => typeof id === 'string' && id.trim()))]
+    : []
+  clean.events = normalizeTimelineEvents(clean.events)
+  return clean
+}
+
 const COLLECTION_OPS = {
   characters: {
     list: (env) => listCharacters(env),
@@ -214,6 +242,16 @@ const COLLECTION_OPS = {
     sanitize: sanitizeOwnedRow,
     canonIds: CANON_POST_IDS,
     canonMessage: 'Cet identifiant est réservé à un article canon — choisis-en un autre.',
+  },
+  timelines: {
+    list: (env) => listTimelines(env),
+    get: (env, id) => getTimeline(env, id),
+    insert: (env, row) => insertTimeline(env, row),
+    update: (env, id, row) => updateTimeline(env, id, row),
+    remove: (env, id) => deleteTimeline(env, id),
+    sanitize: sanitizeOwnedTimelineRow,
+    canonIds: CANON_TIMELINE_IDS,
+    canonMessage: 'Cet identifiant est réservé à une chronologie canon — choisis-en un autre.',
   },
 }
 
@@ -322,6 +360,7 @@ export async function handleAccount(request, env, parts) {
         clans: visibleRows(clans, user),
         locations: visibleRows(await listLocations(env), user),
         posts: visibleRows(await listPosts(env), user),
+        timelines: visibleRows(await listTimelines(env), user),
       }
       for (const name of REFERENCE_COLLECTIONS) data[name] = STATIC_COLLECTIONS[name] || []
       return json({ user, data })

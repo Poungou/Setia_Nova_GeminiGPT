@@ -17,6 +17,7 @@ import path from 'node:path'
 import { resolveClanMembers } from './lib/clanMembers.js'
 import { listPublicPlayerProfiles } from './lib/playerProfiles.js'
 import { loadUsers } from './lib/authStore.js'
+import { resolveTimelineEvents } from '../src/lib/timelineEvents.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
@@ -27,6 +28,14 @@ function isPublished(character) {
 // clan canon (Nakamura) n'a pas ce champ : il reste donc public par défaut.
 function isPublishedClan(clan) {
   return Boolean(clan) && clan.visibility !== 'draft'
+}
+
+// Une chronologie de compte peut rester "draft" tant que sa propriétaire ne
+// l'a pas publiée — même logique que les autres collections de compte. La
+// chronologie canon (Nakamura) n'a pas ce champ : elle reste donc publique
+// par défaut (voir src/lib/timelineEvents.js pour le repli sur events.json).
+function isPublishedTimeline(timeline) {
+  return Boolean(timeline) && timeline.visibility !== 'draft'
 }
 
 export default function woltarPublic() {
@@ -93,6 +102,14 @@ export default function woltarPublic() {
             return send(200, { data: posts })
           }
 
+          if (parts[0] === 'timelines' && parts.length === 1) {
+            const events = await readCollection('events')
+            const timelines = (await readCollection('timelines'))
+              .filter(isPublishedTimeline)
+              .map((timeline) => ({ ...timeline, events: resolveTimelineEvents(timeline, events) }))
+            return send(200, { data: timelines })
+          }
+
           if (parts[0] === 'clans' && parts[1]) {
             const clans = await readCollection('clans')
             const clan = clans.find((c) => c.id === decodeURIComponent(parts[1]))
@@ -120,6 +137,14 @@ export default function woltarPublic() {
             const post = posts.find((item) => item.id === decodeURIComponent(parts[1]))
             if (!post || post.visibility === 'draft') return send(404, { error: 'Article introuvable.' })
             return send(200, { data: post })
+          }
+
+          if (parts[0] === 'timelines' && parts[1]) {
+            const timelines = await readCollection('timelines')
+            const timeline = timelines.find((item) => item.id === decodeURIComponent(parts[1]))
+            if (!isPublishedTimeline(timeline)) return send(404, { error: 'Chronologie introuvable.' })
+            const events = await readCollection('events')
+            return send(200, { data: { ...timeline, events: resolveTimelineEvents(timeline, events) } })
           }
 
           return send(404, { error: 'Route inconnue' })

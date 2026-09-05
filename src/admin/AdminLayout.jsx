@@ -1,11 +1,11 @@
 // src/admin/AdminLayout.jsx
 import { NavLink, Outlet, Link } from 'react-router-dom'
-import { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, Circle, UserCog, House } from 'lucide-react'
+import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House } from 'lucide-react'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 
-const ICONS = { Users, MapPin, Shield, CalendarClock, ScrollText, PenLine, MessageCircle, House }
+const ICONS = { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, House }
 
 export default function AdminLayout({ onLock, currentUser }) {
   const { readOnly, error, reload } = useAdmin()
