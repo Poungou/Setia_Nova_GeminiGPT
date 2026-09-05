@@ -11,7 +11,7 @@ const fragment = (layout) => JSDOM.fragment(layout.sections.map((section) => sec
 
 test('short articles stay single-column and long prose enables columns', () => {
   assert.equal(composeGazette({ body: '<p>Une note brève.</p>' }).sections[0].columns, false)
-  const layout = composeGazette({ body: [1, 2, 3, 4].map(paragraph).join('') })
+  const layout = composeGazette({ body: [1, 2, 3, 4, 5, 6, 7, 8].map(paragraph).join('') })
   assert.equal(layout.long, true)
   assert.equal(layout.sections[0].columns, true)
   assert.equal(fragment(layout).querySelectorAll('.gazette-dropcap').length, 1)
@@ -37,11 +37,18 @@ test('existing cover images are not duplicated and unsafe body markup is removed
 })
 
 test('an interior illustration spans sections without dropping or reordering text', () => {
-  const body = paragraph('A') + paragraph('B') + '<figure><img src="/inside.webp"><figcaption>Au port</figcaption></figure>' + paragraph('C') + paragraph('D')
+  const body = paragraph('A').repeat(2) + paragraph('B').repeat(2) + '<figure><img src="/inside.webp"><figcaption>Au port</figcaption></figure>' + paragraph('C').repeat(2) + paragraph('D').repeat(2)
   const layout = composeGazette({ body })
   assert.deepEqual(layout.sections.map((section) => section.kind), ['flow', 'illustration', 'flow'])
-  assert.deepEqual([...fragment(layout).querySelectorAll('p')].map((p) => p.textContent.trim()[0]), ['A', 'B', 'C', 'D'])
+  assert.deepEqual([...fragment(layout).querySelectorAll('p')].map((p) => p.textContent.trim()[0]), ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'])
   assert.equal(fragment(layout).querySelector('figcaption').textContent, 'Au port')
+  assert.ok(layout.sections.filter((section) => section.kind === 'flow').every((section) => !section.columns))
+})
+
+test('medium articles retain a comfortable single column', () => {
+  const layout = composeGazette({ body: [1, 2, 3, 4, 5, 6].map(paragraph).join('') })
+  assert.equal(layout.long, false)
+  assert.equal(layout.sections[0].columns, false)
 })
 
 test('editorial notes are identified from existing content only', () => {

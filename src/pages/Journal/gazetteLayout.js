@@ -11,7 +11,7 @@ export function composeGazette(post) {
   const root = template.content
   const paragraphs = [...root.querySelectorAll('p')].filter((p) => p.textContent.trim() && !p.closest('blockquote, aside, figure, li'))
   const words = paragraphs.reduce((total, p) => total + textWords(p), 0)
-  const long = words >= 360 && paragraphs.length >= 4
+  const long = words >= 700 && paragraphs.length >= 4
   paragraphs[0]?.classList.add('gazette-dropcap')
 
   root.querySelectorAll('blockquote, aside, .rp-note').forEach((element) => {
@@ -58,7 +58,7 @@ export function composeGazette(post) {
   const flush = () => {
     if (!run.length) return
     const runWords = run.reduce((sum, element) => sum + proseWords(element), 0)
-    sections.push({ kind: 'flow', columns: long && runWords >= 180, html: run.map((element) => element.outerHTML).join('') })
+    sections.push({ kind: 'flow', columns: long && runWords >= 500, html: run.map((element) => element.outerHTML).join('') })
     run = []
   }
   // Preserve bare text nodes from legacy HTML, too.

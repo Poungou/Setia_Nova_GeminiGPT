@@ -9,7 +9,7 @@
 .gazette-chapo { font-family: var(--font-reading); font-size: 1.12rem; line-height: 1.65; max-width: 65ch; margin: 0 auto; }
 .gazette-byline { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.2rem; font-size: .75rem; color: var(--ivory-faint); margin: .9rem 0 0; }
 .gazette-body { border-top: 1px solid var(--line); padding-top: 1.4rem; }
-.gazette-flow { display: flow-root; max-width: 72ch; margin: 0 auto; font-family: var(--font-reading); font-size: 1.04rem; line-height: 1.85; overflow-wrap: anywhere; }
+.gazette-flow { display: flow-root; width: 100%; max-width: 80ch; min-width: 0; column-count: 1; margin: 0 auto; font-family: var(--font-reading); font-size: 1.04rem; line-height: 1.85; overflow-wrap: break-word; word-break: normal; }
 .gazette-flow p { margin: 0 0 1em; orphans: 3; widows: 3; }
 .gazette-flow h2, .gazette-flow h3 { font-family: var(--font-display); break-after: avoid; margin: 1.2em 0 .45em; line-height: 1.2; }
 .gazette-flow h2 { font-size: 1.75rem; }
@@ -18,18 +18,19 @@
 .gazette-flow figure, .gazette-flow blockquote, .gazette-flow aside { break-inside: avoid; }
 .gazette-flow figure { margin: 1rem 0; }
 .gazette-flow img, .gazette-spread img { display: block; width: auto; max-width: 100%; height: auto; max-height: 360px; object-fit: contain; margin: 0 auto; border-radius: 2px; }
-.gazette-flow .gazette-illustration--main { float: right; width: 42%; margin: .2rem 0 1rem 1.5rem; }
+.gazette-flow .gazette-illustration--main { float: none; width: auto; max-width: 620px; margin: 1.4rem auto; }
 .gazette-flow .gazette-illustration--main img { max-height: 260px; }
 .gazette-article figcaption { font-family: var(--font-reading); font-size: .78rem; line-height: 1.5; font-style: italic; color: var(--ivory-faint); text-align: center; margin-top: .5rem; }
 .gazette-image-credit { display: block; font-size: .7rem; font-style: normal; }
 .gazette-flow .gazette-quotation, .gazette-flow .gazette-note { padding: .75rem 0 .75rem 1rem; margin: 1rem 0; border: 0; border-left: 2px solid var(--line-strong); background: none; border-radius: 0; box-shadow: none; }
 .gazette-flow .gazette-quotation { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.4; font-style: italic; }
-.gazette-flow .gazette-quotation--aside { float: right; width: 40%; margin-left: 1.5rem; }
+.gazette-flow .gazette-quotation--aside { float: none; width: auto; margin: 1.2rem 0; }
 .gazette-flow .gazette-note { font-size: .9rem; line-height: 1.7; }
 .gazette-flow blockquote p:last-child, .gazette-flow aside p:last-child { margin-bottom: 0; }
 .gazette-flow hr { width: 30%; border: 0; border-top: 1px solid var(--line-strong); margin: 1.6rem auto; }
-.gazette-flow .align-left, .gazette-flow [data-align="left"] { float: left; width: 44%; margin: .5rem 1.2rem 1rem 0; }
-.gazette-flow .align-right, .gazette-flow [data-align="right"] { float: right; width: 44%; margin: .5rem 0 1rem 1.2rem; }
+.gazette-flow .align-left, .gazette-flow .align-right, .gazette-flow [data-align="left"], .gazette-flow [data-align="right"] { float: none; width: auto; max-width: 100%; margin: 1.2rem 0; }
+.gazette-flow table { display: block; max-width: 100%; overflow-x: auto; }
+.gazette-flow pre { max-width: 100%; white-space: pre-wrap; }
 .gazette-spread { margin: 1.4rem auto; padding-block: 1rem; border-block: 1px solid var(--line); }
 .gazette-spread figure { margin: 0; }
 .gazette-spread img { max-height: 400px; }
@@ -46,7 +47,6 @@
 .gazette-references p { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .8rem; margin: .4rem 0; }
 .gazette-references p > span { color: var(--ivory-faint); }
 .gazette-empty { text-align: center; font-style: italic; }
-.gazette-article--fan-art .gazette-illustration--main { width: 48%; }
 .gazette-article--fan-art .gazette-illustration--main img { max-height: 360px; }
 .gazette-article--chapitre .gazette-headline { text-align: left; }
 .gazette-article--chapitre .gazette-chapo { margin-left: 0; }
@@ -54,8 +54,8 @@
 .gazette-article--note:not(.gazette-article--long) { max-width: 820px; }
 .gazette-article--note .gazette-headline h1 { font-size: clamp(2rem, 4vw, 3.2rem); }
 .gazette-article--news .gazette-chapo { font-style: italic; }
-@media (min-width: 900px) {
-  .gazette-flow--columns { max-width: none; column-count: 2; column-gap: 2.6rem; column-rule: 1px solid var(--line); column-fill: balance; }
+@media (min-width: 1440px) {
+  .gazette-flow--columns { max-width: none; column-count: 2; column-width: 400px; column-gap: 2.6rem; column-rule: 1px solid var(--line); column-fill: balance; }
   .gazette-flow--columns .gazette-illustration--main, .gazette-flow--columns .gazette-quotation--aside { float: none; width: auto; margin: 1rem 0; }
 }
 @media (max-width: 599px) {
