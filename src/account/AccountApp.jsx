@@ -643,13 +643,30 @@ function Dashboard({ data, user }) {
   )
 }
 
-function AccountList({ data, user }) {
+function AccountList({ data, user, reload }) {
   const { section } = useParams()
+  const [deleting, setDeleting] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
   const config = SECTIONS[section]
   const rows = data?.[config?.collection] || []
   const schema = config ? SCHEMA[config.collection] : null
 
   if (!config || !schema) return <Navigate to="/compte" replace />
+
+  const deleteArticle = async (row) => {
+    if (deleting || section !== 'articles' || user?.role !== 'admin') return
+    if (!window.confirm(`Supprimer définitivement l’article « ${schema.title(row)} » ? Cette action est irréversible.`)) return
+    setDeleting(row.id)
+    setDeleteError('')
+    try {
+      await deleteAccountRow('posts', row.id)
+      await reload()
+    } catch (error) {
+      setDeleteError(String(error.message || error))
+    } finally {
+      setDeleting(null)
+    }
+  }
 
   return (
     <div className="adm-list">
@@ -664,6 +681,7 @@ function AccountList({ data, user }) {
           </Link>
         )}
       </header>
+      {deleteError && <div className="adm-banner adm-banner--error" role="alert">{deleteError}</div>}
       <ul className="adm-cards">
         {rows.map((row) => (
           <li key={row.id}>
@@ -677,6 +695,12 @@ function AccountList({ data, user }) {
               </div>
               <code className="adm-card__id">{row.id}</code>
             </Link>
+            {section === 'articles' && user?.role === 'admin' && (
+              <button type="button" className="adm-btn adm-btn--danger" disabled={deleting !== null}
+                onClick={() => deleteArticle(row)} aria-label={`Supprimer l’article ${schema.title(row)}`}>
+                <Trash2 size={15} /> {deleting === row.id ? 'Suppression…' : 'Supprimer l’article'}
+              </button>
+            )}
           </li>
         ))}
         {rows.length === 0 && <li className="adm-muted">Aucun contenu pour le moment.</li>}
@@ -1034,7 +1058,7 @@ function Workspace({ user, onLogout }) {
             <Route index element={<Dashboard data={data} user={user} />} />
             <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
             {canManagePlayerProfile(user) && <Route path="profil" element={<PlayerProfileSection />} />}
-            <Route path=":section" element={<AccountList data={data} user={user} />} />
+            <Route path=":section" element={<AccountList data={data} user={user} reload={load} />} />
             <Route path=":section/:id" element={<AccountEdit data={data} reload={load} user={user} />} />
           </Routes>
         )}
