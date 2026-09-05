@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { characters } from '../../data/characters.js'
 import { locations } from '../../data/locations.js'
 import { getSiteStats } from '../../utils/stats.js'
 import aetherData from '../../data/aether.json'
 import { imgSrc, imgFocus } from '../../lib/image.js'
-import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
+import { usePublicCharacterOwners, usePublicCharacters } from '../../lib/publicData.js'
+import CharacterCarousel from '../../components/CharacterCarousel/CharacterCarousel.jsx'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
@@ -45,7 +45,8 @@ const heroItem = {
 
 export default function Home() {
   const stats = getSiteStats()
-  const featuredCharacters = characters.slice(0, 4)
+  const characters = usePublicCharacters()
+  const characterOwners = usePublicCharacterOwners()
   const featuredLocations = locations.filter((l) => l.canon === 'confirmed')
   const reduce = useReducedMotion()
 
@@ -133,11 +134,7 @@ export default function Home() {
             <span className="eyebrow">Galerie</span>
             <h2 className="section-title">Visages de Woltar</h2>
           </Reveal>
-          <div className="home-grid">
-            {featuredCharacters.map((c, i) => (
-              <CharacterCard key={c.id} character={c} index={i} />
-            ))}
-          </div>
+          <CharacterCarousel characters={characters} owners={characterOwners} />
           <Link to="/personnages" className="btn home-section__more">
             Voir tous les personnages →
           </Link>

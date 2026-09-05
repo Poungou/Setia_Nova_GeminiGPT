@@ -16,7 +16,7 @@ function getInitials(character) {
   return (f + l).toUpperCase()
 }
 
-export default function CharacterCard({ character, index = 0 }) {
+export default function CharacterCard({ character, index = 0, compact = false, hashtag = null }) {
   const reduce = useReducedMotion()
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
   const frameColor = resolveFrameColor(character)
@@ -34,7 +34,11 @@ export default function CharacterCard({ character, index = 0 }) {
       }
 
   return (
-    <MotionLink to={`/personnages/${character.id}`} className="character-card" {...motionProps}>
+    <MotionLink
+      to={`/personnages/${character.id}`}
+      className={`character-card${compact ? ' character-card--compact' : ''}`}
+      {...motionProps}
+    >
       <div className="character-card__portrait">
         <span className="character-card__number">{character.number}</span>
         <PixelHeart color={character.color} size={17} className="character-card__heart" title={`Couleur de ${character.firstName || 'ce personnage'}`} />
@@ -60,16 +64,26 @@ export default function CharacterCard({ character, index = 0 }) {
           <PixelFrame frameColor={frameColor} className="character-card__frame" />
         </span>
       </div>
-      {imgSrc(character.portrait) && imageSource && <p className="character-card__source">Source : {imageSource}</p>}
+      {!compact && imgSrc(character.portrait) && imageSource && (
+        <p className="character-card__source">Source : {imageSource}</p>
+      )}
 
       <div className="character-card__body">
-        {character.clan && <span className="character-card__clan eyebrow">Clan {character.clan}</span>}
+        <div className="character-card__meta-row">
+          {hashtag && <span className="character-card__hashtag eyebrow">{hashtag}</span>}
+          {character.clan && <span className="character-card__clan eyebrow">Clan {character.clan}</span>}
+          {character.isPnj === true && <span className="character-card__pnj eyebrow">PNJ</span>}
+        </div>
         <h3 className="character-card__name">{fullName}</h3>
-        <p className="character-card__title">{character.title}</p>
-        {character.shortDescription && <p className="character-card__summary">{character.shortDescription}</p>}
-        <span className="character-card__cta">
-          Voir la fiche <PixelPaopu size={18} />
-        </span>
+        {!compact && (
+          <>
+            <p className="character-card__title">{character.title}</p>
+            {character.shortDescription && <p className="character-card__summary">{character.shortDescription}</p>}
+            <span className="character-card__cta">
+              Voir la fiche <PixelPaopu size={18} />
+            </span>
+          </>
+        )}
       </div>
     </MotionLink>
   )

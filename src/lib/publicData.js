@@ -128,6 +128,21 @@ export function usePublicClan(id) {
   return clan
 }
 
+// Pseudo des propriétaires de personnages publiés — voir
+// worker/lib/publicStore.js#listPublicCharacterOwners. Volontairement
+// distinct de usePublicPlayers (qui ne liste que les comptes ayant publié un
+// profil RP) : le carrousel d'accueil doit pouvoir afficher `#Pseudo` pour
+// N'IMPORTE QUEL personnage possédant un propriétaire, profil publié ou non.
+export function usePublicCharacterOwners() {
+  const [owners, setOwners] = useState([])
+  useEffect(() => {
+    let alive = true
+    getJson(`${BASE}/character-owners`).then((data) => { if (alive && Array.isArray(data)) setOwners(data) }).catch(() => {})
+    return () => { alive = false }
+  }, [])
+  return owners
+}
+
 export function usePublicPlayers() {
   const [players, setPlayers] = useState([])
   useEffect(() => {

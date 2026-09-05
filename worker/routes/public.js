@@ -14,6 +14,7 @@ import {
   getPublicClan,
   getPublicLocation,
   getPublicPost,
+  listPublicCharacterOwners,
   listPublicCharacters,
   listPublicClans,
   listPublicLocations,
@@ -39,6 +40,10 @@ export async function handlePublic(request, env, parts) {
 
     if (parts[0] === 'characters' && parts.length === 1) {
       return json({ data: await listPublicCharacters(env) })
+    }
+
+    if (parts[0] === 'character-owners' && parts.length === 1) {
+      return json({ data: await listPublicCharacterOwners(env) })
     }
 
     if (parts[0] === 'players' && parts.length === 1) {

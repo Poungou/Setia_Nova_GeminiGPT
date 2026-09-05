@@ -16,6 +16,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { resolveClanMembers } from './lib/clanMembers.js'
 import { listPublicPlayerProfiles } from './lib/playerProfiles.js'
+import { loadUsers } from './lib/authStore.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
@@ -60,6 +61,19 @@ export default function woltarPublic() {
           }
 
           if (parts[0] === 'players' && parts.length === 1) return send(200, { data: await listPublicPlayerProfiles(root) })
+
+          // Miroir dev de worker/lib/publicStore.js#listPublicCharacterOwners
+          // — pseudo des propriétaires de personnages publiés, indépendant
+          // d'un profil RP public (voir ce fichier pour le contexte complet).
+          if (parts[0] === 'character-owners' && parts.length === 1) {
+            const characters = (await readCollection('characters')).filter(isPublished)
+            const ownerIds = new Set(characters.map((c) => c.ownerUserId).filter((id) => id && id !== 'system'))
+            const users = await loadUsers(root)
+            const owners = users
+              .filter((u) => !u.disabled && ownerIds.has(u.id))
+              .map((u) => ({ userId: u.id, name: u.name }))
+            return send(200, { data: owners })
+          }
 
           if (parts[0] === 'clans' && parts.length === 1) {
             const clans = (await readCollection('clans')).filter(isPublishedClan)

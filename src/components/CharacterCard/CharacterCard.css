@@ -122,7 +122,25 @@
   line-height: 1.35;
 }
 
+.character-card__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.character-card__hashtag {
+  color: var(--wine-bright);
+}
+
 .character-card__clan {
+  color: var(--ivory-faint);
+}
+
+.character-card__pnj {
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
   color: var(--ivory-faint);
 }
 
@@ -159,4 +177,17 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--wine-bright);
+}
+
+/* Variante compacte : utilisée par le carrousel d'accueil (voir
+   CharacterCarousel) — même portrait/cadre que la carte standard, mais sans
+   titre RP, résumé ni bouton, pour garder une hauteur réduite dans une
+   bande horizontale. */
+.character-card--compact .character-card__body {
+  padding: var(--space-2) 0.6rem 0.9rem;
+  gap: 0.2rem;
+}
+
+.character-card--compact .character-card__name {
+  font-size: 0.98rem;
 }

@@ -45,6 +45,25 @@ export async function getPublicCharacter(env, id) {
   return isPublished(character) ? publicCharacter(character) : null
 }
 
+// Pseudo des joueuses/joueurs propriétaires de personnages publiés — pour
+// afficher un hashtag `#Pseudo` (voir carrousel d'accueil) SANS dépendre du
+// profil RP public (listPublicPlayerProfiles), qui n'existe que pour les
+// comptes ayant explicitement publié un profil. Un pseudo n'est pas une
+// donnée sensible (déjà visible ailleurs : identifiant de connexion, filtre
+// "Joueur"...) : un compte qui possède au moins un personnage publié voit
+// son pseudo exposé ici, qu'il ait ou non rempli un profil RP.
+export async function listPublicCharacterOwners(env) {
+  const all = await listCharactersWithFallback(env)
+  const ownerIds = [...new Set(all.filter(isPublished).map((c) => c.ownerUserId).filter((id) => id && id !== 'system'))]
+  if (!ownerIds.length) return []
+  const placeholders = ownerIds.map(() => '?').join(',')
+  const { results } = await env.WOLTAR_DB
+    .prepare(`SELECT id, name FROM users WHERE disabled = 0 AND id IN (${placeholders})`)
+    .bind(...ownerIds)
+    .all()
+  return (results || []).map((row) => ({ userId: row.id, name: row.name }))
+}
+
 // Un clan de compte peut rester "draft" (visibility) tant que sa proprietaire
 // ne l'a pas publie -- meme logique que les personnages. Un clan canon
 // (Nakamura) n'a pas ce champ dans clans.json : il reste donc public par
