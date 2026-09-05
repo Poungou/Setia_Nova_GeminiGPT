@@ -31,21 +31,25 @@ export default function PostDetail() {
 
   return (
     <PageTransition>
-      <article className="post">
+      <article className="post post--gazette">
         <div className="container post__hero">
-          <ArticleHeading post={post}>
-            <Link to="/journal" className="post__back">← Journal</Link>
-          </ArticleHeading>
+          <nav className="post__folio" aria-label="Navigation du Journal">
+            <Link to="/journal" className="post__back">← Le Journal de Woltar</Link>
+            <span>Chroniques &amp; illustrations</span>
+          </nav>
+          <ArticleHeading post={post} />
         </div>
 
         <div className="container post__reading-shell">
           <Reveal className="post__panel">
             <ArticleBody body={post.body} />
+            <div className="post__endmark" aria-hidden="true">✧</div>
           </Reveal>
 
           {restGallery.length > 0 && (
             <Reveal className="post__gallery">
-              <h2 className="eyebrow">Galerie</h2>
+              <h2>Dans les marges</h2>
+              <p className="post__gallery-note">Images et fragments de cette chronique.</p>
               <Lightbox images={restGallery.map((v) => ({ src: imgSrc(v), alt: post.title }))} />
             </Reveal>
           )}
