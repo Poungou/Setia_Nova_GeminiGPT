@@ -1,23 +1,25 @@
 // src/admin/CollectionEditPage.jsx
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams, Link, Navigate } from 'react-router-dom'
 import { Save, Trash2, ArrowLeft } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import { Field } from './Fields.jsx'
 import { adminStorageLabel, localFileUploadsAvailable } from './adminApi.js'
 
+const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
+
 export default function CollectionEditPage() {
   const { collection, id } = useParams()
   const navigate = useNavigate()
   const s = SCHEMA[collection]
-  const { data, save, readOnly } = useAdmin()
+  const { data, save, readOnly, currentUser } = useAdmin()
 
   const rows = data?.[collection] || []
   const isNew = id === 'new'
   const existing = isNew ? null : rows.find((r) => r.id === decodeURIComponent(id || ''))
 
-  const [form, setForm] = useState(() => ({ ...s.defaults, ...(existing || {}) }))
+  const [form, setForm] = useState(() => ({ ...s?.defaults, ...(collection === 'posts' && isNew ? { visibility: 'draft' } : {}), ...(existing || {}) }))
   const [saving, setSaving] = useState(false)
   const [flash, setFlash] = useState('') // '' | 'saved' | 'error:<msg>'
   const [dirty, setDirty] = useState(false)
@@ -31,7 +33,7 @@ export default function CollectionEditPage() {
       skipReset.current = false
       return
     }
-    setForm({ ...s.defaults, ...(existing || {}) })
+    setForm({ ...s?.defaults, ...(collection === 'posts' && isNew ? { visibility: 'draft' } : {}), ...(existing || {}) })
     setDirty(false)
     setFlash('')
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,10 +47,11 @@ export default function CollectionEditPage() {
 
   const groups = useMemo(() => {
     const g = {}
-    for (const f of s.fields) (g[f.group || 'Autres'] ||= []).push(f)
+    for (const f of s?.fields || []) (g[f.group || 'Autres'] ||= []).push(f)
     return g
   }, [s])
 
+  if (collection === 'posts' && !import.meta.env.DEV) return <Navigate to={`/compte/articles/${id}`} replace />
   if (!s) return <p className="adm-muted">Collection inconnue.</p>
   if (!data) return <p className="adm-muted">Chargement…</p>
   if (!isNew && !existing) {
@@ -66,7 +69,7 @@ export default function CollectionEditPage() {
 
   const computedId = isNew ? s.makeId(form) : existing.id
 
-  const onSave = async () => {
+  const onSave = async (visibility) => {
     if (readOnly || saving) return
     if (isNew) {
       if (!computedId) {
@@ -80,7 +83,7 @@ export default function CollectionEditPage() {
     }
     setSaving(true)
     try {
-      const row = { ...s.defaults, ...form, id: computedId }
+      const row = { ...s.defaults, ...form, id: computedId, ...(typeof visibility === 'string' ? { visibility } : {}) }
       const next = isNew ? [...rows, row] : rows.map((r) => (r.id === computedId ? row : r))
       skipReset.current = true
       const savedRows = await save(collection, next)
@@ -89,6 +92,7 @@ export default function CollectionEditPage() {
       setFlash('saved')
       setSaving(false)
       if (isNew) navigate(`/admin/${collection}/${encodeURIComponent(computedId)}`, { replace: true })
+      return savedRows?.find((r) => r.id === computedId) || row
     } catch (e) {
       skipReset.current = false
       setSaving(false)
@@ -107,6 +111,16 @@ export default function CollectionEditPage() {
       setSaving(false)
       setFlash(`error:${e.message || e}`)
     }
+  }
+
+  if (collection === 'posts') {
+    if ((isNew && form.id) || (!isNew && form.id !== existing.id)) return <p className="adm-muted">Ouverture de l’article…</p>
+    return <Suspense fallback={<p className="adm-muted">Ouverture de l’atelier…</p>}><ArticleComposer
+      key={`admin-${id}`} form={form}
+      onChange={(next) => { setForm(next); setDirty(true) }} onSave={onSave} onDelete={onDelete}
+      saving={saving} readOnly={readOnly} flash={flash} isNew={isNew} backTo="/admin/posts"
+      data={data} uploadEnabled={localFileUploadsAvailable} draftScope={`local-admin:${currentUser?.id || 'local'}:${id}`}
+    /></Suspense>
   }
 
   return (

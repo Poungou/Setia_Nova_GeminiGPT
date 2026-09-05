@@ -1,6 +1,6 @@
 // src/admin/CollectionListPage.jsx
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { Pencil, Plus, Search } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
@@ -23,6 +23,7 @@ export default function CollectionListPage() {
     return list.filter((r) => JSON.stringify(r).toLowerCase().includes(needle))
   }, [rows, q])
 
+  if (collection === 'posts' && !import.meta.env.DEV) return <Navigate to="/compte/articles" replace />
   if (!s) return <p className="adm-muted">Collection inconnue.</p>
 
   return (

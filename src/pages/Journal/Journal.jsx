@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { categoryLabel, POST_CATEGORIES } from '../../data/posts.js'
 import { usePublicPosts } from '../../lib/publicData.js'
-import { excerptFromMarkdown } from '../../lib/markdown.js'
+import { articleText } from '../../components/ArticleEditor/articleContent.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
@@ -66,7 +66,7 @@ export default function Journal() {
                       {categoryLabel(post.category)} · {formatDate(post.date)}
                     </span>
                     <h2>{post.title}</h2>
-                    <p>{post.excerpt || excerptFromMarkdown(post.body)}</p>
+                    <p>{post.excerpt || articleText(post.body).slice(0, 160)}</p>
                   </div>
                 </Link>
               </Reveal>

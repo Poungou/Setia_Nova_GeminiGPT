@@ -13,10 +13,17 @@
     "d1:seed:generate": "node scripts/generate-d1-seed.mjs",
     "d1:migrate:local": "wrangler d1 execute woltar-db --local --file=./migrations/0001_init.sql",
     "d1:migrate:remote": "wrangler d1 execute woltar-db --remote --file=./migrations/0001_init.sql",
-    "test": "node --test \"Claude outputs/test-player-profiles.mjs\" \"Claude outputs/test-admin-user-creation.mjs\" \"Claude outputs/test-admin-user-local.mjs\""
+    "test": "node --test \"Claude outputs/test-player-profiles.mjs\" \"Claude outputs/test-admin-user-creation.mjs\" \"Claude outputs/test-admin-user-local.mjs\" \"Claude outputs/test-journal.mjs\" \"src/components/CharacterCarousel/*.test.mjs\" \"src/components/ArticleEditor/*.test.mjs\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
+    "@tiptap/core": "^3.31.3",
+    "@tiptap/extension-image": "^3.31.3",
+    "@tiptap/extension-placeholder": "^3.31.3",
+    "@tiptap/extension-table": "^3.31.3",
+    "@tiptap/pm": "^3.31.3",
+    "@tiptap/react": "^3.31.3",
+    "@tiptap/starter-kit": "^3.31.3",
     "dompurify": "^3.4.14",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.462.0",
@@ -29,10 +36,12 @@
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.28.2",
     "eslint": "^9.15.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "jsdom": "^30.0.1",
     "vite": "^5.4.11",
     "wrangler": "^4.127.1"
   }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound } from 'lucide-react'
 import {
@@ -27,6 +27,8 @@ import { SCHEMA } from '../admin/schema.js'
 import { Field } from '../admin/Fields.jsx'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 import '../admin/admin.css'
+
+const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
 
 const SECTIONS = {
   personnages: { collection: 'characters', label: 'Mes personnages', singular: 'personnage' },
@@ -803,7 +805,7 @@ function AccountEdit({ data, reload, user }) {
   const rows = data?.[collection] || []
   const isNew = id === 'new'
   const existing = isNew ? null : rows.find((row) => row.id === decodeURIComponent(id || ''))
-  const [form, setForm] = useState(() => ({ ...(schema?.defaults || {}), ...(existing || {}) }))
+  const [form, setForm] = useState(() => ({ ...(schema?.defaults || {}), ...(collection === 'posts' && isNew ? { visibility: 'draft', author: user.name || '' } : {}), ...(existing || {}) }))
   const [saving, setSaving] = useState(false)
   const [flash, setFlash] = useState('')
   const skipReset = useRef(false)
@@ -813,9 +815,9 @@ function AccountEdit({ data, reload, user }) {
       skipReset.current = false
       return
     }
-    setForm({ ...(schema?.defaults || {}), ...(existing || {}) })
+    setForm({ ...(schema?.defaults || {}), ...(collection === 'posts' && isNew ? { visibility: 'draft', author: user.name || '' } : {}), ...(existing || {}) })
     setFlash('')
-  }, [schema, existing, collection, id])
+  }, [schema, existing, collection, id, isNew, user.name])
 
   const fields = useMemo(() => {
     if (!schema) return {}
@@ -841,7 +843,7 @@ function AccountEdit({ data, reload, user }) {
 
   const setField = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
-  const onSave = async () => {
+  const onSave = async (visibility) => {
     if (saving) return
     if (isNew && !computedId) {
       setFlash('error:Renseigne les champs nécessaires pour créer un identifiant.')
@@ -850,7 +852,7 @@ function AccountEdit({ data, reload, user }) {
     setSaving(true)
     setFlash('')
     try {
-      const row = { ...schema.defaults, ...form, id: computedId }
+      const row = { ...schema.defaults, ...form, id: computedId, ...(typeof visibility === 'string' ? { visibility } : {}) }
       const saved = isNew
         ? await createAccountRow(collection, row)
         : await updateAccountRow(collection, existing.id, row)
@@ -859,6 +861,7 @@ function AccountEdit({ data, reload, user }) {
       await reload()
       setFlash('saved')
       if (isNew) navigate(`/compte/${section}/${encodeURIComponent(saved.id)}`, { replace: true })
+      return saved
     } catch (e) {
       skipReset.current = false
       setFlash(`error:${e.message || e}`)
@@ -880,6 +883,13 @@ function AccountEdit({ data, reload, user }) {
       setSaving(false)
     }
   }
+
+  if (collection === 'posts' && ((isNew && form.id) || (!isNew && form.id !== existing.id))) return <p className="adm-muted">Ouverture de l’article…</p>
+  if (collection === 'posts') return <Suspense fallback={<p className="adm-muted">Ouverture de l’atelier…</p>}><ArticleComposer
+    key={`account-${user.id}-${id}`} form={form} onChange={setForm} onSave={onSave} onDelete={onDelete}
+    saving={saving} flash={flash} isNew={isNew} backTo="/compte/articles" data={data}
+    uploadEnabled={false} draftScope={`account:${user.id}:${id}`}
+  /></Suspense>
 
   return (
     <div className="adm-edit">

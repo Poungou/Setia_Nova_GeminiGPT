@@ -35,4 +35,27 @@ tallounaToken = createSessionToken(env, await loginUser(env, { identifier: 'Tall
 assert((await create(tallounaToken, 'tallouna-second', 'Refusé')).status === 403, 'retrait de permission refuse les nouvelles créations')
 const retained = await handleAccount(request('/__account/api/collections/posts', 'GET', undefined, tallounaToken), env, ['collections', 'posts'])
 assert((await retained.json()).data.some((post) => post.id === 'tallouna-journal'), 'le retrait conserve les articles existants')
+// The visual editor uses the same body field and publication routes.
+const richBody = '<h2>Une chronique</h2><p>Un récit <strong>en gras</strong> et <em>en italique</em>.</p><blockquote><p>Une voix RP.</p></blockquote><ul><li>Une piste</li></ul><p><a href="https://example.test">Une source</a></p><figure><img src="/media/test.webp" alt="Un lieu"><figcaption>Le lieu au matin</figcaption></figure><hr><p>La suite.</p>'
+const richCreate = await handleAccount(request('/__account/api/collections/posts', 'POST', { id: 'rich-journal', title: 'Chronique illustrée', author: 'Une plume', date: '2026-09-05', category: 'Chronique', excerpt: 'Une accroche', cover: '/media/cover.webp', body: richBody, visibility: 'draft' }, admin), env, ['collections', 'posts'])
+assert(richCreate.status === 200, 'éditeur riche réutilise la création D1 existante')
+const richDraft = (await richCreate.json()).row
+const readRich = () => handlePublic(request('/__public/api/posts/rich-journal'), env, ['posts', 'rich-journal'])
+assert((await readRich()).status === 404, 'brouillon riche absent de la lecture publique')
+assert(!(await (await handlePublic(request('/__public/api/posts'), env, ['posts'])).json()).data.some((post) => post.id === 'rich-journal'), 'brouillon riche absent de la liste publique')
+const publish = await handleAccount(request('/__account/api/collections/posts/rich-journal', 'PUT', { ...richDraft, visibility: 'published' }, admin), env, ['collections', 'posts', 'rich-journal'])
+assert(publish.status === 200, 'publication explicite via la route existante')
+const richPublic = (await (await readRich()).json()).data
+assert(richPublic.body === richBody, 'D1 conserve le texte riche, les figures et les légendes')
+assert(richPublic.author === 'Une plume' && richPublic.excerpt === 'Une accroche' && richPublic.cover === '/media/cover.webp', 'métadonnées éditoriales conservées lors de la publication')
+const legacyBody = '## Une chronique ancienne\n\nUn **souvenir** et une [piste](https://example.test).'
+const legacyCreate = await handleAccount(request('/__account/api/collections/posts', 'POST', { id: 'legacy-journal', title: 'Ancien article', body: legacyBody, visibility: 'published' }, admin), env, ['collections', 'posts'])
+const legacyRow = (await legacyCreate.json()).row
+await handleAccount(request('/__account/api/collections/posts/legacy-journal', 'PUT', { ...legacyRow, title: 'Titre corrigé' }, admin), env, ['collections', 'posts', 'legacy-journal'])
+const legacyPublic = (await (await handlePublic(request('/__public/api/posts/legacy-journal'), env, ['posts', 'legacy-journal'])).json()).data
+assert(legacyPublic.body === legacyBody, 'modifier les métadonnées ne réécrit pas le Markdown historique')
+const foreignRich = await handleAccount(request('/__account/api/collections/posts/rich-journal', 'PUT', { body: '<p>Remplacement interdit</p>' }, tallounaToken), env, ['collections', 'posts', 'rich-journal'])
+assert(foreignRich.status === 403 && (await (await readRich()).json()).data.body === richBody, 'éditeur riche conserve la protection par propriétaire')
+await handleAccount(request('/__account/api/collections/posts/rich-journal', 'PUT', { ...richPublic, visibility: 'draft' }, admin), env, ['collections', 'posts', 'rich-journal'])
+assert((await readRich()).status === 404, 'repasser en brouillon retire la lecture publique')
 console.log(`\n${passed} OK, ${failed} FAIL`); if (failed) process.exitCode = 1
