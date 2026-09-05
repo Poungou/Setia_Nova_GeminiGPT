@@ -1,3 +1,6 @@
+import { listCharactersWithFallback } from './contentStore.js'
+import { isCharacterLinked, validateCharacterLinks } from '../../src/lib/characterLinks.js'
+
 const PROFILE_FIELDS = ['avatar', 'image_source', 'player_intro', 'writing_style', 'univers', 'tw', 'rhythm', 'ig_username']
 
 function parseIds(value) {
@@ -65,16 +68,15 @@ export async function createPlayerProfile(env, userId, payload) {
   return savePlayerProfile(env, userId, payload)
 }
 
-export async function savePlayerProfile(env, userId, payload, { allowSystemCharacters = false } = {}) {
-  const profile = normalizePlayerProfile(payload)
-  const requestedIds = parseIds(payload.linked_character_ids)
-  const { results: ownedCharacters } = await env.WOLTAR_DB.prepare('SELECT id FROM characters WHERE owner_user_id = ?').bind(userId).all()
-  const ownedIds = new Set((ownedCharacters || []).map((row) => row.id))
-  if (allowSystemCharacters) {
-    const { results: systemCharacters } = await env.WOLTAR_DB.prepare("SELECT id FROM characters WHERE owner_user_id = 'system'").all()
-    ;(systemCharacters || []).forEach((row) => ownedIds.add(row.id))
-  }
-  const linkedCharacterIds = requestedIds.filter((id) => ownedIds.has(id))
+export async function savePlayerProfile(env, userId, payload, options = {}) {
+  const user = await env.WOLTAR_DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first()
+  if (!user) throw Object.assign(new Error('Ce compte est introuvable.'), { status: 404 })
+  const previous = await getPlayerProfile(env, userId)
+  const profile = normalizePlayerProfile({ ...previous, ...payload })
+  const characters = await listCharactersWithFallback(env)
+  const linkedCharacterIds = payload.linked_character_ids === undefined
+    ? previous.linked_character_ids
+    : validateCharacterLinks(payload.linked_character_ids, characters, userId, previous.linked_character_ids, options)
   const now = new Date().toISOString()
   await env.WOLTAR_DB.prepare(
     `INSERT INTO user_profiles (user_id, avatar, image_source, player_intro, writing_style, univers, tw, rhythm, ig_username, profile_public, linked_character_ids, created_at, updated_at)
@@ -96,22 +98,16 @@ export async function listPublicPlayerProfiles(env) {
     `SELECT u.id, u.name, u.status, p.* FROM users u JOIN user_profiles p ON p.user_id = u.id
      WHERE p.profile_public = 1 AND u.disabled = 0 ORDER BY lower(u.name) ASC`,
   ).all()
-  return Promise.all((results || []).map(async (row) => {
+  const characters = await listCharactersWithFallback(env)
+  return (results || []).map((row) => {
     const linkedIds = parseIds(row.linked_character_ids)
-    const characterQuery = linkedIds.length > 0
-      ? `SELECT id, data FROM characters WHERE id IN (${linkedIds.map(() => '?').join(',')}) ORDER BY created_at ASC`
-      : 'SELECT id, data FROM characters WHERE owner_user_id = ? ORDER BY created_at ASC'
-    const { results: characters } = await env.WOLTAR_DB.prepare(characterQuery).bind(...(linkedIds.length > 0 ? linkedIds : [row.id])).all()
-    const selectedIds = linkedIds.length > 0 ? linkedIds : (characters || []).map((character) => character.id)
+    const visible = characters.filter((character) => character.visibility !== 'draft' && isCharacterLinked(character, row.id, linkedIds))
     return {
       userId: row.id,
       name: row.name,
       status: row.status,
-      profile: rowToProfile(row),
-      characters: (characters || []).filter((character) => selectedIds.includes(character.id)).map((character) => {
-        const data = JSON.parse(character.data)
-        return { id: character.id, name: [data.firstName, data.lastName].filter(Boolean).join(' ') || data.name || character.id }
-      }),
+      profile: { ...rowToProfile(row), linked_character_ids: linkedIds.filter((id) => visible.some((character) => character.id === id)) },
+      characters: visible.map((character) => ({ id: character.id, name: [character.firstName, character.lastName].filter(Boolean).join(' ') || character.name || character.id })),
     }
-  }))
+  })
 }

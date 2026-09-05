@@ -92,6 +92,22 @@ function optionalEmail(email) {
   return value || null
 }
 
+// Voir worker/lib/authStore.js pour le contexte complet (email obligatoire à
+// la création, exception pour les comptes antérieurs identifiés par
+// user_id). Miroir strict de la même règle pour le serveur de dev local.
+const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export const LEGACY_OPTIONAL_EMAIL_USER_IDS = new Set([
+  // TODO (Poungou) : mêmes deux user_id que côté worker/lib/authStore.js.
+])
+
+function assertRequiredEmail(email) {
+  const value = normalizeEmail(email)
+  if (!value) throw httpError(400, 'L’adresse e-mail est obligatoire.')
+  if (!EMAIL_FORMAT_RE.test(value)) throw httpError(400, 'Adresse e-mail invalide.')
+  return value
+}
+
 function assertPassword(password) {
   if (String(password || '').length < 8) {
     throw httpError(400, 'Le mot de passe doit contenir au moins 8 caracteres.')
@@ -154,12 +170,11 @@ export function canEditOwnedResource(user, row) {
 }
 
 export async function registerUser(root, payload) {
-  const email = optionalEmail(payload?.email)
+  const email = assertRequiredEmail(payload?.email)
   const name = String(payload?.name || '').trim()
   const password = String(payload?.password || '')
 
   if (!name) throw httpError(400, 'Le pseudo est obligatoire.')
-  if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
   assertPassword(password)
 
   const users = await loadUsers(root)
@@ -227,12 +242,11 @@ export async function listPublicUsers(root) {
 
 export async function createUser(root, payload, actor) {
   if (!isAdmin(actor)) throw httpError(403, 'Reserve admin.')
-  const email = optionalEmail(payload?.email)
+  const email = assertRequiredEmail(payload?.email)
   const name = String(payload?.name || '').trim()
   const password = String(payload?.password || '')
   const confirmation = String(payload?.passwordConfirmation || '')
   if (!name) throw httpError(400, 'Le pseudo est obligatoire.')
-  if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
   assertPassword(password)
   if (password !== confirmation) throw httpError(400, 'La confirmation du mot de passe ne correspond pas.')
 

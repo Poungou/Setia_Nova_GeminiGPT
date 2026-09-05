@@ -39,7 +39,7 @@ export default function Aether() {
             )}
           </motion.div>
           <motion.span className="eyebrow aether-hero__eyebrow" {...itemMotion}>
-            Nova-Setia · vitrine RP
+            Woltar Nova · vitrine RP
           </motion.span>
           <motion.h1 className="aether-hero__title" {...itemMotion}>
             Aether

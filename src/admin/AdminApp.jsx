@@ -42,11 +42,11 @@ function Gate({ onOpen }) {
           await submit()
         }}
       >
-        <h1>Administration Nova-Setia</h1>
+        <h1>Administration Woltar Nova</h1>
         <p className="adm-muted">
           {localGate
             ? 'Accès local protégé côté serveur.'
-            : 'Connexion avec un compte administrateur Nova-Setia.'}
+            : 'Connexion avec un compte administrateur Woltar Nova.'}
         </p>
 
         {localGate ? (

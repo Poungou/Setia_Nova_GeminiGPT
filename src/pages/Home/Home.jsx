@@ -14,14 +14,18 @@ import './Home.css'
 
 const aetherConfig = aetherData[0] || null
 const DEFAULT_HOME = {
-  eyebrow: 'Nova-Setia · vitrine RP personnelle',
-  title: 'Quelques histoires méritent qu’on s’y attarde.',
-  subtitle: 'Explore les visages, les liens et les lieux qui donnent vie aux récits de Nova-Setia, à ton rythme.',
+  eyebrow: 'Woltar Nova · vitrine RP communautaire',
+  title: 'Bienvenue sur Woltar Nova.',
+  subtitle: 'Explore les visages, les liens et les lieux qui donnent vie aux récits de Woltar Nova, à ton rythme.',
+  communityNote:
+    'Woltar Nova n’est pas le site officiel de Woltar : c’est une vitrine communautaire où chaque joueuse et joueur présente ses propres personnages, son univers et ses histoires.',
   intro: 'Ici, les histoires prennent le temps de respirer.',
-  primaryCtaLabel: 'Découvrir le clan',
+  primaryCtaLabel: 'Découvrir les personnages',
   primaryCtaUrl: '/personnages',
   secondaryCtaLabel: 'Explorer l’univers',
   secondaryCtaUrl: '/univers',
+  journalCtaLabel: 'Lire le Journal',
+  journalCtaUrl: '/journal',
   aetherCtaLabel: 'Parler à Aether',
   aetherCtaUrl: '/aether',
 }
@@ -64,6 +68,11 @@ export default function Home() {
             <motion.p className="hero__subtitle" {...itemMotion}>
               {homeConfig.subtitle}
             </motion.p>
+            {homeConfig.communityNote && (
+              <motion.p className="hero__community-note" {...itemMotion}>
+                {homeConfig.communityNote}
+              </motion.p>
+            )}
             <motion.div className="hero__actions" {...itemMotion}>
               <Link to={homeConfig.primaryCtaUrl || '/personnages'} className="btn btn-primary">
                 {homeConfig.primaryCtaLabel}
@@ -71,6 +80,11 @@ export default function Home() {
               <Link to={homeConfig.secondaryCtaUrl || '/univers'} className="btn">
                 {homeConfig.secondaryCtaLabel}
               </Link>
+              {homeConfig.journalCtaLabel && (
+                <Link to={homeConfig.journalCtaUrl || '/journal'} className="btn">
+                  {homeConfig.journalCtaLabel}
+                </Link>
+              )}
               <Link to={homeConfig.aetherCtaUrl || '/aether'} className="hero__aether-cta">
                 <span className="hero__aether-avatar" aria-hidden="true">
                   {imgSrc(aetherConfig?.avatar) ? (
@@ -101,6 +115,12 @@ export default function Home() {
                 <dd>∞</dd>
               </div>
             </motion.dl>
+
+            <motion.div {...itemMotion}>
+              <Link to="/personnages#players-title" className="hero__players-link">
+                Voir les joueurs de Woltar Nova →
+              </Link>
+            </motion.div>
           </motion.div>
         </section>
 
@@ -126,7 +146,7 @@ export default function Home() {
         <section className="container home-section">
           <Reveal className="section-heading">
             <span className="eyebrow">Coins à explorer</span>
-            <h2 className="section-title">Les lieux de Nova-Setia</h2>
+            <h2 className="section-title">Les lieux de Woltar Nova</h2>
           </Reveal>
           <div className="home-grid home-grid--locations">
             {featuredLocations.map((l, i) => (

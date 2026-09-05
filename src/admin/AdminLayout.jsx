@@ -13,7 +13,7 @@ export default function AdminLayout({ onLock, currentUser }) {
     <div className="adm">
       <aside className="adm-side">
         <div className="adm-side__head">
-          <Link to="/" className="adm-side__logo">Woltar</Link>
+          <Link to="/" className="adm-side__logo">Woltar Nova</Link>
           <span className="adm-side__tag">Administration</span>
         </div>
         <nav className="adm-nav">

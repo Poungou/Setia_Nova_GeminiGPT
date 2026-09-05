@@ -60,14 +60,14 @@ const admin = await register('admin-create@test.local', 'Admin')
 sqlite.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(admin.id)
 const adminSession = createSessionToken(env, await loginUser(env, { email: admin.email, password: 'AdminPass123' }))
 const createdResponse = await handleAuth(authRequest('/__auth/api/users', 'POST', {
-  name: 'Tallouna', email: '', password: 'TallounaTemp123', passwordConfirmation: 'TallounaTemp123',
+  name: 'Tallouna', email: 'tallouna@test.local', password: 'TallounaTemp123', passwordConfirmation: 'TallounaTemp123',
   role: 'user', status: 'RPiste', active: true,
   permissions: { create_character: true, create_clan: true, create_location: true },
 }, adminSession), env, ['users'])
 const createdBody = await createdResponse.json()
 assert(createdResponse.status === 201, 'admin peut créer Tallouna')
 assert(createdBody.user?.name === 'Tallouna' && createdBody.user?.status === 'RPiste', 'le profil créé contient pseudo et statut')
-assert(createdBody.user?.email === null, 'Tallouna est créée sans email')
+assert(createdBody.user?.email === 'tallouna@test.local', 'Tallouna est créée avec email')
 assert(!JSON.stringify(createdBody).includes('passwordHash') && !JSON.stringify(createdBody).includes('password_hash'), 'la réponse ne contient aucun hash')
 
 const tallouna = await loginUser(env, { identifier: 'Tallouna', password: 'TallounaTemp123' })
@@ -94,7 +94,7 @@ const duplicate = await handleAuth(authRequest('/__auth/api/users', 'POST', {
 }, adminSession), env, ['users'])
 assert(duplicate.status === 409, 'un email déjà utilisé est refusé')
 const duplicateName = await handleAuth(authRequest('/__auth/api/users', 'POST', {
-  name: 'tALLOUNA', password: 'ValidPass123', passwordConfirmation: 'ValidPass123',
+  name: 'tALLOUNA', email: 'duplicate@test.local', password: 'ValidPass123', passwordConfirmation: 'ValidPass123',
 }, adminSession), env, ['users'])
 assert(duplicateName.status === 409, 'un pseudo déjà utilisé est refusé sans tenir compte de la casse')
 

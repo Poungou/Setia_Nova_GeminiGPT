@@ -1,7 +1,8 @@
+import { isCharacterLinked } from '../../lib/characterLinks.js'
 import { useMemo, useState } from 'react'
 import { usePublicCharacters, usePublicPlayers } from '../../lib/publicData.js'
 import { imgSrc } from '../../lib/image.js'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
@@ -53,7 +54,24 @@ function PlayerCard({ player }) {
     </summary>
     <div className="player-card__content">
       {PROFILE_SECTIONS.map(([key, label]) => player.profile?.[key] && <section key={key}><h3>{label}</h3><p>{player.profile[key]}</p></section>)}
-      <section><h3>Pseudo IG &amp; Personnages</h3>{player.profile?.ig_username && <p>Pseudo IG : {player.profile.ig_username}</p>}{player.characters?.length ? <ul>{player.characters.map((character) => <li key={character.id}><Link to={`/personnages/${character.id}`}>{character.name}</Link></li>)}</ul> : <p className="player-card__empty">Aucun personnage lié pour le moment.</p>}</section>
+      <section>
+        <h3>Pseudo IG &amp; Personnages</h3>
+        {player.profile?.ig_username && <p>Pseudo IG : {player.profile.ig_username}</p>}
+        {player.characters?.length ? (
+          <>
+            <ul>
+              {player.characters.slice(0, 3).map((character) => (
+                <li key={character.id}><Link to={`/personnages/${character.id}`}>{character.name}</Link></li>
+              ))}
+            </ul>
+            <Link to={`/personnages?joueur=${encodeURIComponent(player.userId)}#gallery-title`} className="player-card__see-all">
+              Voir tous ses personnages →
+            </Link>
+          </>
+        ) : (
+          <p className="player-card__empty">Aucun personnage lié pour le moment.</p>
+        )}
+      </section>
     </div>
   </details>
 }
@@ -84,29 +102,66 @@ function matchesQuery(character, query) {
 export default function Characters() {
   const characters = usePublicCharacters()
   const players = usePublicPlayers()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
+  // Filtre principal de la galerie : "Joueur" (qui a créé le personnage),
+  // pas le clan — voir la demande "remplacer le filtre Clan par Joueur".
+  // Peut être pré-rempli via ?joueur=<userId> (lien "Voir tous ses
+  // personnages" depuis une carte joueur).
+  const joueur = searchParams.get('joueur') || 'all'
   const [clan, setClan] = useState('all')
   const [canon, setCanon] = useState('all')
   const [sort, setSort] = useState('number')
 
+  const handleJoueurChange = (value) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (value === 'all') next.delete('joueur')
+      else next.set('joueur', value)
+      return next
+    }, { replace: true })
+  }
+
+  // Joueurs réellement présents dans les données publiques (profils publics
+  // uniquement — voir usePublicPlayers / /__public/api/players), plus une
+  // entrée "Personnages officiels" pour les fiches canon sans ownerUserId,
+  // et une entrée "PNJ" indépendante de la propriété (`isPnj`, préparé côté
+  // admin — un PNJ peut appartenir à n'importe quel joueur ou au système).
+  const joueurOptions = useMemo(() => {
+    const hasSystemCharacter = characters.some((c) => (!c.ownerUserId || c.ownerUserId === 'system'))
+    const hasPnj = characters.some((c) => c.isPnj === true)
+    const known = players
+      .map((p) => ({ value: p.userId, label: p.name }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'fr'))
+    const withSystem = hasSystemCharacter ? [{ value: 'system', label: 'Personnages officiels' }, ...known] : known
+    return hasPnj ? [{ value: 'pnj', label: '— PNJ —' }, ...withSystem] : withSystem
+  }, [characters, players])
+
   // Clans réellement présents dans les données (pas de liste figée : si un
   // nouveau clan apparaît dans une fiche, il apparaît ici automatiquement).
+  // .trim() défensif : une donnée avec un espace parasite ("Nakamura ") ne
+  // doit jamais recréer une entrée en double dans ce filtre.
   const clanOptions = useMemo(() => {
-    const values = new Set(characters.map((c) => c.clan).filter(Boolean))
+    const values = new Set(characters.map((c) => c.clan?.trim()).filter(Boolean))
     return Array.from(values).sort((a, b) => a.localeCompare(b, 'fr'))
   }, [characters])
 
   const filtered = useMemo(() => {
     const list = characters.filter((c) => {
       const statusOk = status === 'all' ? true : c.status === status
-      const clanOk = clan === 'all' ? true : c.clan === clan
+      const joueurOk =
+        joueur === 'all' ? true
+        : joueur === 'pnj' ? c.isPnj === true
+        : joueur === 'system' ? (!c.ownerUserId || c.ownerUserId === 'system')
+        : isCharacterLinked(c, joueur, players.find((player) => player.userId === joueur)?.characters?.map((character) => character.id) || [])
+      const clanOk = clan === 'all' ? true : (c.clan || '').trim() === clan
       const canonOk = canon === 'all' ? true : c.canon === canon
-      return statusOk && clanOk && canonOk && matchesQuery(c, query)
+      return statusOk && joueurOk && clanOk && canonOk && matchesQuery(c, query)
     })
     const sorted = [...list].sort(sort === 'name' ? compareByName : compareByNumber)
     return sorted
-  }, [characters, query, status, clan, canon, sort])
+  }, [characters, players, query, status, joueur, clan, canon, sort])
 
   const featured = useMemo(
     () => characters.filter((c) => c.is_featured === true).sort(compareByNumber),
@@ -149,12 +204,25 @@ export default function Characters() {
 
         <div className="characters-page__section-head">
           <span className="eyebrow">Galerie</span>
-          <h2>Tous les personnages</h2>
+          <h2 id="gallery-title">Tous les personnages</h2>
         </div>
 
         <div className="characters-page__controls">
           <SearchBar value={query} onChange={setQuery} />
           <FilterBar filters={FILTERS} active={status} onChange={setStatus} />
+          {joueurOptions.length > 0 && (
+            <label className="characters-page__select characters-page__select--primary">
+              <span className="eyebrow">Joueur</span>
+              <select value={joueur} onChange={(e) => handleJoueurChange(e.target.value)}>
+                <option value="all">Tous les joueurs</option>
+                {joueurOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
 
         {(clanOptions.length > 0 || characters.length > 0) && (

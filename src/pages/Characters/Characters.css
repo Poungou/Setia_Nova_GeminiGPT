@@ -51,6 +51,19 @@
 .player-card__content ul { padding-left: 1rem; }
 .player-card__content a { color: var(--ivory); }
 .player-card__empty { color: var(--ivory-dim); font-style: italic; }
+.player-card__see-all {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ivory);
+}
+.player-card__see-all:hover,
+.player-card__see-all:focus-visible {
+  color: var(--wine-bright);
+}
 
 @media (max-width: 600px) {
   .player-card__content { padding: 22px 24px 24px; }
@@ -320,6 +333,11 @@
 .characters-page__select select:focus-visible {
   color: var(--ivory);
   border-color: var(--ivory-dim);
+}
+
+.characters-page__select--primary select {
+  border-color: var(--wine-bright);
+  color: var(--ivory);
 }
 
 .characters-page__count {

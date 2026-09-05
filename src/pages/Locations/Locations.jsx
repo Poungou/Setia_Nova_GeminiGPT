@@ -17,7 +17,7 @@ export default function Locations() {
       <section className="container locations-page">
         <Reveal className="section-heading">
           <span className="eyebrow">Coins à explorer</span>
-          <h1 className="section-title">Les lieux de Nova-Setia</h1>
+          <h1 className="section-title">Les lieux de Woltar Nova</h1>
         </Reveal>
 
         <div className="locations-page__grid">

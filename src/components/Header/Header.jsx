@@ -60,7 +60,7 @@ export default function Header() {
         <NavLink to="/" className="site-header__brand" onClick={() => setOpen(false)}>
           <span className="site-header__mark">N</span>
           <span className="site-header__brand-text">
-            Nova-Setia
+            Woltar Nova
             <small>vitrine RP</small>
           </span>
         </NavLink>

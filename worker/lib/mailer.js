@@ -22,7 +22,7 @@ const RESEND_ENDPOINT = 'https://api.resend.com/emails'
 
 export async function sendMail(env, { to, subject, html, text }) {
   const apiKey = env.RESEND_API_KEY
-  const from = env.MAIL_FROM || 'Nova-Setia <onboarding@resend.dev>'
+  const from = env.MAIL_FROM || 'Woltar Nova <onboarding@resend.dev>'
 
   if (!apiKey) {
     console.warn('[mailer] RESEND_API_KEY absent — email non envoyé (mode dégradé).')
@@ -51,16 +51,16 @@ export async function sendMail(env, { to, subject, html, text }) {
 
 export function passwordResetEmail(link) {
   return {
-    subject: 'Réinitialisation de ton mot de passe — Nova-Setia',
-    html: `<p>Tu as demandé la réinitialisation du mot de passe de ton compte Nova-Setia.</p><p><a href="${link}">Choisir un nouveau mot de passe</a></p><p>Ce lien est valable 30 minutes et ne fonctionne qu'une seule fois. Si tu n'es pas à l'origine de cette demande, tu peux ignorer cet email — ton mot de passe reste inchangé.</p>`,
+    subject: 'Réinitialisation de ton mot de passe — Woltar Nova',
+    html: `<p>Tu as demandé la réinitialisation du mot de passe de ton compte Woltar Nova.</p><p><a href="${link}">Choisir un nouveau mot de passe</a></p><p>Ce lien est valable 30 minutes et ne fonctionne qu'une seule fois. Si tu n'es pas à l'origine de cette demande, tu peux ignorer cet email — ton mot de passe reste inchangé.</p>`,
     text: `Réinitialise ton mot de passe : ${link}\n\nCe lien est valable 30 minutes et ne fonctionne qu'une seule fois. Si tu n'es pas à l'origine de cette demande, ignore cet email — ton mot de passe reste inchangé.`,
   }
 }
 
 export function emailChangeEmail(link) {
   return {
-    subject: 'Confirme ta nouvelle adresse — Nova-Setia',
-    html: `<p>Une demande de changement d'adresse email a été faite sur ton compte Nova-Setia.</p><p><a href="${link}">Confirmer cette nouvelle adresse</a></p><p>Ce lien est valable 60 minutes et ne fonctionne qu'une seule fois. Si tu n'es pas à l'origine de cette demande, ignore cet email — ton adresse actuelle reste inchangée.</p>`,
+    subject: 'Confirme ta nouvelle adresse — Woltar Nova',
+    html: `<p>Une demande de changement d'adresse email a été faite sur ton compte Woltar Nova.</p><p><a href="${link}">Confirmer cette nouvelle adresse</a></p><p>Ce lien est valable 60 minutes et ne fonctionne qu'une seule fois. Si tu n'es pas à l'origine de cette demande, ignore cet email — ton adresse actuelle reste inchangée.</p>`,
     text: `Confirme ta nouvelle adresse : ${link}\n\nCe lien est valable 60 minutes et ne fonctionne qu'une seule fois. Si tu n'es pas à l'origine de cette demande, ignore cet email — ton adresse actuelle reste inchangée.`,
   }
 }

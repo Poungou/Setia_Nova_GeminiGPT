@@ -68,6 +68,35 @@ function optionalEmail(email) {
   return value || null
 }
 
+// Format volontairement permissif (pas de RFC 5322 complet) : on veut juste
+// écarter les fautes de frappe évidentes ("test", "a@b"), pas rejeter des
+// adresses réelles un peu inhabituelles.
+const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// Historique — email obligatoire (2026-09) : l'inscription publique et la
+// création de compte depuis l'admin exigent désormais une adresse email
+// valide (voir registerUser/createUser ci-dessous). Deux comptes créés AVANT
+// cette règle (Poungou, Tallouna) continuent de fonctionner sans email en
+// base — la migration 0007 a rendu la colonne nullable et on ne revient pas
+// dessus. Identifiés ici par leur user_id D1 EXACT, jamais par pseudo :
+// un futur compte nommé « Poungou » ou « Tallouna » ne doit PAS hériter de
+// cette exception. Cette règle ne s'applique qu'aux DEUX flux de création —
+// elle ne bloque ni la connexion ni la mise à jour d'un compte existant sans
+// email (updateUser reste inchangé, voir plus bas).
+export const LEGACY_OPTIONAL_EMAIL_USER_IDS = new Set([
+  // TODO (Poungou) : coller ici les deux user_id D1 réels, visibles dans
+  // /admin/users sous chaque carte utilisateur (élément <code>). Tant que
+  // cette liste est vide, elle n'a aucun effet : aucune route actuelle ne
+  // s'en sert pour restreindre quoi que ce soit sur un compte existant.
+])
+
+function assertRequiredEmail(email) {
+  const value = normalizeEmail(email)
+  if (!value) throw httpError(400, 'L’adresse e-mail est obligatoire.')
+  if (!EMAIL_FORMAT_RE.test(value)) throw httpError(400, 'Adresse e-mail invalide.')
+  return value
+}
+
 function assertPassword(password) {
   if (String(password || '').length < 8) {
     throw httpError(400, 'Le mot de passe doit contenir au moins 8 caractères.')
@@ -186,12 +215,11 @@ async function findUserById(db, id) {
 
 export async function registerUser(env, payload) {
   const db = env.WOLTAR_DB
-  const email = optionalEmail(payload?.email)
+  const email = assertRequiredEmail(payload?.email)
   const name = String(payload?.name || '').trim()
   const password = String(payload?.password || '')
 
   if (!name) throw httpError(400, 'Le pseudo est obligatoire.')
-  if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
   assertPassword(password)
   await assertAvailableName(db, name)
 
@@ -265,12 +293,11 @@ export async function listPublicUsers(env) {
 export async function createUser(env, payload, actor) {
   if (!isAdmin(actor)) throw httpError(403, 'Réservé admin.')
   const db = env.WOLTAR_DB
-  const email = optionalEmail(payload?.email)
+  const email = assertRequiredEmail(payload?.email)
   const name = String(payload?.name || '').trim()
   const password = String(payload?.password || '')
   const confirmation = String(payload?.passwordConfirmation || '')
   if (!name) throw httpError(400, 'Le pseudo est obligatoire.')
-  if (email && !email.includes('@')) throw httpError(400, 'Adresse e-mail invalide.')
   assertPassword(password)
   if (password !== confirmation) throw httpError(400, 'La confirmation du mot de passe ne correspond pas.')
   await assertAvailableName(db, name)

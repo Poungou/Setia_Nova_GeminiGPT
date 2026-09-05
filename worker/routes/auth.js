@@ -143,7 +143,7 @@ export async function handleAuth(request, env, parts) {
       if (parts[1] && parts[2] === 'profile') {
         if (method === 'GET') return json({ profile: await getPlayerProfile(env, parts[1]) })
         if (method === 'POST') return json({ profile: await createPlayerProfile(env, parts[1], await readJson(request)) }, { status: 201 })
-        if (method === 'PUT') return json({ profile: await savePlayerProfile(env, parts[1], await readJson(request)) })
+        if (method === 'PUT') return json({ profile: await savePlayerProfile(env, parts[1], await readJson(request), { allowAllCharacters: true }) })
         if (method === 'DELETE') {
           await deletePlayerProfile(env, parts[1])
           return json({ ok: true })

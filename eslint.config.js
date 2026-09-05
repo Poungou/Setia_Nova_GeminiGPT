@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 const browserGlobals = {
+  URLSearchParams: 'readonly',
   window: 'readonly',
   document: 'readonly',
   console: 'readonly',
@@ -36,7 +37,7 @@ const workerGlobals = {
 }
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', '.wrangler/**'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

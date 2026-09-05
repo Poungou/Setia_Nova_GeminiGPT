@@ -20,7 +20,7 @@ const CHAPTERS = [
   },
   {
     title: 'Clan Nakamura',
-    text: "L'un des axes principaux de Nova-Setia.",
+    text: "L'un des axes principaux de Woltar Nova.",
     to: '/clans/nakamura',
   },
   {
@@ -48,7 +48,7 @@ export default function Universe() {
       <section className="container universe-page">
         <Reveal className="section-heading">
           <span className="eyebrow">Repères</span>
-          <h1 className="section-title">Autour de Nova-Setia</h1>
+          <h1 className="section-title">Autour de Woltar Nova</h1>
         </Reveal>
 
         <div className="universe-grid">

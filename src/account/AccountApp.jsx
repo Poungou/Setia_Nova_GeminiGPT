@@ -54,7 +54,7 @@ function AccountBackendUnavailable() {
   return (
     <div className="adm-gate">
       <div className="adm-gate__card">
-        <h1>Espace Nova-Setia</h1>
+        <h1>Espace Woltar Nova</h1>
         <p className="adm-hint">
           {"L'espace compte n'est pas actif sur ce build Cloudflare tant que le stockage persistant D1 et les routes serveur n'ont pas ete valides."}
         </p>
@@ -76,9 +76,27 @@ function AuthGate({ onSession }) {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // Format volontairement permissif — même règle que côté serveur (voir
+  // worker/lib/authStore.js#assertRequiredEmail) : on écarte les fautes de
+  // frappe évidentes sans être trop strict. La vérification serveur reste la
+  // seule autorité : ce contrôle ne fait qu'éviter un aller-retour réseau
+  // inutile, il ne remplace jamais la validation backend.
+  const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   const submit = async () => {
-    setBusy(true)
     setError('')
+    if (mode === 'register') {
+      const trimmedEmail = email.trim()
+      if (!trimmedEmail) {
+        setError('L’adresse email est obligatoire pour créer un compte.')
+        return
+      }
+      if (!EMAIL_FORMAT_RE.test(trimmedEmail)) {
+        setError('Cette adresse email n’est pas valide.')
+        return
+      }
+    }
+    setBusy(true)
     try {
       const body =
         mode === 'register'
@@ -101,7 +119,7 @@ function AuthGate({ onSession }) {
           await submit()
         }}
       >
-        <h1>Espace Nova-Setia</h1>
+        <h1>Espace Woltar Nova</h1>
         <div className="adm-markdown__tabs">
           <button type="button" className={mode === 'login' ? 'is-active' : ''} onClick={() => setMode('login')}>
             Connexion
@@ -124,14 +142,15 @@ function AuthGate({ onSession }) {
         )}
         {mode === 'register' ? (
           <>
-            <label htmlFor="account-email" className="adm-field__label">Adresse email (facultatif)</label>
+            <label htmlFor="account-email" className="adm-field__label">Email *</label>
             <input
               id="account-email"
               className="adm-input"
               type="email"
               name="email"
               autoComplete="email"
-              placeholder="Email (facultatif)"
+              placeholder="Email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -160,7 +179,7 @@ function AuthGate({ onSession }) {
           onChange={(e) => setPassword(e.target.value)}
         />
         {mode === 'register' && (
-          <p className="adm-hint">Les nouveaux comptes sont créés avec le rôle user. L’email est facultatif.</p>
+          <p className="adm-hint">Les nouveaux comptes sont créés avec le rôle user. Une adresse email valide est obligatoire.</p>
         )}
         {mode === 'login' && (
           <>
@@ -561,7 +580,7 @@ function PlayerProfileSection() {
   const set = (key, value) => setProfile((current) => ({ ...current, [key]: value }))
   const save = async (event) => { event.preventDefault(); setFlash(''); try { const body = await savePlayerProfile(profile); setProfile(body.profile); setFlash('ok:Profil joueur enregistré.') } catch (error) { setFlash(`error:${error.message || error}`) } }
   const fields = [['player_intro', 'Quelques mots'], ['writing_style', 'Style d’écriture'], ['univers', 'Univers'], ['tw', 'TW'], ['rhythm', 'Rythme']]
-  return <div className="adm-edit"><header className="adm-edit__head"><div className="adm-edit__title"><h1>Mon profil joueur</h1><p className="adm-muted">Choisis les personnages qui apparaîtront sur ta fiche publique.</p></div></header><form className="adm-form" onSubmit={save}><fieldset className="adm-fieldset"><legend>Profil public</legend><div className="adm-field"><label htmlFor="profile-avatar">Photo de profil</label><input id="profile-avatar" className="adm-input" value={profile.avatar} onChange={(e) => set('avatar', e.target.value)} placeholder="URL ou chemin /media/..." /></div><div className="adm-field"><label htmlFor="profile-image-source">Source / crédit image</label><input id="profile-image-source" className="adm-input" value={profile.image_source} onChange={(e) => set('image_source', e.target.value)} /></div>{fields.map(([key, label]) => <div className="adm-field" key={key}><label htmlFor={`profile-${key}`}>{label}</label><textarea id={`profile-${key}`} className="adm-input" rows="4" value={profile[key]} onChange={(e) => set(key, e.target.value)} /></div>)}<div className="adm-field"><label htmlFor="profile-ig">Pseudo IG</label><input id="profile-ig" className="adm-input" value={profile.ig_username} onChange={(e) => set('ig_username', e.target.value)} /></div><div className="adm-field"><span>Personnages liés</span>{characters.length === 0 ? <span className="adm-muted">Aucun personnage créé par ce compte.</span> : characters.map((character) => <label className="adm-check" key={character.id}><input type="checkbox" checked={(profile.linked_character_ids || []).includes(character.id)} onChange={(e) => set('linked_character_ids', e.target.checked ? [...(profile.linked_character_ids || []), character.id] : (profile.linked_character_ids || []).filter((id) => id !== character.id))} />{[character.firstName, character.lastName].filter(Boolean).join(' ') || character.name || character.id}</label>)}</div><label className="adm-check"><input type="checkbox" checked={profile.profile_public} onChange={(e) => set('profile_public', e.target.checked)} />Profil public</label>{flash.startsWith('ok:') && <div className="adm-banner adm-banner--ok">{flash.slice(3)}</div>}{flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}<button type="submit" className="adm-btn adm-btn--primary">{profile.exists ? 'Enregistrer' : 'Créer ma fiche joueur'}</button></fieldset></form></div>
+  return <div className="adm-edit"><header className="adm-edit__head"><div className="adm-edit__title"><h1>Mon profil joueur</h1><p className="adm-muted">Les personnages dont tu es propriétaire sont automatiquement rattachés. Les liens complémentaires sont gérés dans Admin &gt; Utilisateurs.</p></div></header><form className="adm-form" onSubmit={save}><fieldset className="adm-fieldset"><legend>Profil public</legend><div className="adm-field"><label htmlFor="profile-avatar">Photo de profil</label><input id="profile-avatar" className="adm-input" value={profile.avatar} onChange={(e) => set('avatar', e.target.value)} placeholder="URL ou chemin /media/..." /></div><div className="adm-field"><label htmlFor="profile-image-source">Source / crédit image</label><input id="profile-image-source" className="adm-input" value={profile.image_source} onChange={(e) => set('image_source', e.target.value)} /></div>{fields.map(([key, label]) => <div className="adm-field" key={key}><label htmlFor={`profile-${key}`}>{label}</label><textarea id={`profile-${key}`} className="adm-input" rows="4" value={profile[key]} onChange={(e) => set(key, e.target.value)} /></div>)}<div className="adm-field"><label htmlFor="profile-ig">Pseudo IG</label><input id="profile-ig" className="adm-input" value={profile.ig_username} onChange={(e) => set('ig_username', e.target.value)} /></div><div className="adm-field"><span>Personnages liés</span>{characters.length === 0 ? <span className="adm-muted">Aucun personnage créé par ce compte.</span> : characters.map((character) => <label className="adm-check" key={character.id}><input type="checkbox" disabled={character.ownerUserId === profile.userId} checked={character.ownerUserId === profile.userId || (profile.linked_character_ids || []).includes(character.id)} onChange={(e) => set('linked_character_ids', e.target.checked ? [...(profile.linked_character_ids || []), character.id] : (profile.linked_character_ids || []).filter((id) => id !== character.id))} />{[character.firstName, character.lastName].filter(Boolean).join(' ') || character.name || character.id}</label>)}</div><label className="adm-check"><input type="checkbox" checked={profile.profile_public} onChange={(e) => set('profile_public', e.target.checked)} />Profil public</label>{flash.startsWith('ok:') && <div className="adm-banner adm-banner--ok">{flash.slice(3)}</div>}{flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}<button type="submit" className="adm-btn adm-btn--primary">{profile.exists ? 'Enregistrer' : 'Créer ma fiche joueur'}</button></fieldset></form></div>
 }
 
 function Dashboard({ data, user }) {
@@ -946,7 +965,7 @@ function Workspace({ user, onLogout }) {
     <div className="adm">
       <aside className="adm-side">
         <div className="adm-side__head">
-          <Link to="/" className="adm-side__logo">Nova-Setia</Link>
+          <Link to="/" className="adm-side__logo">Woltar Nova</Link>
           <span className="adm-side__tag">Compte</span>
         </div>
         <nav className="adm-nav">

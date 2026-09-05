@@ -461,8 +461,173 @@ textarea.adm-input {
   border-color: var(--line);
 }
 
+/* --- fiche utilisateur (admin/users) ---------------------------------
+   Passe ergonomique (Woltar Nova) : avant, chaque information (statut,
+   rôle, date, compteurs, permissions...) était un <span> empilé dans une
+   colonne flex — d'où l'effet "très éclaté verticalement" signalé.
+   Regroupé ici en un bloc identité + une grille de méta compacte, puis
+   les actions par zones (normales / sensibles / suppression), au lieu
+   d'une seule rangée flex qui débordait. */
+.adm-user-card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.adm-user-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.adm-user-card__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.adm-user-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 0.3rem 1.2rem;
+  margin: 0;
+}
+.adm-user-meta > div {
+  display: flex;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+.adm-user-meta dt {
+  color: var(--ivory-faint);
+}
+.adm-user-meta dd {
+  margin: 0;
+  color: var(--ivory-dim);
+}
+
+.adm-user-permissions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.adm-user-permissions__label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+}
+.adm-user-permissions__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+/* Zones d'actions : normales, puis sensibles (séparées par un filet),
+   puis suppression poussée à droite avec son propre filet — hiérarchie
+   visuelle demandée sans surcharger de couleurs supplémentaires. */
+.adm-user-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--line);
+}
+.adm-user-actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.adm-user-actions-group--sensitive {
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--line);
+}
+.adm-user-actions-group--danger {
+  margin-left: auto;
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--wine-bright);
+}
+
+.adm-user-email {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.adm-user-email .adm-input {
+  width: auto;
+  min-width: 150px;
+  max-width: 210px;
+}
+
 .adm-user-control {
   max-width: 130px;
+}
+
+/* Profil RP : sous-blocs distincts au lieu d'un grand formulaire brut. */
+.adm-user-profile-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+.adm-profile-block {
+  display: grid;
+  gap: 0.55rem;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+}
+.adm-profile-block legend {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+  padding: 0 0.3rem;
+}
+.adm-profile-block > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
+}
+.adm-profile-avatar-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+.adm-profile-avatar-preview {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-void);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--ivory-faint);
+  font-size: 0.66rem;
+  text-align: center;
+}
+.adm-profile-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.adm-profile-avatar-fields {
+  flex: 1;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .adm-check {
@@ -678,6 +843,45 @@ textarea.adm-input {
   .adm-relation__meta {
     grid-template-columns: 1fr 1fr;
   }
+
+  /* Fiche utilisateur : une seule colonne de méta, actions empilées en
+     pleine largeur (rien ne doit sortir de l'écran ni se couper). */
+  .adm-user-meta {
+    grid-template-columns: 1fr;
+  }
+  .adm-user-card__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .adm-user-actions-group {
+    align-items: stretch;
+  }
+  .adm-user-actions-group--sensitive,
+  .adm-user-actions-group--danger {
+    margin-left: 0;
+    padding-left: 0;
+    padding-top: var(--space-2);
+    border-left: none;
+    border-top: 1px dashed var(--line);
+  }
+  .adm-user-actions-group .adm-btn,
+  .adm-user-actions-group .adm-user-control {
+    width: 100%;
+    max-width: none;
+  }
+  .adm-user-email {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .adm-user-email .adm-input {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+  .adm-profile-avatar-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 420px) {
@@ -685,3 +889,14 @@ textarea.adm-input {
     font-size: 1.2rem;
   }
 }
+
+.adm-character-links {
+  display: grid;
+  gap: var(--space-2);
+  max-height: 22rem;
+  overflow-y: auto;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+}
+.adm-character-links .adm-check { flex-wrap: wrap; overflow-wrap: anywhere; }

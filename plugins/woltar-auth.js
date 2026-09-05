@@ -165,7 +165,7 @@ export default function woltarAuth() {
             if (parts[1] && parts[2] === 'profile') {
               if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, parts[1]) })
               if (req.method === 'POST') return send(201, { profile: await createPlayerProfile(root, parts[1], await readJson(req)) })
-              if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, parts[1], await readJson(req)) })
+              if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, parts[1], await readJson(req), { allowAllCharacters: true }) })
               if (req.method === 'DELETE') {
                 await deletePlayerProfile(root, parts[1])
                 return send(200, { ok: true })
