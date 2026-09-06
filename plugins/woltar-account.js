@@ -287,11 +287,12 @@ export default function woltarAccount() {
             if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, user.id, await readJson(req), { allowSystemCharacters: isAdmin(user) }) })
           }
 
-          // Upload de l'avatar joueur — miroir de worker/routes/account.js
-          // (même règle : `kind` toujours forcé à 'image', un avatar n'est
-          // jamais un fichier audio).
+          // Upload d'image de compte — miroir de worker/routes/account.js
+          // (avatar joueur ET portraits de personnages/clans/lieux édités
+          // depuis /compte) : ouvert à toute utilisatrice connectée, pas
+          // seulement au statut RPiste — voir le commentaire côté Worker
+          // pour le détail. `kind` toujours forcé à 'image'.
           if (parts[0] === 'upload' && parts.length === 1) {
-            assertCanManagePlayerProfile(user)
             if (req.method !== 'POST') return send(405, { error: 'Méthode non autorisée' })
             const { filename, dataUrl } = await readJson(req)
             const result = await saveMediaLocal(root, { filename, dataUrl, kind: 'image' })

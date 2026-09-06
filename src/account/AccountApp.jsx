@@ -19,6 +19,7 @@ import {
   getPlayerProfile,
   updateAccountRow,
   savePlayerProfile,
+  uploadAccountImage,
   uploadAvatar,
 } from '../lib/accountApi.js'
 import { SCHEMA } from '../admin/schema.js'
@@ -1041,7 +1042,12 @@ function AccountEdit({ data, reload, user }) {
                     onChange={(value) => setField(field.key, value)}
                     allData={data}
                     disabled={saving}
-                    uploadEnabled={import.meta.env.DEV && !saving}
+                    // Portraits de personnages/clans/lieux édités depuis
+                    // /compte : upload réel via /__account/api/upload (pas
+                    // le endpoint admin, réservé aux administratrices), et
+                    // plus limité au dev — voir uploadAccountImage.
+                    uploadEnabled={!saving}
+                    uploadFn={uploadAccountImage}
                   />
                 </div>
               ))}

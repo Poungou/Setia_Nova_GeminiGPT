@@ -353,14 +353,18 @@ export async function handleAccount(request, env, parts) {
       if (method === 'PUT') return json({ profile: await savePlayerProfile(env, user.id, await readJson(request), { allowSystemCharacters: isAdmin(user) }) })
     }
 
-    // Upload de l'avatar joueur — même mécanisme de stockage que /__admin
-    // (voir worker/lib/mediaStore.js), mais ouvert à toute joueuse pouvant
-    // gérer un profil (pas besoin d'être admin) : seule sa propre session
-    // compte, il n'y a pas d'id de compte ciblé dans l'URL. `kind` est
-    // volontairement forcé à 'image' ici, quoi qu'envoie le client — un
-    // avatar n'est jamais un fichier audio.
+    // Upload d'image de compte — même mécanisme de stockage que /__admin
+    // (voir worker/lib/mediaStore.js). Utilisé pour l'avatar joueur ET pour
+    // les portraits de personnages/clans/lieux édités depuis /compte (voir
+    // src/account/AccountApp.jsx) : ouvert à toute utilisatrice connectée
+    // (le `getRequestUser` en tête de handleAccount suffit), pas seulement
+    // au statut RPiste — cette route ne fait qu'écrire un fichier et
+    // renvoyer son URL, elle n'accorde aucun droit d'écriture sur une fiche.
+    // Le vrai contrôle d'accès reste sur la sauvegarde elle-même (canCreate/
+    // assertCanEdit pour les collections, assertCanManagePlayerProfile pour
+    // /profile juste au-dessus). `kind` est volontairement forcé à 'image'
+    // ici, quoi qu'envoie le client — jamais de fichier audio par ce biais.
     if (parts[0] === 'upload' && parts.length === 1) {
-      assertCanManagePlayerProfile(user)
       if (method !== 'POST') return json({ error: 'Methode non autorisee' }, { status: 405 })
       const body = await readJson(request)
       const result = await saveMedia(env, { filename: body?.filename, dataUrl: body?.dataUrl, kind: 'image' })

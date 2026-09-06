@@ -117,9 +117,15 @@ export async function savePlayerProfile(profile) {
   }))
 }
 
-// Avatar joueur — même mécanisme d'upload que src/admin/adminApi.js
-// (voir src/lib/mediaUpload.js), mais vers la route compte (ouverte à
-// toute joueuse pouvant gérer un profil, pas seulement une administratrice).
-export async function uploadAvatar(file) {
+// Upload d'image de compte — même mécanisme que src/admin/adminApi.js (voir
+// src/lib/mediaUpload.js), mais vers la route compte : ouverte à toute
+// utilisatrice connectée (pas seulement une administratrice), `kind` est
+// toujours forcé à 'image' côté serveur. Utilisé pour l'avatar joueur
+// (uploadAvatar) ET pour les portraits de personnages/clans/lieux édités
+// depuis /compte (uploadAccountImage, voir src/account/AccountApp.jsx) —
+// même route serveur, juste deux noms plus clairs à l'usage.
+export async function uploadAccountImage(file) {
   return uploadMedia(file, { kind: 'image', endpoint: `${BASE}/upload` })
 }
+
+export const uploadAvatar = uploadAccountImage

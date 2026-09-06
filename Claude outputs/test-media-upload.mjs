@@ -12,7 +12,11 @@
 // fichier invalide (mauvais type), fichier trop lourd, URL manuelle
 // toujours fonctionnelle (le champ src/avatar accepte toujours une simple
 // chaîne sans passer par /upload), + séparation des permissions
-// (admin-only pour la musique, RPiste/admin pour l'avatar).
+// (admin-only pour la musique ; /__account/api/upload ouvert à toute
+// session valide — avatar ET portraits de personnages/clans/lieux édités
+// depuis /compte, voir worker/routes/account.js — la permission RPiste/
+// admin ne s'applique qu'à l'enregistrement du profil joueur lui-même,
+// pas à l'upload d'un fichier).
 
 import { DatabaseSync } from 'node:sqlite'
 import { readFileSync } from 'node:fs'
@@ -204,10 +208,22 @@ const membreSession = createSessionToken(env, await loginUser(env, { identifier:
 // ---------------------------------------------------------------------
 {
   const noAuth = await handleAccount(request('/__account/api/upload', 'POST', { filename: 'a.png', dataUrl: PNG_1PX }), env, ['upload'])
-  assert(noAuth.status === 401, 'upload avatar refuse sans session')
+  assert(noAuth.status === 401, 'upload compte refuse sans session')
 
-  const notRpiste = await handleAccount(request('/__account/api/upload', 'POST', { filename: 'a.png', dataUrl: PNG_1PX }, membreSession), env, ['upload'])
-  assert(notRpiste.status === 403, 'upload avatar refuse un compte ni admin ni RPiste')
+  // L'upload lui-même (écrire un fichier, recevoir une URL) est ouvert à
+  // toute session valide — y compris un compte ni admin ni RPiste, ex. une
+  // joueuse ayant seulement la permission "create_character" : c'est cette
+  // route qu'utilisent aussi les portraits de personnages édités depuis
+  // /compte (voir src/account/AccountApp.jsx), pas seulement l'avatar.
+  const membreUploadRes = await handleAccount(request('/__account/api/upload', 'POST', { filename: 'portrait-perso.png', dataUrl: PNG_1PX }, membreSession), env, ['upload'])
+  const membreUploadBody = await membreUploadRes.json()
+  assert(membreUploadRes.status === 200 && /^\/uploads\/images\/portrait-perso-.*\.png$/.test(membreUploadBody.path), `upload compte (ni admin ni RPiste) -> chemin propre (${membreUploadBody.path})`)
+
+  // ... mais le vrai garde-fou reste ailleurs : un compte ni admin ni
+  // RPiste ne peut toujours pas enregistrer de profil joueur (avatar y
+  // compris), même avec une URL déjà uploadée avec succès ci-dessus.
+  const membreProfile = await handleAccount(request('/__account/api/profile', 'PUT', { avatar: membreUploadBody.path, profile_public: true }, membreSession), env, ['profile'])
+  assert(membreProfile.status === 403, 'enregistrer un profil joueur (avatar) reste refusé à un compte ni admin ni RPiste')
 
   const avatarRes = await handleAccount(request('/__account/api/upload', 'POST', { filename: 'Mon Avatar.png', dataUrl: PNG_1PX }, rpisteSession), env, ['upload'])
   const avatarBody = await avatarRes.json()

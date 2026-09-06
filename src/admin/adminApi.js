@@ -15,7 +15,14 @@ import { uploadMedia } from '../lib/mediaUpload.js'
 const BASE = '/__admin/api'
 
 export const adminAvailable = import.meta.env.VITE_WOLTAR_ADMIN_BACKEND !== 'disabled'
-export const localFileUploadsAvailable = import.meta.env.DEV
+// L'upload de fichiers locaux (portraits, galerie...) passe par
+// /__admin/api/upload, qui fonctionne aussi bien en dev (plugin Vite) qu'en
+// production (Worker Cloudflare + R2 — voir worker/lib/mediaStore.js).
+// Auparavant restreint à `import.meta.env.DEV`, ce qui désactivait
+// silencieusement le bouton « Choisir un fichier » en production alors que
+// l'API le supporte réellement : on s'aligne simplement sur la disponibilité
+// du backend admin.
+export const localFileUploadsAvailable = adminAvailable
 export const adminStorageLabel = import.meta.env.DEV ? 'src/data/*.json' : 'Cloudflare D1'
 
 async function json(res) {
