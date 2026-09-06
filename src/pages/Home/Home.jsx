@@ -118,7 +118,7 @@ export default function Home() {
             </motion.dl>
 
             <motion.div {...itemMotion}>
-              <Link to="/personnages#players-title" className="hero__players-link">
+              <Link to="/joueurs" className="hero__players-link">
                 Voir les joueurs de Woltar Nova →
               </Link>
             </motion.div>

@@ -1,7 +1,7 @@
 import { isCharacterLinked } from '../../lib/characterLinks.js'
 import { useMemo, useState } from 'react'
 import { usePublicCharacters, usePublicPlayers } from '../../lib/publicData.js'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
@@ -141,11 +141,6 @@ export default function Characters() {
           <p className="characters-page__intro">
             Chaque visage conserve une histoire. Certaines sont encore en train de s&rsquo;écrire.
           </p>
-        </Reveal>
-
-        <Reveal as="section" className="players-section" aria-labelledby="players-title">
-          <div className="characters-page__section-head"><span className="eyebrow">Joueurs</span><h2 id="players-title">Les joueurs — qui sont-ils ?</h2></div>
-          <Link to="/joueurs" className="btn">Rencontrer les joueurs →</Link>
         </Reveal>
 
         <Reveal as="section" className="characters-featured" aria-labelledby="characters-featured-title">
