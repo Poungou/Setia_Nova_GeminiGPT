@@ -13,7 +13,7 @@
   padding: var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
-  background: var(--gradient-card);
+  background: var(--gradient-card), var(--bg-raised);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 6px 20px -16px rgba(0, 0, 0, 0.55);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -58,6 +58,11 @@
 
 .players-card__name {
   margin-top: 0.1rem;
+  /* Couleur explicite requise : `color` est hérité (pas re-résolu par
+     élément), donc sans ceci le h2 garde la teinte --ivory calculée plus
+     haut dans l'arbre au lieu de la valeur ré-aliasée par .players-card
+     en thème woltar/clair (contraste illisible sur fond clair). */
+  color: var(--ivory);
   font-size: 1.25rem;
   overflow-wrap: anywhere;
 }

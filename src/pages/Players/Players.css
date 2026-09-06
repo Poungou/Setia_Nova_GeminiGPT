@@ -161,7 +161,10 @@
 .players-section {
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
-  background: linear-gradient(160deg, rgba(139, 36, 56, 0.05), rgba(51, 64, 122, 0.04)), var(--gradient-card);
+  /* Couche opaque var(--bg-raised) requise en plus des dégradés translucides :
+     sans elle, le fond sombre de la page transparaît sous la carte en thème
+     woltar/clair (contraste illisible) — même correctif que PlayerCard.css. */
+  background: linear-gradient(160deg, rgba(139, 36, 56, 0.05), rgba(51, 64, 122, 0.04)), var(--gradient-card), var(--bg-raised);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 20px -14px rgba(0, 0, 0, 0.6);
   padding: var(--space-3);
 }
