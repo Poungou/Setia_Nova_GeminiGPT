@@ -14,10 +14,9 @@
   z-index: 0;
 }
 
-:root[data-theme='dark'] .ambient--dark-media ~ .site-header,
+/* Keep the header's own sticky/z-index layer above page content and dropdowns. */
 :root[data-theme='dark'] .ambient--dark-media ~ .page-main,
 :root[data-theme='dark'] .ambient--dark-media ~ .site-footer,
-:root[data-theme='light'] .ambient--light-media ~ .site-header,
 :root[data-theme='light'] .ambient--light-media ~ .page-main,
 :root[data-theme='light'] .ambient--light-media ~ .site-footer {
   position: relative;

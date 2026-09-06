@@ -15,7 +15,7 @@ test('DOM: universal navigation, account access, public players, nested spoilers
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
   const React = await import('react')
   const { createRoot } = await import('react-dom/client')
-  const { MemoryRouter } = await import('react-router-dom')
+  const { MemoryRouter, useLocation } = await import('react-router-dom')
   const { act, createElement: h } = React
   const cache = path.resolve('node_modules/.cache')
   mkdirSync(cache, { recursive: true })
@@ -34,6 +34,7 @@ test('DOM: universal navigation, account access, public players, nested spoilers
       } }],
     })
     const { Header, Players, Timeline, About, Chat } = await import(pathToFileURL(path.join(temporary, 'components.mjs')))
+    function LocationProbe() { return h('output', { id: 'current-route' }, useLocation().pathname) }
     const mount = async (element, route = '/journal') => act(async () => { root.render(h(MemoryRouter, { key: route, initialEntries: [route], future: { v7_startTransition: true, v7_relativeSplatPath: true } }, element)) })
     const click = async (element) => { assert(element); await act(async () => element.click()) }
     await mount(h(Header))
@@ -58,6 +59,29 @@ test('DOM: universal navigation, account access, public players, nested spoilers
     await click(document.querySelector('.site-header__toggle'))
     await click(document.querySelector('#navigation-mobile .site-header__caret'))
     assert(document.querySelector('#universe-mobile a[href="/chronologie"]'), 'still works after changing route')
+
+    // Assert router navigation, not merely the menu closing. Browser tests
+    // additionally cover hit testing and native Enter/Space activation.
+    for (const origin of ['/univers', '/journal']) {
+      for (const mobile of [false, true]) {
+        for (const destination of ['/clans', '/lieux', '/chronologie']) {
+          for (const method of ['click', 'space']) {
+            await mount(h(React.Fragment, null, h(Header), h(LocationProbe)), `${origin}?case=${mobile}-${destination}-${method}`)
+            if (mobile) await click(document.querySelector('.site-header__toggle'))
+            const trigger = document.querySelector(mobile ? '#navigation-mobile .site-header__caret' : '.site-header__nav--desktop .site-header__caret')
+            await click(trigger)
+            const entry = document.querySelector(`${mobile ? '#universe-mobile' : '#universe-desktop'} a[href="${destination}"]`)
+            await act(async () => { trigger.focus(); entry.focus() })
+            assert.equal(trigger.getAttribute('aria-expanded'), 'true', 'focus within menu must not close it')
+            if (method === 'click') await click(entry)
+            else await act(async () => entry.dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })))
+            assert.equal(document.getElementById('current-route').textContent, destination)
+            assert.equal(document.getElementById('universe-desktop').hidden, true)
+            assert.equal(document.getElementById('navigation-mobile'), null)
+          }
+        }
+      }
+    }
     globalThis.fetch = async () => ({ ok: true, json: async () => ({ user: null }) })
     await mount(h(Header), '/visiteur')
     assert.equal(document.querySelector('.site-header__account').textContent, 'Connexion')

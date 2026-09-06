@@ -27,6 +27,14 @@ const NAV_LINKS = [
   { to: '/aether', label: 'Aether' },
 ]
 
+// Links already support Enter. Also allow Space without scrolling the page.
+function activateLinkOnSpace(event) {
+  if (event.key === ' ' && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+    event.preventDefault()
+    if (!event.repeat) event.currentTarget.click()
+  }
+}
+
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [desktopGroupOpen, setDesktopGroupOpen] = useState(null)
@@ -128,6 +136,7 @@ export default function Header() {
                     <NavLink
                       key={child.to}
                       to={child.to}
+                      onKeyDown={activateLinkOnSpace}
                       onClick={() => setDesktopGroupOpen(null)}
                       className={({ isActive }) =>
                         'site-header__submenu-link' + (isActive ? ' is-active' : '')
@@ -194,6 +203,7 @@ export default function Header() {
                       <NavLink
                         key={child.to}
                         to={child.to}
+                        onKeyDown={activateLinkOnSpace}
                         onClick={() => setOpen(false)}
                         className={({ isActive }) => 'site-header__link' + (isActive ? ' is-active' : '')}
                       >
