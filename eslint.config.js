@@ -34,6 +34,10 @@ const workerGlobals = {
   ...nodeGlobals,
   AbortController: 'readonly',
   Response: 'readonly',
+  Request: 'readonly',
+  Headers: 'readonly',
+  atob: 'readonly',
+  btoa: 'readonly',
 }
 
 export default [
