@@ -14,6 +14,14 @@ export function Field({
   allData,
   disabled = !adminAvailable,
   uploadEnabled = adminAvailable,
+  // Fonction d'upload à utiliser (défaut : uploadImage, vers /__admin/api/upload).
+  // Permet de réutiliser ImageInput/GalleryInput ailleurs qu'en admin — ex.
+  // l'avatar joueur dans src/account/AccountApp.jsx passe uploadAvatar
+  // (vers /__account/api/upload) plutôt que de dupliquer ce composant.
+  uploadFn,
+  // false pour un champ 'image' stocké tel quel en base (chaîne simple,
+  // jamais { src, focus }) — voir ImageInput plus bas.
+  allowFocus = true,
 }) {
   const common = { id: `f-${field.key}`, disabled }
   switch (field.type) {
@@ -65,7 +73,16 @@ export function Field({
     case 'tags':
       return <TagsInput value={value || []} onChange={onChange} disabled={disabled} />
     case 'image':
-      return <ImageInput value={value || ''} onChange={onChange} disabled={disabled} uploadEnabled={uploadEnabled} />
+      return (
+        <ImageInput
+          value={value || ''}
+          onChange={onChange}
+          disabled={disabled}
+          uploadEnabled={uploadEnabled}
+          uploadFn={uploadFn}
+          allowFocus={allowFocus}
+        />
+      )
     case 'gallery':
       return (
         <GalleryInput
@@ -73,6 +90,7 @@ export function Field({
           onChange={onChange}
           disabled={disabled}
           uploadEnabled={uploadEnabled}
+          uploadFn={uploadFn}
         />
       )
     case 'refs':
@@ -195,12 +213,18 @@ function parseFocus(focus) {
   return m ? { x: Number(m[1]), y: Number(m[2]) } : { x: 50, y: 50 }
 }
 
+// allowFocus=false désactive le cadrage par point de focus et force `value`
+// à rester une simple chaîne (jamais l'objet { src, focus }) — nécessaire
+// pour les champs stockés tels quels en base (ex. l'avatar joueur, colonne
+// TEXT `user_profiles.avatar`, voir src/account/AccountApp.jsx).
 function ImageInput({
   value,
   onChange,
   disabled = false,
   uploadEnabled = adminAvailable,
+  uploadFn = uploadImage,
   showManualInput = true,
+  allowFocus = true,
 }) {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -211,8 +235,9 @@ function ImageInput({
   const focus = imgFocus(value)
   const { x: fx, y: fy } = parseFocus(focus)
 
-  const setSrc = (nextSrc) => onChange(makeImageValue(nextSrc, focus))
+  const setSrc = (nextSrc) => onChange(allowFocus ? makeImageValue(nextSrc, focus) : nextSrc)
   const setFocus = (x, y) => {
+    if (!allowFocus) return
     const cx = Math.min(100, Math.max(0, Math.round(x)))
     const cy = Math.min(100, Math.max(0, Math.round(y)))
     onChange(makeImageValue(src, `${cx}% ${cy}%`))
@@ -226,7 +251,8 @@ function ImageInput({
     setBusy(true)
     setErr('')
     try {
-      onChange(makeImageValue(await uploadImage(file), focus))
+      const path = await uploadFn(file)
+      onChange(allowFocus ? makeImageValue(path, focus) : path)
     } catch (e2) {
       setErr(String(e2.message || e2))
     } finally {
@@ -243,39 +269,50 @@ function ImageInput({
   return (
     <div className="adm-image">
       {src ? (
-        <>
-          <div
-            ref={frameRef}
-            className="adm-focus"
-            onPointerDown={(e) => {
-              if (disabled) return
-              dragging.current = true
-              e.currentTarget.setPointerCapture(e.pointerId)
-              moveTo(e.clientX, e.clientY)
-            }}
-            onPointerMove={(e) => dragging.current && moveTo(e.clientX, e.clientY)}
-            onPointerUp={(e) => {
-              dragging.current = false
-              e.currentTarget.releasePointerCapture?.(e.pointerId)
-            }}
-          >
-            <img src={src} alt="" style={{ objectPosition: `${fx}% ${fy}%` }} />
-            <span className="adm-focus__dot" style={{ left: `${fx}%`, top: `${fy}%` }}>
-              <Move size={12} />
-            </span>
-          </div>
-          <p className="adm-hint">
-            Glisse le point pour choisir la partie visible en vignette ({fx}% {fy}%).
-          </p>
-          <div className="adm-row">
-            <button type="button" className="adm-btn adm-btn--ghost" onClick={() => setFocus(50, 50)} disabled={disabled}>
-              Recentrer
-            </button>
-            <button type="button" className="adm-btn adm-btn--ghost" onClick={() => onChange('')} disabled={disabled}>
-              Retirer
-            </button>
-          </div>
-        </>
+        allowFocus ? (
+          <>
+            <div
+              ref={frameRef}
+              className="adm-focus"
+              onPointerDown={(e) => {
+                if (disabled) return
+                dragging.current = true
+                e.currentTarget.setPointerCapture(e.pointerId)
+                moveTo(e.clientX, e.clientY)
+              }}
+              onPointerMove={(e) => dragging.current && moveTo(e.clientX, e.clientY)}
+              onPointerUp={(e) => {
+                dragging.current = false
+                e.currentTarget.releasePointerCapture?.(e.pointerId)
+              }}
+            >
+              <img src={src} alt="" style={{ objectPosition: `${fx}% ${fy}%` }} />
+              <span className="adm-focus__dot" style={{ left: `${fx}%`, top: `${fy}%` }}>
+                <Move size={12} />
+              </span>
+            </div>
+            <p className="adm-hint">
+              Glisse le point pour choisir la partie visible en vignette ({fx}% {fy}%).
+            </p>
+            <div className="adm-row">
+              <button type="button" className="adm-btn adm-btn--ghost" onClick={() => setFocus(50, 50)} disabled={disabled}>
+                Recentrer
+              </button>
+              <button type="button" className="adm-btn adm-btn--ghost" onClick={() => onChange('')} disabled={disabled}>
+                Retirer
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="adm-image__preview">
+              <img src={src} alt="" />
+              <button type="button" className="adm-btn adm-btn--ghost" onClick={() => onChange('')} disabled={disabled}>
+                Retirer
+              </button>
+            </div>
+          </>
+        )
       ) : (
         <p className="adm-muted">Aucune image</p>
       )}
@@ -297,7 +334,7 @@ function ImageInput({
   )
 }
 
-function GalleryInput({ value, onChange, disabled, uploadEnabled }) {
+function GalleryInput({ value, onChange, disabled, uploadEnabled, uploadFn }) {
   const [draft, setDraft] = useState('')
   const addDraft = () => {
     const src = imgSrc(draft.trim())
@@ -326,6 +363,7 @@ function GalleryInput({ value, onChange, disabled, uploadEnabled }) {
           onChange={(p) => p && onChange([...value, imgSrc(p)])}
           disabled={disabled}
           uploadEnabled={uploadEnabled}
+          uploadFn={uploadFn}
           showManualInput={false}
         />
       )}

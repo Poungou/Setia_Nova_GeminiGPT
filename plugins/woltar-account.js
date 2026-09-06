@@ -38,10 +38,15 @@ import {
 } from './lib/authStore.js'
 import { addClanMember, listClanMembers, removeClan, removeClanMember } from './lib/clanMembers.js'
 import { canCreate, CREATE_PERMISSIONS } from '../worker/lib/permissions.js'
+import { saveMediaLocal } from './lib/mediaStore.js'
 import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
 import { normalizeTimelineEvents } from '../src/lib/timelineEvents.js'
 
-const MAX_BODY_BYTES = 1024 * 1024
+// 1 Mo suffit largement aux payloads JSON habituels (fiches, profils...),
+// mais l'upload d'avatar (image en base64, voir la route /upload plus bas)
+// a besoin de plus de marge — jusqu'à ~8 Mo d'image + ~33% d'overhead
+// base64 + l'enveloppe JSON.
+const MAX_BODY_BYTES = 12 * 1024 * 1024
 const REFERENCE_COLLECTIONS = ['events', 'archives']
 const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts', 'timelines'])
 
@@ -280,6 +285,17 @@ export default function woltarAccount() {
             assertCanManagePlayerProfile(user)
             if (req.method === 'GET') return send(200, { profile: await getPlayerProfile(root, user.id) })
             if (req.method === 'PUT') return send(200, { profile: await savePlayerProfile(root, user.id, await readJson(req), { allowSystemCharacters: isAdmin(user) }) })
+          }
+
+          // Upload de l'avatar joueur — miroir de worker/routes/account.js
+          // (même règle : `kind` toujours forcé à 'image', un avatar n'est
+          // jamais un fichier audio).
+          if (parts[0] === 'upload' && parts.length === 1) {
+            assertCanManagePlayerProfile(user)
+            if (req.method !== 'POST') return send(405, { error: 'Méthode non autorisée' })
+            const { filename, dataUrl } = await readJson(req)
+            const result = await saveMediaLocal(root, { filename, dataUrl, kind: 'image' })
+            return send(200, result)
           }
 
           if (parts[0] === 'bootstrap' && req.method === 'GET') {

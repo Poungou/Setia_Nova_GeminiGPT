@@ -1,3 +1,5 @@
+import { uploadMedia } from './mediaUpload.js'
+
 const BASE = '/__account/api'
 
 async function json(res) {
@@ -113,4 +115,11 @@ export async function savePlayerProfile(profile) {
   return json(await fetch(`${BASE}/profile`, {
     method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile),
   }))
+}
+
+// Avatar joueur — même mécanisme d'upload que src/admin/adminApi.js
+// (voir src/lib/mediaUpload.js), mais vers la route compte (ouverte à
+// toute joueuse pouvant gérer un profil, pas seulement une administratrice).
+export async function uploadAvatar(file) {
+  return uploadMedia(file, { kind: 'image', endpoint: `${BASE}/upload` })
 }

@@ -7,10 +7,54 @@
 // collection de fiches mais un unique blob de réglages + une petite liste
 // de pistes (titre/URL/ordre/actif).
 import { useEffect, useState } from 'react'
-import { Save, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
-import { getSiteSetting, saveSiteSetting } from './adminApi.js'
+import { Save, Plus, Trash2, ArrowUp, ArrowDown, Upload } from 'lucide-react'
+import { getSiteSetting, saveSiteSetting, uploadAudio } from './adminApi.js'
 import { DEFAULT_MUSIC_SETTINGS, normalizeMusicSettings } from '../lib/musicSettings.js'
 import { useAdmin } from './useAdmin.js'
+
+// Bouton "Choisir un fichier audio" pour une piste — upload vers le
+// stockage média existant (voir src/lib/mediaUpload.js), aperçu du nom de
+// fichier envoyé, message d'erreur propre si refusé (type/taille). Le
+// champ URL juste au-dessus reste toujours modifiable en alternative.
+function TrackAudioUpload({ disabled, onUploaded }) {
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [filename, setFilename] = useState('')
+
+  const pick = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setBusy(true)
+    setErr('')
+    try {
+      const path = await uploadAudio(file)
+      setFilename(file.name)
+      onUploaded(path, file.name)
+    } catch (e2) {
+      setErr(String(e2.message || e2))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="adm-music-track__upload">
+      <label className={`adm-btn adm-btn--ghost ${disabled || busy ? 'adm-btn--disabled' : ''}`}>
+        <Upload size={14} /> {busy ? 'Envoi…' : 'Choisir un fichier audio'}
+        <input
+          type="file"
+          accept="audio/mpeg,audio/mp3,audio/ogg,audio/wav,audio/x-wav,audio/wave,.mp3,.ogg,.wav"
+          hidden
+          onChange={pick}
+          disabled={disabled || busy}
+        />
+      </label>
+      {filename && <span className="adm-hint adm-music-track__filename">{filename}</span>}
+      {err && <p className="adm-error">{err}</p>}
+    </div>
+  )
+}
 
 const MODE_OPTIONS = [
   ['off', 'Aucune musique'],
@@ -169,46 +213,57 @@ export default function AdminMusicPage() {
               {settings.tracks.length === 0 && <p className="adm-muted">Aucune piste. Ajoute-en une ci-dessous.</p>}
               {settings.tracks.map((track, i) => (
                 <div key={track.id} className="adm-music-track">
-                  <div className="adm-music-track__reorder">
-                    <button type="button" className="adm-btn adm-btn--ghost" disabled={adminReadOnly || i === 0} onClick={() => reorder(i, -1)} aria-label="Monter">
-                      <ArrowUp size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn--ghost"
-                      disabled={adminReadOnly || i === settings.tracks.length - 1}
-                      onClick={() => reorder(i, 1)}
-                      aria-label="Descendre"
-                    >
-                      <ArrowDown size={14} />
+                  <div className="adm-music-track__fields">
+                    <div className="adm-music-track__reorder">
+                      <button type="button" className="adm-btn adm-btn--ghost" disabled={adminReadOnly || i === 0} onClick={() => reorder(i, -1)} aria-label="Monter">
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn--ghost"
+                        disabled={adminReadOnly || i === settings.tracks.length - 1}
+                        onClick={() => reorder(i, 1)}
+                        aria-label="Descendre"
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+                    <input
+                      className="adm-input"
+                      placeholder="Titre"
+                      value={track.title}
+                      disabled={adminReadOnly}
+                      onChange={(e) => setTrack(track.id, { title: e.target.value })}
+                    />
+                    <input
+                      className="adm-input"
+                      placeholder="Fichier audio ou URL (ex. /media/musique/piste.mp3)"
+                      value={track.src}
+                      disabled={adminReadOnly}
+                      onChange={(e) => setTrack(track.id, { src: e.target.value })}
+                    />
+                    <label className="adm-music-track__active">
+                      <input
+                        type="checkbox"
+                        checked={track.active}
+                        disabled={adminReadOnly}
+                        onChange={(e) => setTrack(track.id, { active: e.target.checked })}
+                      />
+                      Actif
+                    </label>
+                    <button type="button" className="adm-btn adm-btn--danger" disabled={adminReadOnly} onClick={() => removeTrack(track.id)} aria-label="Supprimer la piste">
+                      <Trash2 size={14} />
                     </button>
                   </div>
-                  <input
-                    className="adm-input"
-                    placeholder="Titre"
-                    value={track.title}
+                  <TrackAudioUpload
                     disabled={adminReadOnly}
-                    onChange={(e) => setTrack(track.id, { title: e.target.value })}
+                    onUploaded={(path, filename) =>
+                      setTrack(track.id, {
+                        src: path,
+                        title: track.title || filename.replace(/\.[^.]+$/, ''),
+                      })
+                    }
                   />
-                  <input
-                    className="adm-input"
-                    placeholder="Fichier audio ou URL (ex. /media/musique/piste.mp3)"
-                    value={track.src}
-                    disabled={adminReadOnly}
-                    onChange={(e) => setTrack(track.id, { src: e.target.value })}
-                  />
-                  <label className="adm-music-track__active">
-                    <input
-                      type="checkbox"
-                      checked={track.active}
-                      disabled={adminReadOnly}
-                      onChange={(e) => setTrack(track.id, { active: e.target.checked })}
-                    />
-                    Actif
-                  </label>
-                  <button type="button" className="adm-btn adm-btn--danger" disabled={adminReadOnly} onClick={() => removeTrack(track.id)} aria-label="Supprimer la piste">
-                    <Trash2 size={14} />
-                  </button>
                 </div>
               ))}
             </div>

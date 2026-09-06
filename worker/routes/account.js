@@ -66,6 +66,7 @@ import {
   updateRow,
   updateTimeline,
 } from '../lib/contentStore.js'
+import { saveMedia } from '../lib/mediaStore.js'
 import { canCreate, CREATE_PERMISSIONS } from '../lib/permissions.js'
 import { getPlayerProfile, savePlayerProfile } from '../lib/playerProfiles.js'
 import { normalizeTimelineEvents } from '../../src/lib/timelineEvents.js'
@@ -350,6 +351,20 @@ export async function handleAccount(request, env, parts) {
       assertCanManagePlayerProfile(user)
       if (method === 'GET') return json({ profile: await getPlayerProfile(env, user.id) })
       if (method === 'PUT') return json({ profile: await savePlayerProfile(env, user.id, await readJson(request), { allowSystemCharacters: isAdmin(user) }) })
+    }
+
+    // Upload de l'avatar joueur — même mécanisme de stockage que /__admin
+    // (voir worker/lib/mediaStore.js), mais ouvert à toute joueuse pouvant
+    // gérer un profil (pas besoin d'être admin) : seule sa propre session
+    // compte, il n'y a pas d'id de compte ciblé dans l'URL. `kind` est
+    // volontairement forcé à 'image' ici, quoi qu'envoie le client — un
+    // avatar n'est jamais un fichier audio.
+    if (parts[0] === 'upload' && parts.length === 1) {
+      assertCanManagePlayerProfile(user)
+      if (method !== 'POST') return json({ error: 'Methode non autorisee' }, { status: 405 })
+      const body = await readJson(request)
+      const result = await saveMedia(env, { filename: body?.filename, dataUrl: body?.dataUrl, kind: 'image' })
+      return json(result)
     }
 
     if (parts[0] === 'bootstrap' && method === 'GET') {

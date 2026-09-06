@@ -10,6 +10,8 @@
 // claude/architecture-decisions.md. Les personnages créés en production
 // passent par /compte (D1), pas par /admin — voir src/lib/accountApi.js.
 
+import { uploadMedia } from '../lib/mediaUpload.js'
+
 const BASE = '/__admin/api'
 
 export const adminAvailable = import.meta.env.VITE_WOLTAR_ADMIN_BACKEND !== 'disabled'
@@ -59,54 +61,22 @@ export async function saveSiteSetting(key, data) {
   return body.data
 }
 
-export function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader()
-    r.onload = () => resolve(r.result)
-    r.onerror = () => reject(r.error)
-    r.readAsDataURL(file)
-  })
-}
+// Ré-exporté pour compatibilité ascendante — l'implémentation vit
+// maintenant dans le module partagé src/lib/mediaUpload.js.
+export { fileToDataUrl } from '../lib/mediaUpload.js'
 
-// Redimensionne et compresse en WebP avant l'envoi (les PNG bruts font
-// facilement plusieurs Mo — inutile pour un affichage web, et ça alourdit le
-// dépôt). SVG et GIF passent tels quels (pas de rasterisation / on garde l'animation).
-const MAX_EDGE = 1800
-const PASSTHROUGH = ['image/svg+xml', 'image/gif']
-
-async function prepareImage(file) {
-  if (PASSTHROUGH.includes(file.type)) {
-    return { filename: file.name, dataUrl: await fileToDataUrl(file) }
-  }
-  const srcUrl = await fileToDataUrl(file)
-  const img = await new Promise((resolve, reject) => {
-    const i = new Image()
-    i.onload = () => resolve(i)
-    i.onerror = () => reject(new Error('Image illisible'))
-    i.src = srcUrl
-  })
-  const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height))
-  if (scale === 1 && file.size < 400 * 1024) {
-    return { filename: file.name, dataUrl: srcUrl }
-  }
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.round(img.width * scale)
-  canvas.height = Math.round(img.height * scale)
-  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
-  const dataUrl = canvas.toDataURL('image/webp', 0.85)
-  const base = file.name.replace(/\.[^.]+$/, '')
-  return { filename: `${base}.webp`, dataUrl }
-}
-
+// Upload d'image — portraits, galerie, emblèmes de clan, couvertures du
+// Journal, images de lieux... tous les champs "image"/"gallery" de
+// src/admin/Fields.jsx passent par ici par défaut. Compression WebP côté
+// client avant l'envoi (voir src/lib/mediaUpload.js).
 export async function uploadImage(file) {
-  const payload = await prepareImage(file)
-  const body = await json(
-    await fetch(`${BASE}/upload`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }),
-  )
-  return body.path
+  return uploadMedia(file, { kind: 'image', endpoint: `${BASE}/upload` })
+}
+
+// Upload audio — pistes de la musique de fond du site (voir
+// src/admin/AdminMusicPage.jsx). Même mécanisme de stockage que les images
+// (worker/lib/mediaStore.js / plugins/lib/mediaStore.js), pas de
+// compression côté client.
+export async function uploadAudio(file) {
+  return uploadMedia(file, { kind: 'audio', endpoint: `${BASE}/upload` })
 }

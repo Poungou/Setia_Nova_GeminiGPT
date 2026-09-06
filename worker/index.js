@@ -15,6 +15,7 @@ import { handleAccount } from './routes/account.js'
 import { handleAdmin } from './routes/admin.js'
 import { handleAether } from './routes/aether.js'
 import { handleAuth } from './routes/auth.js'
+import { handleMediaGet } from './routes/media.js'
 import { handlePublic } from './routes/public.js'
 
 const API_HANDLERS = {
@@ -34,6 +35,13 @@ export default {
     const handler = segments.length >= 2 && segments[1] === 'api' ? API_HANDLERS[segments[0]] : null
     if (handler) {
       return handler(request, env, segments.slice(2))
+    }
+
+    // /uploads/<clé> — fichiers médias uploadés à l'exécution, servis depuis
+    // R2 (voir worker/lib/mediaStore.js). Distinct de /media/... (statique,
+    // empaqueté au build) : ne passe donc jamais par env.ASSETS.
+    if (segments[0] === 'uploads' && segments.length >= 2) {
+      return handleMediaGet(request, env, segments.slice(1).join('/'))
     }
 
     return env.ASSETS.fetch(request)

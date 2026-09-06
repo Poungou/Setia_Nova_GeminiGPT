@@ -700,6 +700,17 @@ textarea.adm-input {
   margin-bottom: 0.6rem;
 }
 .adm-music-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.adm-music-track:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.adm-music-track__fields {
   display: grid;
   grid-template-columns: auto 1fr 2fr auto auto;
   align-items: center;
@@ -718,8 +729,18 @@ textarea.adm-input {
   color: var(--ivory-dim);
   white-space: nowrap;
 }
+.adm-music-track__upload {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.adm-music-track__filename {
+  font-family: var(--font-mono, monospace);
+  word-break: break-all;
+}
 @media (max-width: 720px) {
-  .adm-music-track {
+  .adm-music-track__fields {
     grid-template-columns: 1fr 1fr;
   }
 }

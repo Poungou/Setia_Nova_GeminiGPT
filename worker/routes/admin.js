@@ -7,6 +7,7 @@
 
 import { getRequestUser, httpError, isAdmin } from '../lib/authStore.js'
 import { getCharacter, insertRow, listCharactersWithFallback, updateRow } from '../lib/contentStore.js'
+import { saveMedia } from '../lib/mediaStore.js'
 import { getSiteSetting, setSiteSetting } from '../lib/siteSettings.js'
 import { normalizeMusicSettings } from '../../src/lib/musicSettings.js'
 import homeJson from '../../src/data/home.json' with { type: 'json' }
@@ -125,8 +126,17 @@ export async function handleAdmin(request, env, parts) {
       return json({ error: 'Methode non autorisee' }, { status: 405 })
     }
 
+    // Upload média (images ET audio — musique du site, portraits, galerie,
+    // emblèmes de clan, couvertures du Journal...) : mécanisme unique
+    // partagé, voir worker/lib/mediaStore.js. `isAdmin` déjà vérifié en tête
+    // de handleAdmin, donc réservé aux administratrices ici (l'avatar joueur,
+    // ouvert à toute joueuse, passe par /__account/api/upload à la place —
+    // voir worker/routes/account.js).
     if (parts[0] === 'upload') {
-      throw httpError(501, 'Upload distant non configure. Utilise un chemin /media/... existant ou une URL.')
+      if (request.method !== 'POST') return json({ error: 'Methode non autorisee' }, { status: 405 })
+      const body = await readJson(request)
+      const result = await saveMedia(env, { filename: body?.filename, dataUrl: body?.dataUrl, kind: body?.kind })
+      return json(result)
     }
 
     // Reglages globaux clé/valeur (table D1 `site_settings`, deja existante,

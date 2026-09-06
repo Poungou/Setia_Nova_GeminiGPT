@@ -26,6 +26,22 @@
       "remote": true
     }
   ],
+  "r2_buckets": [
+    {
+      // Stockage des fichiers uploadés à l'exécution (musique du site,
+      // avatars joueurs, et potentiellement portraits/emblèmes/couvertures
+      // plus tard) — voir worker/lib/mediaStore.js. JAMAIS stocké dans D1.
+      //
+      // AVANT tout `wrangler deploy` : créer le bucket une fois avec
+      //   npx wrangler r2 bucket create woltar-media
+      // (pas fait depuis cette session — aucun déploiement effectué). En
+      // local (`wrangler dev` / `npm run cloudflare:preview`), ce binding est
+      // émulé automatiquement (état sqlite local sous .wrangler/), aucune
+      // création de bucket distant nécessaire pour tester en local.
+      "binding": "WOLTAR_MEDIA",
+      "bucket_name": "woltar-media"
+    }
+  ],
   "vars": {
     "ALLOW_PUBLIC_REGISTRATION": "true"
   },

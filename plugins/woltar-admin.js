@@ -8,30 +8,20 @@
 // Endpoints (préfixe /__admin/api) :
 //   GET  /collections/:name        -> contenu de src/data/:name.json
 //   PUT  /collections/:name        -> réécrit src/data/:name.json (corps = tableau JSON)
-//   POST /upload                   -> { filename, dataUrl } -> écrit public/media/<slug>, renvoie { path }
+//   POST /upload                   -> { filename, dataUrl, kind } -> écrit public/media/(audio/)<slug>,
+//                                      renvoie { path } — voir plugins/lib/mediaStore.js (image ET audio,
+//                                      même mécanisme que le Worker de production, worker/lib/mediaStore.js)
 //
 // En build de production, ce plugin ne fait rien : le Worker prend le relais.
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { getRequestUser, httpError, isAdmin } from './lib/authStore.js'
+import { saveMediaLocal } from './lib/mediaStore.js'
 import { getSiteSetting, setSiteSetting } from './lib/siteSettings.js'
 import { normalizeMusicSettings } from '../src/lib/musicSettings.js'
 
 const COLLECTIONS = ['home', 'characters', 'locations', 'clans', 'events', 'archives', 'posts', 'aether', 'timelines']
-const MEDIA_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg' }
-
-function slugify(s) {
-  return (
-    s
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/[^a-z0-9.]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'fichier'
-  )
-}
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -52,7 +42,6 @@ export default function woltarAdmin() {
     configureServer(server) {
       const root = server.config.root
       const dataDir = path.join(root, 'src', 'data')
-      const mediaDir = path.join(root, 'public', 'media')
 
       server.middlewares.use('/__admin/api', async (req, res) => {
         const send = (code, obj) => {
@@ -89,21 +78,14 @@ export default function woltarAdmin() {
             return send(405, { error: 'Méthode non autorisée' })
           }
 
-          // --- upload image --------------------------------------------
+          // --- upload média (image ou audio) -----------------------------
           if (parts[0] === 'upload' && req.method === 'POST') {
             const user = await getRequestUser(root, req)
             if (!user) throw httpError(401, 'Connexion requise.')
 
-            const { filename, dataUrl } = JSON.parse(await readBody(req))
-            const m = /^data:([^;]+);base64,(.+)$/s.exec(dataUrl || '')
-            if (!m) return send(400, { error: 'dataUrl invalide' })
-            const ext = MEDIA_EXT[m[1]]
-            if (!ext) return send(400, { error: `Type non supporté : ${m[1]}` })
-            if (!existsSync(mediaDir)) await mkdir(mediaDir, { recursive: true })
-            const base = slugify((filename || 'image').replace(/\.[^.]+$/, ''))
-            const finalName = `${base}-${Date.now().toString(36)}${ext}`
-            await writeFile(path.join(mediaDir, finalName), Buffer.from(m[2], 'base64'))
-            return send(200, { path: `/media/${finalName}` })
+            const { filename, dataUrl, kind } = JSON.parse(await readBody(req))
+            const result = await saveMediaLocal(root, { filename, dataUrl, kind })
+            return send(200, result)
           }
 
           // --- réglages globaux (clé/valeur, équivalent site_settings) ----
