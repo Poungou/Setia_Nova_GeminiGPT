@@ -16,6 +16,8 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { getRequestUser, httpError, isAdmin } from './lib/authStore.js'
+import { getSiteSetting, setSiteSetting } from './lib/siteSettings.js'
+import { normalizeMusicSettings } from '../src/lib/musicSettings.js'
 
 const COLLECTIONS = ['home', 'characters', 'locations', 'clans', 'events', 'archives', 'posts', 'aether', 'timelines']
 const MEDIA_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/svg+xml': '.svg' }
@@ -102,6 +104,28 @@ export default function woltarAdmin() {
             const finalName = `${base}-${Date.now().toString(36)}${ext}`
             await writeFile(path.join(mediaDir, finalName), Buffer.from(m[2], 'base64'))
             return send(200, { path: `/media/${finalName}` })
+          }
+
+          // --- réglages globaux (clé/valeur, équivalent site_settings) ----
+          if (parts[0] === 'settings') {
+            const user = await getRequestUser(root, req)
+            if (!user) throw httpError(401, 'Connexion requise.')
+            if (!isAdmin(user)) throw httpError(403, 'Réservé admin.')
+
+            const key = parts[1]
+            if (key !== 'music') return send(404, { error: 'Réglage inconnu' })
+
+            if (req.method === 'GET') {
+              const raw = await getSiteSetting(root, key)
+              return send(200, { data: normalizeMusicSettings(raw || {}) })
+            }
+            if (req.method === 'PUT') {
+              const body = JSON.parse(await readBody(req))
+              const clean = normalizeMusicSettings(body)
+              await setSiteSetting(root, key, clean)
+              return send(200, { ok: true, data: clean })
+            }
+            return send(405, { error: 'Méthode non autorisée' })
           }
 
           return send(404, { error: 'Route inconnue' })

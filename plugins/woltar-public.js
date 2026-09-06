@@ -16,8 +16,10 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { resolveClanMembers } from './lib/clanMembers.js'
 import { listPublicPlayerProfiles } from './lib/playerProfiles.js'
+import { getSiteSetting } from './lib/siteSettings.js'
 import { loadUsers } from './lib/authStore.js'
 import { resolveTimelineEvents } from '../src/lib/timelineEvents.js'
+import { normalizeMusicSettings, activeTracksFor } from '../src/lib/musicSettings.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
@@ -70,6 +72,11 @@ export default function woltarPublic() {
           }
 
           if (parts[0] === 'players' && parts.length === 1) return send(200, { data: await listPublicPlayerProfiles(root) })
+
+          if (parts[0] === 'music-settings' && parts.length === 1) {
+            const settings = normalizeMusicSettings((await getSiteSetting(root, 'music')) || {})
+            return send(200, { data: { ...settings, tracks: activeTracksFor(settings) } })
+          }
 
           // Miroir dev de worker/lib/publicStore.js#listPublicCharacterOwners
           // — pseudo des propriétaires de personnages publiés, indépendant

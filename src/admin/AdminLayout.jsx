@@ -1,6 +1,6 @@
 // src/admin/AdminLayout.jsx
 import { NavLink, Outlet, Link } from 'react-router-dom'
-import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House } from 'lucide-react'
+import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House, Music } from 'lucide-react'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
@@ -24,6 +24,10 @@ export default function AdminLayout({ onLock, currentUser }) {
           <NavLink to="/admin/players" className="adm-nav__link">
             <Users size={16} />
             Joueurs
+          </NavLink>
+          <NavLink to="/admin/music" className="adm-nav__link">
+            <Music size={16} />
+            Musique du site
           </NavLink>
           {COLLECTION_NAMES.map((name) => {
             const s = SCHEMA[name]

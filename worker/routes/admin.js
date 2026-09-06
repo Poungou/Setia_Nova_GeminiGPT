@@ -7,6 +7,8 @@
 
 import { getRequestUser, httpError, isAdmin } from '../lib/authStore.js'
 import { getCharacter, insertRow, listCharactersWithFallback, updateRow } from '../lib/contentStore.js'
+import { getSiteSetting, setSiteSetting } from '../lib/siteSettings.js'
+import { normalizeMusicSettings } from '../../src/lib/musicSettings.js'
 import homeJson from '../../src/data/home.json' with { type: 'json' }
 import locationsJson from '../../src/data/locations.json' with { type: 'json' }
 import clansJson from '../../src/data/clans.json' with { type: 'json' }
@@ -125,6 +127,28 @@ export async function handleAdmin(request, env, parts) {
 
     if (parts[0] === 'upload') {
       throw httpError(501, 'Upload distant non configure. Utilise un chemin /media/... existant ou une URL.')
+    }
+
+    // Reglages globaux clé/valeur (table D1 `site_settings`, deja existante,
+    // voir worker/lib/siteSettings.js) — pour l'instant uniquement la
+    // musique de fond globale (clé "music").
+    if (parts[0] === 'settings') {
+      const key = parts[1]
+      if (key !== 'music') return json({ error: 'Reglage inconnu' }, { status: 404 })
+
+      if (request.method === 'GET' && parts.length === 2) {
+        const raw = await getSiteSetting(env, key)
+        return json({ data: normalizeMusicSettings(raw || {}) })
+      }
+
+      if (request.method === 'PUT' && parts.length === 2) {
+        const body = await readJson(request)
+        const clean = normalizeMusicSettings(body)
+        await setSiteSetting(env, key, clean)
+        return json({ ok: true, data: clean })
+      }
+
+      return json({ error: 'Methode non autorisee' }, { status: 405 })
     }
 
     return json({ error: 'Route inconnue' }, { status: 404 })

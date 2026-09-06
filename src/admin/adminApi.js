@@ -39,6 +39,26 @@ export async function saveCollection(name, rows) {
   return body.data || rows
 }
 
+// Réglages globaux clé/valeur (table D1 `site_settings` en prod, fichier
+// local en dev — voir worker/lib/siteSettings.js / plugins/lib/siteSettings.js).
+// Pour l'instant, uniquement la musique de fond globale (clé "music").
+export async function getSiteSetting(key) {
+  const body = await json(await fetch(`${BASE}/settings/${key}`, { credentials: 'same-origin' }))
+  return body.data
+}
+
+export async function saveSiteSetting(key, data) {
+  const body = await json(
+    await fetch(`${BASE}/settings/${key}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  )
+  return body.data
+}
+
 export function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader()

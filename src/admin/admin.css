@@ -685,6 +685,45 @@ textarea.adm-input {
   opacity: 0.5;
 }
 
+/* --- musique du site (AdminMusicPage) ----------------------------- */
+.adm-field--boolean {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ivory-dim);
+}
+.adm-music-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.adm-music-track {
+  display: grid;
+  grid-template-columns: auto 1fr 2fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+.adm-music-track__reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.adm-music-track__active {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--ivory-dim);
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .adm-music-track {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* --- markdown ---------------------------------------------------- */
 .adm-markdown__tabs {
   display: flex;
