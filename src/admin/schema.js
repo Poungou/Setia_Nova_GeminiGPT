@@ -97,8 +97,8 @@ export const SCHEMA = {
       status: 'to-develop', canon: 'draft', age: '', gender: '', species: '',
       origin: '', residence: '', occupation: '', traits: [], shortDescription: '',
       character: '', appearance: '', biography: '', quote: '', portrait: '', gallery: [],
-      color: '', frameColor: '', relations: [], locations: [], tags: [], author: '', visibility: 'published',
-      ownerUserId: 'system', is_featured: false, image_source: '', gallery_sources: {},
+      color: '', frameColor: '', portraitFramed: true, relations: [], locations: [], tags: [], author: '', visibility: 'published',
+      ownerUserId: 'system', is_featured: false, image_source: '', gallery_sources: {}, isPnj: false,
     },
     fields: [
       { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
@@ -116,6 +116,11 @@ export const SCHEMA = {
       {
         key: 'author', label: 'Auteur / joueur', type: 'text', group: 'Publication',
         hint: 'Laisse vide si c’est une fiche canon. Servira quand d’autres joueurs pourront proposer leurs persos.',
+      },
+      {
+        key: 'isPnj', label: 'PNJ', type: 'boolean', group: 'Publication',
+        accountHidden: true,
+        hint: 'Personnage non-joueur : indépendant du propriétaire (ownerUserId). Prépare une distinction simple joueur/PNJ dans la galerie — désactivé par défaut, à cocher au cas par cas. Réservé à l’admin.',
       },
       { key: 'number', label: 'Numéro', type: 'text', group: 'Identité' },
       { key: 'firstName', label: 'Prénom', type: 'text', group: 'Identité' },
@@ -141,9 +146,13 @@ export const SCHEMA = {
         hint: 'Code hexadécimal (#RRGGBB), ex. #4dd8d0. Utilisée pour le cœur pixel-art de la vignette, et pour choisir automatiquement le cadre ci-dessous si "Cadre" est laissé sur Auto. Laisser vide si pas encore définie.',
       },
       {
+        key: 'portraitFramed', label: 'Portrait avec cadre', type: 'boolean', group: 'Identité',
+        hint: 'Activé par défaut (comportement actuel inchangé). Désactive pour afficher la vignette sans l’illustration de cadre ci-dessous.',
+      },
+      {
         key: 'frameColor', label: 'Cadre (vignette)', type: 'select', group: 'Identité',
         options: [['', 'Auto (déduit de la couleur)'], ['bleu', 'Bleu'], ['gris', 'Gris'], ['rouge', 'Rouge'], ['violet', 'Violet']],
-        hint: 'Illustration de cadre à utiliser sur la vignette personnage. Laisse sur Auto pour la déduire de la couleur ci-dessus, ou force un choix précis parmi les 4 illustrations disponibles.',
+        hint: 'Illustration de cadre à utiliser sur la vignette personnage (si "Portrait avec cadre" est activé). Laisse sur Auto pour la déduire de la couleur ci-dessus, ou force un choix précis parmi les 4 illustrations disponibles.',
       },
       { key: 'shortDescription', label: 'Description courte', type: 'textarea', group: 'Textes' },
       {

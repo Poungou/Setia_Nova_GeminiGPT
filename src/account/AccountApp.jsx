@@ -11,21 +11,19 @@ import {
   resetPassword as resetPasswordRequest,
 } from '../lib/authApi.js'
 import {
-  addClanMember,
   changeEmail,
   changePassword,
   createAccountRow,
   deleteAccountRow,
   getAccountBootstrap,
-  getClanMembers,
   getPlayerProfile,
-  removeClanMember,
   updateAccountRow,
   savePlayerProfile,
 } from '../lib/accountApi.js'
 import { SCHEMA } from '../admin/schema.js'
 import { Field } from '../admin/Fields.jsx'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
+import ClanComposer from '../components/ClanComposer/ClanComposer.jsx'
 import '../admin/admin.css'
 
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
@@ -718,120 +716,17 @@ function AccountList({ data, user, reload }) {
   )
 }
 
-// Gestion des membres d'un clan de compte (POST/DELETE sur
-// /collections/clans/:id/members) — séparée du formulaire générique
-// ci-dessus car ça touche une table à part (clan_members), pas le champ
-// `members` de la fiche clan elle-même. Un membre ne peut être choisi que
-// parmi SES propres personnages (ou tous, pour une administratrice) — le
-// serveur revérifie de toute façon (voir worker/routes/account.js).
-function ClanMembersEditor({ clanId, data, user }) {
-  const [members, setMembers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [selected, setSelected] = useState('')
-
-  const load = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      setMembers(await getClanMembers(clanId))
-    } catch (e) {
-      setError(String(e.message || e))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clanId])
-
-  const nameFor = (characterId) => {
-    const c = (data?.characters || []).find((x) => x.id === characterId)
-    return c ? [c.firstName, c.lastName].filter(Boolean).join(' ') || characterId : characterId
-  }
-
-  const candidates = (data?.characters || []).filter(
-    (c) => (user.role === 'admin' || c.ownerUserId === user.id) && !members.some((m) => m.characterId === c.id),
-  )
-
-  const onAdd = async () => {
-    if (!selected) return
-    try {
-      setError('')
-      await addClanMember(clanId, { characterId: selected, order: members.length })
-      setSelected('')
-      await load()
-    } catch (e) {
-      setError(String(e.message || e))
-    }
-  }
-
-  const onRemove = async (characterId) => {
-    try {
-      setError('')
-      await removeClanMember(clanId, characterId)
-      await load()
-    } catch (e) {
-      setError(String(e.message || e))
-    }
-  }
-
-  return (
-    <fieldset className="adm-fieldset">
-      <legend>Membres du clan</legend>
-      {error && <div className="adm-banner adm-banner--error">{error}</div>}
-      {loading ? (
-        <p className="adm-muted">Chargement...</p>
-      ) : (
-        <ul className="adm-cards">
-          {members.map((m) => (
-            <li key={m.characterId} className="adm-card">
-              <div className="adm-card__body">
-                <strong>{nameFor(m.characterId)}</strong>
-                {m.role && <span className="adm-muted">{m.role}</span>}
-              </div>
-              <button
-                type="button"
-                className="adm-btn adm-btn--danger"
-                onClick={() => onRemove(m.characterId)}
-                aria-label={`Retirer ${nameFor(m.characterId)} du clan`}
-              >
-                <Trash2 size={15} />
-              </button>
-            </li>
-          ))}
-          {members.length === 0 && <li className="adm-muted">Aucun membre pour le moment.</li>}
-        </ul>
-      )}
-      <div className="adm-field">
-        <select className="adm-input" value={selected} onChange={(e) => setSelected(e.target.value)}>
-          <option value="">— Choisir un personnage —</option>
-          {candidates.map((c) => (
-            <option key={c.id} value={c.id}>
-              {[c.firstName, c.lastName].filter(Boolean).join(' ') || c.id}
-            </option>
-          ))}
-        </select>
-        <button type="button" className="adm-btn adm-btn--primary" onClick={onAdd} disabled={!selected}>
-          <Plus size={15} /> Ajouter au clan
-        </button>
-        {candidates.length === 0 && (
-          <p className="adm-hint">
-            {user.role === 'admin'
-              ? 'Aucun autre personnage disponible.'
-              : 'Crée d’abord un personnage dans « Mes personnages » pour pouvoir l’ajouter à ce clan.'}
-          </p>
-        )}
-      </div>
-    </fieldset>
-  )
-}
+// Gestion des membres, des liens et de l'aperçu du sociogramme d'un clan de
+// compte — voir src/components/ClanComposer/ClanComposer.jsx (Refonte
+// composeur de clan). Vivait auparavant ici sous la forme d'un simple
+// <select> + liste (ClanMembersEditor) ; la logique de rattachement
+// (POST/DELETE sur /collections/clans/:id/members, table clan_members à
+// part du champ `members` de la fiche clan) n'a pas changé, seule sa
+// présentation visuelle a été déplacée dans ce composant dédié.
 
 // Éditeur des événements d'une chronologie de compte. Contrairement aux
-// membres d'un clan (ClanMembersEditor ci-dessus, table clan_members à
-// part), les événements d'une chronologie sont un simple tableau embarqué
+// membres d'un clan (ClanComposer, table clan_members à part), les
+// événements d'une chronologie sont un simple tableau embarqué
 // dans sa propre fiche JSON (voir migrations/0012_timelines.sql et
 // src/lib/timelineEvents.js) : pas d'appel serveur ici, juste un état local
 // propagé par `onChange` vers le formulaire générique (form.events),
@@ -1016,10 +911,15 @@ function AccountEdit({ data, reload, user }) {
     for (const field of schema.fields) {
       if (field.key === 'ownerUserId') continue
       if (field.accountHidden) continue
+      // Pour un clan, le personnage central se choisit dans l'aperçu du
+      // sociogramme (ClanComposer, Bloc D) plutôt que via un <select> perdu
+      // au milieu du formulaire d'identité — voir rendu conditionnel plus
+      // bas dans ce composant.
+      if (collection === 'clans' && field.key === 'centerCharacterId') continue
       ;(groups[field.group || 'Autres'] ||= []).push(field)
     }
     return groups
-  }, [schema])
+  }, [schema, collection])
 
   if (!config || !schema) return <Navigate to="/compte" replace />
   if (!isNew && !existing) {
@@ -1114,28 +1014,41 @@ function AccountEdit({ data, reload, user }) {
           onSave()
         }}
       >
-        {Object.entries(fields).map(([group, groupFields]) => (
-          <fieldset key={group} className="adm-fieldset">
-            <legend>{group}</legend>
-            {groupFields.map((field) => (
-              <div key={field.key} className={`adm-field adm-field--${field.type}`}>
-                <label htmlFor={`f-${field.key}`}>{field.label}</label>
-                {field.hint && <p className="adm-hint">{field.hint}</p>}
-                <Field
-                  field={field}
-                  value={form[field.key]}
-                  onChange={(value) => setField(field.key, value)}
-                  allData={data}
-                  disabled={saving}
-                  uploadEnabled={import.meta.env.DEV && !saving}
-                />
-              </div>
-            ))}
-          </fieldset>
-        ))}
+        {collection === 'clans' ? (
+          <ClanComposer
+            fieldGroups={fields}
+            form={form}
+            setField={setField}
+            data={data}
+            user={user}
+            reload={reload}
+            isNew={isNew}
+            clanId={existing?.id}
+            disabled={saving}
+          />
+        ) : (
+          Object.entries(fields).map(([group, groupFields]) => (
+            <fieldset key={group} className="adm-fieldset">
+              <legend>{group}</legend>
+              {groupFields.map((field) => (
+                <div key={field.key} className={`adm-field adm-field--${field.type}`}>
+                  <label htmlFor={`f-${field.key}`}>{field.label}</label>
+                  {field.hint && <p className="adm-hint">{field.hint}</p>}
+                  <Field
+                    field={field}
+                    value={form[field.key]}
+                    onChange={(value) => setField(field.key, value)}
+                    allData={data}
+                    disabled={saving}
+                    uploadEnabled={import.meta.env.DEV && !saving}
+                  />
+                </div>
+              ))}
+            </fieldset>
+          ))
+        )}
       </form>
 
-      {collection === 'clans' && !isNew && <ClanMembersEditor clanId={existing.id} data={data} user={user} />}
       {collection === 'timelines' && (
         <TimelineEventsEditor
           events={form.events || []}

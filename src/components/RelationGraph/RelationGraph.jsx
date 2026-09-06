@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import { resolveFrameColor, getFrameMeta } from '../../lib/frames.js'
+import { collectEdges } from '../../lib/relations.js'
 import PixelFrame from '../PixelIcons/PixelFrame.jsx'
 import './RelationGraph.css'
 
@@ -35,6 +36,16 @@ const VBH = 100
 const CX = VBW / 2
 const CY = VBH / 2
 const RADIUS = { up: 30, down: 33, side: 40 }
+const NAKAMURA_POSITIONS = {
+  'kazuko-nakamura': { x: 70, y: 51 },
+  'marie-chat-nakamura': { x: 42, y: 10 },
+  'salut-nakamura': { x: 98, y: 10 },
+  'hachiro-nakamura': { x: 18, y: 38 },
+  'shizuka-nakamura': { x: 122, y: 38 },
+  'fudo-nakamura': { x: 25, y: 86 },
+  calion: { x: 115, y: 86 },
+  'kumiko-lolita': { x: 70, y: 94 },
+}
 
 const UP_WORDS = ['père', 'papa', 'mère', 'maman', 'grand-père', 'grand-mère', 'aïeul', 'aïeule', 'ancêtre', 'oncle', 'tante']
 const DOWN_WORDS = ['fils', 'fille', 'neveu', 'nièce', 'petit-fils', 'petite-fille', 'filleul', 'filleule']
@@ -56,7 +67,7 @@ const NATURE_STYLE = {
 }
 const NATURE_ORDER = ['Famille', 'Confiance', 'Protection', 'Admiration', 'Rivalité', 'Tension', 'Distance', 'Trahison', 'Lien']
 const INTENSITY_WIDTH = { faible: 0.9, moyen: 1.5, fort: 2.3 }
-const INTENSITY_OPACITY = { faible: 0.55, moyen: 0.85, fort: 1 }
+const INTENSITY_OPACITY = { faible: 0.4, moyen: 0.68, fort: 0.86 }
 
 function normalize(text) {
   return String(text || '').trim().toLowerCase()
@@ -95,26 +106,6 @@ function fullName(c) {
 
 function initials(c) {
   return ((c?.firstName?.[0] || '') + (c?.lastName?.[0] || '')).toUpperCase()
-}
-
-// Regroupe les relations de TOUS les membres passés en une liste d'arêtes
-// non orientées, en conservant les deux sens séparément (fromA / fromB) :
-// c'est ce qui permet à Kazuko de décrire Hachiro autrement que Hachiro ne
-// décrit Kazuko, sans perdre l'un des deux textes.
-function collectEdges(members) {
-  const ids = new Set(members.map((m) => m.id))
-  const map = new Map()
-  members.forEach((m) => {
-    ;(m.relations || []).forEach((rel) => {
-      if (!rel.characterId || rel.characterId === m.id || !ids.has(rel.characterId)) return
-      const key = [m.id, rel.characterId].sort().join('::')
-      const entry = map.get(key) || { key, a: [m.id, rel.characterId].sort()[0], b: [m.id, rel.characterId].sort()[1], fromA: null, fromB: null }
-      if (m.id === entry.a) entry.fromA = rel
-      else entry.fromB = rel
-      map.set(key, entry)
-    })
-  })
-  return [...map.values()]
 }
 
 function degreeMap(members, edges) {
@@ -167,6 +158,22 @@ function pct(x, y) {
   return { left: `${(x / VBW) * 100}%`, top: `${(y / VBH) * 100}%` }
 }
 
+function keepLabelAwayFromPortraits(point, edge, positions) {
+  const next = { ...point }
+  Object.entries(positions).forEach(([id, node]) => {
+    if (id === edge.a || id === edge.b) return
+    const dx = next.x - node.x
+    const dy = next.y - node.y
+    const distance = Math.hypot(dx, dy)
+    const minimum = id === 'kazuko-nakamura' ? 16 : 7
+    if (distance >= minimum) return
+    const length = distance || 1
+    next.x += (dx / length) * (minimum - distance)
+    next.y += (dy / length) * (minimum - distance)
+  })
+  return next
+}
+
 // Point à t=0.5 d'une courbe de Bézier quadratique + un chemin SVG « Q »,
 // avec un léger arc (perpendiculaire au segment) plutôt qu'une ligne
 // droite — le sens de l'arc alterne d'une arête à l'autre pour limiter les
@@ -183,7 +190,9 @@ function edgeGeometry(pa, pb, curveSign) {
   const cx = mx + nx * bulge
   const cy = my + ny * bulge
   const mid = { x: 0.25 * pa.x + 0.5 * cx + 0.25 * pb.x, y: 0.25 * pa.y + 0.5 * cy + 0.25 * pb.y }
-  return { d: `M ${pa.x} ${pa.y} Q ${cx} ${cy} ${pb.x} ${pb.y}`, mid }
+  const labelOffset = Math.min(4, dist * 0.08) * curveSign
+  const labelMid = { x: mid.x + nx * labelOffset, y: mid.y + ny * labelOffset }
+  return { d: `M ${pa.x} ${pa.y} Q ${cx} ${cy} ${pb.x} ${pb.y}`, mid, labelMid }
 }
 
 function useNarrow(query = '(max-width: 640px)') {
@@ -359,7 +368,18 @@ function Legend({ natures }) {
   )
 }
 
-export default function RelationGraph({ members, centerId }) {
+// `onNodeClick` est un ajout Phase « Composeur de clan » : facultatif, il ne
+// change RIEN au rendu public (ClanDetail.jsx / CharacterDetail.jsx ne le
+// passent jamais). Quand il est fourni (éditeur visuel de sociogramme dans
+// /compte), les portraits deviennent des <button> qui appellent
+// onNodeClick(id) au lieu de naviguer vers la fiche publique — c'est ce qui
+// permet de choisir le « personnage central » en cliquant directement dans
+// l'aperçu plutôt que via un simple <select>. Dans ce mode, le graphe reste
+// aussi affiché même sans aucun lien renseigné (portraits seuls, sans
+// traits) — utile pendant la création d'un clan, avant que des relations
+// n'existent — alors que le rendu public garde son message "Aucun lien
+// renseigné" tant qu'aucune arête n'existe.
+export default function RelationGraph({ members, centerId, onNodeClick }) {
   const [hoveredId, setHoveredId] = useState(null)
   const [activeEdge, setActiveEdge] = useState(null)
   const narrow = useNarrow()
@@ -392,8 +412,17 @@ export default function RelationGraph({ members, centerId }) {
     return b
   }, [satellites, centerEdges, resolvedCenterId])
 
+  const isNakamuraLayout = resolvedCenterId === 'kazuko-nakamura' && members.some((m) => m.id === 'hachiro-nakamura')
+
   const positions = useMemo(() => {
     if (!center) return {}
+    if (isNakamuraLayout) {
+      const pos = {}
+      members.forEach((member) => {
+        if (NAKAMURA_POSITIONS[member.id]) pos[member.id] = NAKAMURA_POSITIONS[member.id]
+      })
+      return pos
+    }
     const pos = { [center.id]: { x: CX, y: CY } }
     const place = (list, angles, radius) => {
       list.forEach((m, i) => {
@@ -408,7 +437,7 @@ export default function RelationGraph({ members, centerId }) {
     place(right, fanAround(0, right.length, 60), RADIUS.side)
     place(left, fanAround(180, left.length, 60), RADIUS.side)
     return pos
-  }, [center, buckets])
+  }, [center, buckets, isNakamuraLayout, members])
 
   const renderEdges = useMemo(() => {
     return edges
@@ -419,8 +448,9 @@ export default function RelationGraph({ members, centerId }) {
         const rel = primaryRelation(e, resolvedCenterId)
         const nature = classifyNature(rel)
         const intensity = classifyIntensity(rel)
-        const { d, mid } = edgeGeometry(pa, pb, i % 2 === 0 ? 1 : -1)
-        return { ...e, rel, nature, intensity, label: rel?.type || '', d, mid }
+        const touchesCenter = e.a === resolvedCenterId || e.b === resolvedCenterId
+        const { d, mid, labelMid } = edgeGeometry(pa, pb, touchesCenter ? 0 : (i % 2 === 0 ? 1 : -1))
+        return { ...e, rel, nature, intensity, label: rel?.type || '', d, mid, labelMid: keepLabelAwayFromPortraits(labelMid, e, positions) }
       })
       .filter(Boolean)
   }, [edges, positions, resolvedCenterId])
@@ -440,7 +470,7 @@ export default function RelationGraph({ members, centerId }) {
     return NATURE_ORDER.filter((n) => set.has(n))
   }, [renderEdges])
 
-  if (!center || renderEdges.length === 0) {
+  if (!center || (renderEdges.length === 0 && !onNodeClick)) {
     return <p className="adm-muted">Aucun lien renseigné entre les membres.</p>
   }
 
@@ -448,25 +478,52 @@ export default function RelationGraph({ members, centerId }) {
     const order = [...buckets.up, ...buckets.side, ...buckets.down]
     return (
       <div className="relation-graph relation-graph--mobile">
-        <div className="relation-graph__mobile-center">
+        <button
+          type="button"
+          className={`relation-graph__mobile-center${hoveredId === center.id ? ' is-active' : ''}`}
+          onClick={() => setHoveredId((current) => (current === center.id ? null : center.id))}
+        >
           <Portrait character={center} size="lg" />
           <strong>{fullName(center)}</strong>
-        </div>
+        </button>
         <ul className="relation-graph__mobile-list">
           {order.map((s) => {
             const edge = renderEdges.find(
               (e) => (e.a === resolvedCenterId && e.b === s.id) || (e.b === resolvedCenterId && e.a === s.id),
             )
+            const dimmed = hoveredId ? hoveredId !== s.id && hoveredId !== resolvedCenterId : false
+            const active = hoveredId === s.id
             return (
-              <li key={s.id} className="relation-graph__mobile-row">
-                <Link to={`/personnages/${s.id}`} className="relation-graph__mobile-portrait-link">
-                  <Portrait character={s} size="sm" />
-                  <span>{fullName(s)}</span>
-                </Link>
+              <li key={s.id} className={`relation-graph__mobile-row${dimmed ? ' is-dimmed' : ''}${active ? ' is-active' : ''}`}>
+                {onNodeClick ? (
+                  <button
+                    type="button"
+                    className="relation-graph__mobile-portrait-link"
+                    onClick={() => onNodeClick(s.id)}
+                    title="Définir comme personnage central"
+                  >
+                    <Portrait character={s} size="sm" />
+                    <span>{fullName(s)}</span>
+                  </button>
+                ) : (
+                  <Link
+                    to={`/personnages/${s.id}`}
+                    className="relation-graph__mobile-portrait-link"
+                    onClick={(event) => {
+                      if (hoveredId !== s.id) {
+                        event.preventDefault()
+                        setHoveredId(s.id)
+                      }
+                    }}
+                  >
+                    <Portrait character={s} size="sm" />
+                    <span>{fullName(s)}</span>
+                  </Link>
+                )}
                 {edge?.label && (
                   <button
                     type="button"
-                    className="relation-graph__pill"
+                    className={`relation-graph__pill${active ? ' is-active' : ''}`}
                     style={{ borderColor: NATURE_STYLE[edge.nature].color, color: NATURE_STYLE[edge.nature].color }}
                     onClick={() => setActiveEdge(edge)}
                   >
@@ -530,8 +587,8 @@ export default function RelationGraph({ members, centerId }) {
                 <button
                   key={e.key}
                   type="button"
-                  className={`relation-graph__pill${dimmed ? ' is-dimmed' : ''}`}
-                  style={{ ...pct(e.mid.x, e.mid.y), borderColor: NATURE_STYLE[e.nature].color, color: NATURE_STYLE[e.nature].color }}
+                  className={`relation-graph__pill${dimmed ? ' is-dimmed' : ''}${hoveredId && (e.a === hoveredId || e.b === hoveredId) ? ' is-active' : ''}`}
+                  style={{ ...pct(e.labelMid.x, e.labelMid.y), borderColor: NATURE_STYLE[e.nature].color, color: NATURE_STYLE[e.nature].color }}
                   onClick={() => setActiveEdge(e)}
                 >
                   <NatureIcon nature={e.nature} />
@@ -548,20 +605,41 @@ export default function RelationGraph({ members, centerId }) {
             const isCenter = n.id === center.id
             const dimmed = neighborIds ? !neighborIds.has(n.id) : false
             const active = hoveredId === n.id
-            return (
+            const className = `relation-graph__node${isCenter ? ' relation-graph__node--center' : ''}${dimmed ? ' is-dimmed' : ''}${active ? ' is-active' : ''}`
+            const content = (
+              <>
+                {isCenter && <span className="relation-graph__halo" aria-hidden="true" />}
+                <Portrait character={n} size={isCenter ? 'lg' : 'md'} />
+                <span className="relation-graph__name">{n.firstName || n.lastName}</span>
+              </>
+            )
+            return onNodeClick ? (
+              <button
+                key={n.id}
+                type="button"
+                className={className}
+                style={pct(p.x, p.y)}
+                onMouseEnter={() => setHoveredId(n.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onFocus={() => setHoveredId(n.id)}
+                onBlur={() => setHoveredId(null)}
+                onClick={() => onNodeClick(n.id)}
+                title={isCenter ? 'Personnage central' : 'Définir comme personnage central'}
+              >
+                {content}
+              </button>
+            ) : (
               <Link
                 key={n.id}
                 to={`/personnages/${n.id}`}
-                className={`relation-graph__node${isCenter ? ' relation-graph__node--center' : ''}${dimmed ? ' is-dimmed' : ''}${active ? ' is-active' : ''}`}
+                className={className}
                 style={pct(p.x, p.y)}
                 onMouseEnter={() => setHoveredId(n.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 onFocus={() => setHoveredId(n.id)}
                 onBlur={() => setHoveredId(null)}
               >
-                {isCenter && <span className="relation-graph__halo" aria-hidden="true" />}
-                <Portrait character={n} size={isCenter ? 'lg' : 'md'} />
-                <span className="relation-graph__name">{n.firstName || n.lastName}</span>
+                {content}
               </Link>
             )
           })}

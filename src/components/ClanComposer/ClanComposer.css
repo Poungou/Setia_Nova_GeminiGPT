@@ -1,0 +1,277 @@
+/* src/components/ClanComposer/ClanComposer.css — refonte création/édition
+   de clan (voir /compte/clans/:id). Reprend le vocabulaire visuel de
+   l'espace compte (adm-*, voir src/admin/admin.css) plutôt que celui du
+   site public, puisque ce composant ne s'affiche que dans /compte. */
+
+/* .adm-form (src/admin/admin.css) plafonne à 760px — un peu court pour la
+   grille à deux colonnes du Bloc A ci-dessous. */
+.adm-form:has(.clan-composer) {
+  max-width: 900px;
+}
+
+.clan-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 860px;
+}
+
+.clan-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.clan-block__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  margin: 0;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.clan-composer__save-first {
+  margin: 0;
+}
+
+/* --- Bloc A : identité, sous-sections compactes en grille ------------- */
+.clan-identity__groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+.clan-identity__group {
+  margin: 0;
+}
+
+/* Les groupes texte long (Textes) prennent toute la largeur */
+.clan-identity__group:has(.adm-field--prose),
+.clan-identity__group:has(.adm-field--markdown) {
+  grid-column: 1 / -1;
+}
+
+/* --- portraits miniatures, réutilisés partout dans ce composant -------- */
+.clan-mini-portrait {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-raised-2);
+  border: 1px solid var(--line-strong);
+}
+.clan-mini-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.clan-mini-portrait__initials {
+  font-family: var(--font-display);
+  color: var(--ivory-dim);
+}
+.clan-mini-portrait--sm {
+  width: 28px;
+  height: 28px;
+}
+.clan-mini-portrait--sm .clan-mini-portrait__initials {
+  font-size: 0.68rem;
+}
+.clan-mini-portrait--md {
+  width: 44px;
+  height: 44px;
+}
+.clan-mini-portrait--md .clan-mini-portrait__initials {
+  font-size: 0.9rem;
+}
+.clan-mini-portrait--lg {
+  width: 72px;
+  height: 72px;
+}
+.clan-mini-portrait--lg .clan-mini-portrait__initials {
+  font-size: 1.3rem;
+}
+
+/* --- Bloc B : membres, cartes visuelles -------------------------------- */
+.clan-member-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.7rem;
+}
+
+.clan-member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.8rem 0.5rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  text-align: center;
+}
+
+.clan-member-card--candidate {
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease;
+}
+.clan-member-card--candidate:hover,
+.clan-member-card--candidate:focus-visible {
+  border-color: var(--wine-bright);
+}
+
+.clan-member-card__name {
+  font-size: 0.86rem;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.clan-member-card__remove {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.55rem;
+}
+
+.clan-member-add {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: var(--space-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-s);
+}
+
+.clan-member-add__search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ivory-faint);
+}
+.clan-member-add__search .adm-input {
+  flex: 1;
+}
+
+.clan-member-grid--candidates {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+/* --- Bloc C : liste et éditeur de liens --------------------------------- */
+.clan-relation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.clan-relation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+}
+
+.clan-relation-row__pair {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.clan-relation-row__label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--ivory-dim);
+}
+
+.clan-relation-row__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.clan-relation-draft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-m);
+  background: var(--bg-raised);
+}
+
+.clan-relation-draft__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+.clan-relation-draft__row:nth-of-type(2) {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.clan-relation-draft__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
+}
+
+.clan-relation-draft__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --- Bloc D : aperçu du sociogramme ------------------------------------- */
+.clan-preview__stage {
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--bg-void);
+  overflow-x: auto;
+}
+
+.clan-preview__fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-width: 320px;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
+}
+
+/* --- responsive ---------------------------------------------------------- */
+@media (max-width: 720px) {
+  .clan-identity__groups {
+    grid-template-columns: 1fr;
+  }
+  .clan-identity__group:has(.adm-field--prose),
+  .clan-identity__group:has(.adm-field--markdown) {
+    grid-column: auto;
+  }
+  .clan-relation-draft__row,
+  .clan-relation-draft__row:nth-of-type(2) {
+    grid-template-columns: 1fr;
+  }
+  .clan-member-grid {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  }
+}

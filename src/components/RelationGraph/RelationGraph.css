@@ -15,7 +15,7 @@
 .relation-graph__stage {
   position: relative;
   width: 100%;
-  max-width: 720px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 
@@ -64,6 +64,7 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ivory-dim);
+  opacity: 0.82;
   box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.6);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -74,7 +75,11 @@
 }
 
 .relation-graph__pill.is-dimmed {
-  opacity: 0.2;
+  opacity: 0.14;
+}
+
+.relation-graph__pill.is-active {
+  opacity: 1;
 }
 
 /* --- nœuds (portraits) --------------------------------------------------- */
@@ -89,6 +94,19 @@
   text-decoration: none;
   color: inherit;
   transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* Reset des styles par défaut d'un <button> quand le graphe est utilisé en
+   mode éditeur (voir onNodeClick, prop RelationGraph.jsx) — un bouton doit
+   rester visuellement identique au <Link> qu'il remplace. */
+button.relation-graph__node,
+button.relation-graph__mobile-portrait-link {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
 }
 
 .relation-graph__node.is-dimmed {
@@ -115,7 +133,8 @@
   color: var(--ivory);
   text-shadow: 0 0 6px var(--bg-base), 0 0 6px var(--bg-base), 0 1px 2px var(--bg-base);
   text-align: center;
-  max-width: 6.5rem;
+  max-width: 7.5rem;
+  line-height: 1.15;
 }
 
 .relation-graph__node--center .relation-graph__name {
@@ -305,11 +324,25 @@
 }
 
 .relation-graph__mobile-center {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
   margin-bottom: var(--space-1);
+  padding: 0.35rem 1rem;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.relation-graph__mobile-center.is-active {
+  border-color: var(--wine-bright);
+  background: var(--wine-soft);
+  transform: translateY(-2px);
 }
 
 .relation-graph__mobile-center strong {
@@ -335,6 +368,16 @@
   border-radius: var(--radius-s);
   padding: 0.5rem 0.7rem;
   background: var(--gradient-card);
+  transition: opacity 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.relation-graph__mobile-row.is-dimmed {
+  opacity: 0.32;
+}
+
+.relation-graph__mobile-row.is-active {
+  border-color: var(--wine-bright);
+  transform: translateX(3px);
 }
 
 .relation-graph__mobile-portrait-link {
@@ -363,6 +406,37 @@
 .relation-graph--mobile .relation-graph__pill:hover,
 .relation-graph--mobile .relation-graph__pill:focus-visible {
   transform: scale(1.05);
+}
+
+.relation-graph--mobile .relation-graph__pill.is-active {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+@media (min-width: 641px) and (max-width: 1100px) {
+  .relation-graph__stage {
+    max-width: 900px;
+  }
+
+  .relation-graph__portrait--md {
+    width: 54px;
+  }
+}
+
+@media (max-width: 640px) {
+  .relation-graph {
+    width: 100%;
+  }
+
+  .relation-graph__mobile-row {
+    min-height: 64px;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .relation-graph--mobile .relation-graph__pill {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.6rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

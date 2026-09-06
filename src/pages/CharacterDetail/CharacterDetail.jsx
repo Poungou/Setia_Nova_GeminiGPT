@@ -7,6 +7,7 @@ import { events } from '../../data/events.js'
 import { usePublicCharacter, usePublicClans, usePublicPlayers } from '../../lib/publicData.js'
 import { imgSrc, imgFocus, imgCredit } from '../../lib/image.js'
 import RelationGraph from '../../components/RelationGraph/RelationGraph.jsx'
+import SpoilerGate from '../../components/SpoilerGate/SpoilerGate.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
@@ -299,16 +300,18 @@ export default function CharacterDetail() {
                   <GlyphEvents />
                   Événements clés
                 </h2>
-                <ol className="character-chronology">
-                  {personalEvents.map((e) => (
-                    <li key={e.id}>
-                      <Link to="/chronologie" className="character-chronology__link">
-                        <span className="eyebrow">{e.dateRP}</span>
-                        <strong>{e.title}</strong>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
+                <SpoilerGate message="Cette chronologie contient des éléments importants de l’histoire de ce personnage.">
+                  <ol className="character-chronology">
+                    {personalEvents.map((e) => (
+                      <li key={e.id}>
+                        <Link to="/chronologie" className="character-chronology__link">
+                          <span className="eyebrow">{e.dateRP}</span>
+                          <strong>{e.title}</strong>
+                        </Link>
+                      </li>
+                    ))}
+                  </ol>
+                </SpoilerGate>
               </Reveal>
             )}
           </aside>
