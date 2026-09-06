@@ -13,7 +13,7 @@
     "d1:seed:generate": "node scripts/generate-d1-seed.mjs",
     "d1:migrate:local": "wrangler d1 execute woltar-db --local --file=./migrations/0001_init.sql",
     "d1:migrate:remote": "wrangler d1 execute woltar-db --remote --file=./migrations/0001_init.sql",
-    "test": "node --test \"Claude outputs/test-player-profiles.mjs\" \"Claude outputs/test-admin-user-creation.mjs\" \"Claude outputs/test-admin-user-local.mjs\" \"Claude outputs/test-journal.mjs\" \"Claude outputs/test-timelines.mjs\" \"src/components/CharacterCarousel/*.test.mjs\" \"src/components/ArticleEditor/*.test.mjs\" \"Claude outputs/test-aether-privacy.mjs\" \"Claude outputs/test-navigation-players-dom.mjs\""
+    "test": "node --test \"Claude outputs/test-player-profiles.mjs\" \"Claude outputs/test-admin-user-creation.mjs\" \"Claude outputs/test-admin-user-local.mjs\" \"Claude outputs/test-journal.mjs\" \"Claude outputs/test-timelines.mjs\" \"src/components/CharacterCarousel/*.test.mjs\" \"src/components/ArticleEditor/*.test.mjs\" \"Claude outputs/test-aether-privacy.mjs\" \"Claude outputs/test-navigation-players-dom.mjs\" \"Claude outputs/test-footer-community.mjs\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

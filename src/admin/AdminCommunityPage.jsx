@@ -3,6 +3,7 @@ import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { createUserProfile, deleteUserProfile, getUserProfile, listUsers, updateUserProfile } from '../lib/authApi.js'
 import { getAccountBootstrap } from '../lib/accountApi.js'
+import { isCharacterLinked } from '../lib/characterLinks.js'
 
 const FIELDS = [
   ['avatar', 'Avatar', 'input'],
@@ -160,7 +161,7 @@ export default function AdminCommunityPage() {
   return (
     <div className="adm-list">
       <header className="adm-list__head">
-        <div><h1>Communauté RP</h1><p className="adm-muted">{profileUsers.length} profil(s) joueur</p></div>
+        <div><h1>Joueurs</h1><p className="adm-muted">{profileUsers.length} profil(s) joueur · mêmes profils que la galerie publique</p><Link to="/joueurs">Voir les joueurs →</Link></div>
         <button type="button" className="adm-btn adm-btn--ghost" onClick={load}><RefreshCw size={15} /> Recharger</button>
         <button type="button" className="adm-btn adm-btn--primary" onClick={() => setCreating(true)}><Plus size={15} /> Créer un profil joueur</button>
       </header>
@@ -171,7 +172,7 @@ export default function AdminCommunityPage() {
       <ul className="adm-cards">
         {profileUsers.map((user) => {
           const profile = profiles[user.id]
-          const linkedCharacters = characters.filter((character) => character.ownerUserId === user.id)
+          const linkedCharacters = characters.filter((character) => isCharacterLinked(character, user.id, profile.linked_character_ids || []))
           return <li key={user.id}>
             <article className="adm-card adm-card--static">
               <div className="adm-card__body">
@@ -180,8 +181,9 @@ export default function AdminCommunityPage() {
                 <span className="adm-muted">Statut : {user.status || 'Membre'}</span>
                 <span className="adm-muted">Compte associé : {user.id}</span>
                 <span className="adm-muted">Profil public : {profile.profile_public ? 'oui' : 'non'}</span>
-                <span className="adm-muted">{user.contentCounts?.characters || 0} personnage(s) lie(s)</span>
-                {linkedCharacters.length > 0 && <span className="adm-muted">Personnages : {linkedCharacters.map((character) => <Link key={character.id} to={`/personnages/${character.id}`}>{[character.firstName, character.lastName].filter(Boolean).join(' ') || character.id}</Link>)}</span>}
+                <span className="adm-muted">{linkedCharacters.length} personnage(s) rattaché(s), brouillons inclus</span>
+                {profile.profile_public && !user.disabled && <Link to={`/joueurs/${encodeURIComponent(user.id)}`}>Voir le profil public</Link>}
+                {linkedCharacters.length > 0 && <ul className="adm-muted">{linkedCharacters.map((character) => <li key={character.id}>{character.visibility === 'draft' ? <span>{[character.firstName, character.lastName].filter(Boolean).join(' ') || character.id} · brouillon</span> : <Link to={`/personnages/${encodeURIComponent(character.id)}`}>{[character.firstName, character.lastName].filter(Boolean).join(' ') || character.id}</Link>}</li>)}</ul>}
                 <span className="adm-muted">Modifié le : {profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString('fr-FR') : '—'}</span>
               </div>
               <button type="button" className="adm-btn adm-btn--primary" onClick={() => startEdit(user)}>Modifier</button>

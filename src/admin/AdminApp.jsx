@@ -147,8 +147,9 @@ export default function AdminApp() {
         >
           <Route index element={<Navigate to={COLLECTION_NAMES[0]} replace />} />
           <Route path="users" element={<AdminUsersPage />} />
-          <Route path="community" element={<AdminCommunityPage />} />
-          <Route path="creator/*" element={<Navigate to="/admin/community" replace />} />
+          <Route path="players" element={<AdminCommunityPage />} />
+          <Route path="community" element={<Navigate to="/admin/players" replace />} />
+          <Route path="creator/*" element={<Navigate to="/admin/players" replace />} />
           <Route path=":collection" element={<CollectionListPage />} />
           <Route path=":collection/:id" element={<CollectionEditPage />} />
         </Route>

@@ -223,7 +223,8 @@
 
 .site-header__submenu[hidden] { display: none; }
 .site-header__inner { gap: .75rem; }
-.site-header__account { margin-left: auto; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; padding-block: .8rem; }
+.site-header__account { margin-left: auto; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; color: var(--ivory-dim); min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; padding: .65rem .25rem; }
+.site-header__account:hover, .site-header__account:focus-visible { color: var(--ivory); }
 .site-header__caret, .site-header__toggle { min-width: 44px; min-height: 44px; }
 .site-header__nav--mobile { max-height: calc(100dvh - 76px); overflow-y: auto; }
 .site-header__nav--mobile .site-header__link { min-height: 44px; display: flex; align-items: center; }

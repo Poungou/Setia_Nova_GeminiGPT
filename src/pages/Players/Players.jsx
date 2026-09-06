@@ -20,7 +20,7 @@ export default function Players() {
   const [query, setQuery] = useState('')
   const filtered = players.filter((player) => [player.name, player.profile?.player_intro, player.profile?.writing_style, player.profile?.univers].join(' ').toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr')))
   return <PageTransition><section className="container players-page">
-    <div className="section-heading"><span className="eyebrow">Communauté RP</span><h1 className="section-title">Les joueurs</h1><p>Des plumes, des univers et des histoires à partager.</p></div>
+    <div className="section-heading"><span className="eyebrow">Joueurs</span><h1 className="section-title">Les joueurs</h1><p>Des plumes, des univers et des histoires à partager.</p></div>
     <label className="players-search">Rechercher un joueur<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pseudo, style ou univers…" /></label>
     {loading && <p role="status">Chargement des joueurs…</p>}
     {error && <p role="alert">Les profils sont momentanément indisponibles. Réessaie en rechargeant la page.</p>}

@@ -144,7 +144,7 @@ export default function Characters() {
         </Reveal>
 
         <Reveal as="section" className="players-section" aria-labelledby="players-title">
-          <div className="characters-page__section-head"><span className="eyebrow">Communauté RP</span><h2 id="players-title">Les joueurs — qui sont-ils ?</h2></div>
+          <div className="characters-page__section-head"><span className="eyebrow">Joueurs</span><h2 id="players-title">Les joueurs — qui sont-ils ?</h2></div>
           <Link to="/joueurs" className="btn">Rencontrer les joueurs →</Link>
         </Reveal>
 

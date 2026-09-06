@@ -18,3 +18,8 @@
   color: var(--ivory);
   border-color: var(--line-strong);
 }
+
+.theme-select { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding-inline: .35rem; white-space: nowrap; }
+.theme-select select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 1rem; }
+.theme-select:hover { color: var(--ivory); }
+.theme-select:focus-within { outline: 1px solid var(--ivory-dim); outline-offset: 2px; border-radius: var(--radius-s); }

@@ -21,9 +21,9 @@ export default function AdminLayout({ onLock, currentUser }) {
             <UserCog size={16} />
             Utilisateurs
           </NavLink>
-          <NavLink to="/admin/community" className="adm-nav__link">
+          <NavLink to="/admin/players" className="adm-nav__link">
             <Users size={16} />
-            Communauté RP
+            Joueurs
           </NavLink>
           {COLLECTION_NAMES.map((name) => {
             const s = SCHEMA[name]
