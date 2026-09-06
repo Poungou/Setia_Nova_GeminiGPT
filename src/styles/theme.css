@@ -112,76 +112,149 @@
 }
 
 /* --- Thème "woltar" ---------------------------------------------------
-   Palette reprise directement du site historique woltar.net (échantillonnée
-   en direct sur le site, puis affinée sur retour de l'utilisatrice avec
-   captures d'écran + code source du jeu à l'appui — 1er jet jugé "pas assez
-   fidèle"). --bg-void/--bg-base reprennent maintenant le rouge saturé réel
-   (#980000) plutôt qu'un bordeaux assourdi, avec des pois de fond bien
-   visibles (cf. règle body plus bas). Les cartes/panneaux (--bg-raised,
-   --bg-raised-2) restent en revanche sombres façon "Nova-Setia" —
-   choix explicite de l'utilisatrice de ne PAS reprendre le panneau
-   bleu/blanc du jeu, pour rester cohérente avec le reste du site. Pas de
-   violet dans la source : --violet est ici aliasé sur la famille bleue
-   plutôt que d'inventer une teinte hors palette. */
+   Refonte (session du 06/09/2026) : le 1er jet (voir historique git)
+   reprenait le rouge saturé réel de woltar.net (#980000) sur toute la
+   page ET sur les cartes, jugé trop brut / pas assez élégant sur retour de
+   l'utilisatrice, avec une palette de référence précise à la clé (cyan
+   #29A4D2, brique #B30F17, ivoire #F4F1E8, gris-bleu #DDE4E7, encre chaude
+   #423B38) et une demande explicite : « à quoi ressemblerait Woltar si son
+   interface avait été modernisée proprement en 2026 ? ». Deux changements
+   de fond par rapport au 1er jet :
+   1) --bg-void/--bg-base passent d'un rouge saturé plein cadre à une
+      brique profonde et désaturée : le rouge doit rester la couleur du
+      CHROME ambiant (fond de page, halos), pas remplir en aplat saturé —
+      cf. règle body plus bas, contraste très réduit.
+   2) Les cartes/panneaux redeviennent CLAIRES (ivoire/gris-bleu, texte
+      encre chaude), à l'inverse du choix du 1er jet ("rester cohérente
+      avec le reste du site" en gardant des cartes sombres) — changement de
+      direction explicitement redemandé cette fois-ci. Techniquement :
+      plutôt que de dupliquer chaque composant carte, on ré-alias
+      localement le SOUS-ENSEMBLE de tokens qui pilote fond/texte/lignes
+      d'une carte (--bg-raised*, --gradient-card, --ivory*, --line*) sur
+      les sélecteurs "carte" existants (voir bloc « cartes claires » plus
+      bas) : la cascade CSS fait le reste, aucun composant n'a besoin
+      d'être modifié pour prendre la nouvelle apparence. --violet reste
+      aliasé sur la famille cyan (pas de violet dans la palette de
+      référence), comme dans le 1er jet. */
 :root[data-theme='woltar'] {
-  --bg-void: #5c0000;
-  --bg-base: #8a0000;
-  --bg-raised: #2c0a0a;
-  --bg-raised-2: #391010;
-  --bg-glass: rgba(44, 10, 10, 0.72);
-  --bg-header: rgba(60, 0, 0, 0.8);
-  --overlay: rgba(30, 0, 0, 0.6);
+  --bg-void: #33110e;
+  --bg-base: #451911;
+  --bg-raised: #4f2019;
+  --bg-raised-2: #5c2921;
+  --bg-glass: rgba(51, 17, 14, 0.74);
+  --bg-header: rgba(43, 14, 11, 0.82);
+  --overlay: rgba(26, 8, 6, 0.6);
 
-  --wine: #980000;
-  --wine-bright: #c81f1f;
-  --wine-soft: rgba(168, 24, 24, 0.35);
-  --midnight: #00599c;
-  --midnight-bright: #279fd3;
-  --violet: #1c6fa8;
-  --violet-soft: rgba(39, 159, 211, 0.25);
+  --wine: #b30f17;
+  --wine-bright: #d0432f;
+  --wine-soft: rgba(179, 15, 23, 0.28);
+  --midnight: #11688c;
+  --midnight-bright: #29a4d2;
+  --violet: #1c86ad;
+  --violet-soft: rgba(41, 164, 210, 0.22);
 
-  --ivory: #f2e8df;
-  --ivory-dim: #cbb9ae;
-  --ivory-faint: #9c8b83;
+  --ivory: #f4f1e8;
+  --ivory-dim: rgba(244, 241, 232, 0.76);
+  --ivory-faint: rgba(244, 241, 232, 0.54);
 
-  --on-accent: #fdf6f0;
+  --on-accent: #fbf8f2;
 
-  --line: rgba(242, 232, 223, 0.14);
-  --line-strong: rgba(242, 232, 223, 0.26);
+  --line: rgba(244, 241, 232, 0.14);
+  --line-strong: rgba(244, 241, 232, 0.26);
 
   --ok: #bfe6c8;
   --ok-line: rgba(120, 200, 140, 0.4);
   --danger: #f0c2cc;
   --danger-line: var(--wine-bright);
 
-  --gradient-hero: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(168, 24, 24, 0.4), transparent),
-    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(39, 159, 211, 0.22), transparent);
-  --gradient-card: linear-gradient(160deg, rgba(152, 0, 0, 0.1), rgba(0, 89, 156, 0.08));
+  --gradient-hero: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(179, 15, 23, 0.3), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(41, 164, 210, 0.22), transparent);
+  --gradient-card: linear-gradient(160deg, rgba(179, 15, 23, 0.1), rgba(41, 164, 210, 0.08));
 
-  --glow-wine: 0 0 0 1px rgba(168, 24, 24, 0.4), 0 8px 28px -8px rgba(168, 24, 24, 0.45);
+  --glow-wine: 0 0 0 1px rgba(179, 15, 23, 0.35), 0 8px 26px -10px rgba(179, 15, 23, 0.4);
+
+  /* Tokens "carte claire" (voir bloc de ré-aliasing plus bas) — regroupés
+     ici pour n'avoir qu'un seul endroit à ajuster si l'utilisatrice affine
+     la palette. */
+  --woltar-card-bg: #f4f1e8;
+  --woltar-card-bg-2: #dde4e7;
+  --woltar-card-gradient: linear-gradient(160deg, rgba(41, 164, 210, 0.06), rgba(179, 15, 23, 0.05));
+  --woltar-card-ink: #423b38;
+  --woltar-card-ink-dim: rgba(66, 59, 56, 0.74);
+  --woltar-card-ink-faint: rgba(66, 59, 56, 0.54);
+  --woltar-card-line: rgba(66, 59, 56, 0.14);
+  --woltar-card-line-strong: rgba(66, 59, 56, 0.28);
 
   color-scheme: dark;
 }
 
-/* Fond à pois — repris fidèlement du fond historique de woltar.net (motif
-   à pois rouges sur fond rouge, tuile 140×140 sur le vrai site — mesurée en
-   direct sur le fichier `wo_fond.jpg`). Un seul pois doux/dégradé par tuile,
-   assez large et contrasté pour se voir nettement (1er jet en filigrane
-   jugé pas assez fidèle par l'utilisatrice, corrigé sur retour explicite
-   avec captures + code source du jeu à l'appui). Fixe au scroll pour ne
-   pas distraire. */
+/* Fond à pois — réinterprétation TRÈS discrète du motif historique
+   (pois rouges sur fond rouge, tuile 140×140 sur woltar.net) : sur retour
+   explicite de l'utilisatrice après le 1er jet ("juste une ambiance, pas
+   de saturation en aplat"), le contraste est ici volontairement réduit de
+   plus de moitié par rapport au 1er jet et la tuile agrandie, pour rester
+   un clin d'œil en arrière-plan plutôt qu'un motif dominant. Fixe au
+   scroll pour ne pas distraire. */
 :root[data-theme='woltar'] body {
   background-image: radial-gradient(
     circle at center,
-    rgba(216, 48, 48, 0.85) 0%,
-    rgba(200, 40, 40, 0.6) 28%,
-    rgba(184, 32, 32, 0.28) 45%,
-    rgba(168, 24, 24, 0.08) 60%,
-    transparent 72%
+    rgba(208, 67, 47, 0.22) 0%,
+    rgba(179, 15, 23, 0.14) 30%,
+    rgba(179, 15, 23, 0.06) 48%,
+    transparent 66%
   );
-  background-size: 140px 140px;
+  background-size: 160px 160px;
   background-position: 0 0;
   background-attachment: fixed;
+}
+
+/* --- Cartes claires -----------------------------------------------------
+   Liste volontairement énumérée (plutôt qu'un sélecteur générique du style
+   "tout ce qui a une bordure") pour ne toucher QUE les vraies surfaces
+   "carte/panneau d'information" identifiées dans l'audit : carte générique
+   (.card, .empty-state), carte personnage (grille ET blocs Caractère/
+   Apparence/Histoire de la fiche — même classe .character-card dans les
+   deux), carte lieu, blocs latéraux de fiche (Relations/Lieux associés/
+   Chronologie/Aether), barre d'identité + ses cellules, panneau de détail
+   du sociogramme (clic sur une liaison) + sa variante liste mobile, cartes
+   "Qui suis-je"/règles RP. Le portrait en grand format du hero et les
+   médaillons du sociogramme restent volontairement sur le fond sombre du
+   chrome (ce sont des vignettes, pas des panneaux d'info) — non inclus ici.
+   Chaque sélecteur ré-aliase localement le sous-ensemble de tokens
+   fond/texte/ligne : tout composant qui les consomme déjà (100% du site,
+   voir audit) prend la nouvelle apparence par cascade normale, sans
+   qu'aucun fichier de composant n'ait besoin d'être modifié pour ça. */
+:root[data-theme='woltar'] .card,
+:root[data-theme='woltar'] .empty-state,
+:root[data-theme='woltar'] .character-card,
+:root[data-theme='woltar'] .location-card,
+:root[data-theme='woltar'] .player-card,
+:root[data-theme='woltar'] .rule-card,
+:root[data-theme='woltar'] .aside-block,
+:root[data-theme='woltar'] .character-aside-block,
+:root[data-theme='woltar'] .identity-bar,
+:root[data-theme='woltar'] .identity-chip,
+:root[data-theme='woltar'] .relation-graph__panel,
+:root[data-theme='woltar'] .relation-graph__mobile-row {
+  --bg-raised: var(--woltar-card-bg);
+  --bg-raised-2: var(--woltar-card-bg-2);
+  --gradient-card: var(--woltar-card-gradient);
+  --ivory: var(--woltar-card-ink);
+  --ivory-dim: var(--woltar-card-ink-dim);
+  --ivory-faint: var(--woltar-card-ink-faint);
+  --line: var(--woltar-card-line);
+  --line-strong: var(--woltar-card-line-strong);
+}
+
+/* Petits titres rouges "dans un bandeau clair" : uniquement à l'intérieur
+   des cartes ci-dessus (jamais sur le fond sombre de la page, où un rouge
+   sur rouge serait illisible) — cf. cahier des charges §5. */
+:root[data-theme='woltar'] .character-card .eyebrow,
+:root[data-theme='woltar'] .aside-block .eyebrow,
+:root[data-theme='woltar'] .character-aside-block .eyebrow,
+:root[data-theme='woltar'] .rule-card__title,
+:root[data-theme='woltar'] .section-card-title {
+  color: var(--wine-bright);
 }
 
 * {

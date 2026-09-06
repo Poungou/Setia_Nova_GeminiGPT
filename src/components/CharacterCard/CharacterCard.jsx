@@ -19,6 +19,10 @@ function getInitials(character) {
 export default function CharacterCard({ character, index = 0, compact = false, hashtag = null }) {
   const reduce = useReducedMotion()
   const fullName = [character.firstName, character.lastName].filter(Boolean).join(' ')
+  // Cadre activé par défaut (`undefined` → activé) pour ne rien changer à
+  // l'affichage des personnages existants — seule une valeur explicite
+  // `false` (case décochée dans l'édition) masque le cadre.
+  const isFramed = character.portraitFramed !== false
   const frameColor = resolveFrameColor(character)
   const frameMeta = getFrameMeta(frameColor)
   const imageSource = imgCredit(character.portrait, character.image_source)
@@ -43,12 +47,14 @@ export default function CharacterCard({ character, index = 0, compact = false, h
         <span className="character-card__number">{character.number}</span>
         <PixelHeart color={character.color} size={17} className="character-card__heart" title={`Couleur de ${character.firstName || 'ce personnage'}`} />
 
-        <span className="character-card__disc-wrap">
+        <span className={`character-card__disc-wrap${isFramed ? '' : ' character-card__disc-wrap--plain'}`}>
           <span
             className="character-card__disc"
-            style={{
-              inset: `${frameMeta.inset.top}% ${frameMeta.inset.right}% ${frameMeta.inset.bottom}% ${frameMeta.inset.left}%`,
-            }}
+            style={
+              isFramed
+                ? { inset: `${frameMeta.inset.top}% ${frameMeta.inset.right}% ${frameMeta.inset.bottom}% ${frameMeta.inset.left}%` }
+                : undefined
+            }
           >
             {imgSrc(character.portrait) ? (
               <img
@@ -61,7 +67,7 @@ export default function CharacterCard({ character, index = 0, compact = false, h
               <span className="character-card__initials">{getInitials(character)}</span>
             )}
           </span>
-          <PixelFrame frameColor={frameColor} className="character-card__frame" />
+          {isFramed && <PixelFrame frameColor={frameColor} className="character-card__frame" />}
         </span>
       </div>
       {!compact && imgSrc(character.portrait) && imageSource && (

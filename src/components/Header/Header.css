@@ -221,6 +221,48 @@
   }
 }
 
+/* --- Thème "woltar" : onglets en petites capsules -----------------------
+   Reprend l'idée historique "capsule + texte" du site woltar.net, en plus
+   sobre (pas de pictogramme par lien pour l'instant — ça demanderait de
+   toucher Header.jsx, hors du cahier des charges CSS-only de cette passe ;
+   voir le résumé transmis à l'utilisatrice). Le soulignement animé existant
+   est désactivé au profit d'un fond de capsule, plus proche de l'esprit
+   "petit onglet net" du jeu. Actif = rouge Woltar plein (fort contraste,
+   lisible), survol = léger lavis cyan. */
+:root[data-theme='woltar'] .site-header__link {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:root[data-theme='woltar'] .site-header__link::after {
+  display: none;
+}
+
+:root[data-theme='woltar'] .site-header__link:hover {
+  color: var(--ivory);
+  background: var(--violet-soft);
+  border-color: var(--line-strong);
+}
+
+:root[data-theme='woltar'] .site-header__link.is-active {
+  color: var(--on-accent);
+  background: var(--wine);
+  border-color: var(--wine);
+}
+
+:root[data-theme='woltar'] .site-header__submenu-link.is-active {
+  color: var(--on-accent);
+  background: var(--wine);
+}
+
+@media (max-width: 1279px) {
+  :root[data-theme='woltar'] .site-header__nav--mobile .site-header__link {
+    border-radius: var(--radius-s);
+  }
+}
+
 .site-header__submenu[hidden] { display: none; }
 .site-header__inner { gap: .75rem; }
 .site-header__account { margin-left: auto; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; color: var(--ivory-dim); min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; padding: .65rem .25rem; }

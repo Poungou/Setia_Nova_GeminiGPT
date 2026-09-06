@@ -23,3 +23,9 @@
 .search-bar input::placeholder {
   color: var(--ivory-faint);
 }
+
+/* Thème "woltar" : léger accent cyan au focus, cohérent avec le reste des
+   micro-interactions du thème (survol de nav, etc.). */
+:root[data-theme='woltar'] .search-bar:focus-within {
+  border-color: var(--midnight-bright);
+}

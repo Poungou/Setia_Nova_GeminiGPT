@@ -40,8 +40,20 @@
   aspect-ratio: 1;
 }
 
+/* Portrait "sans cadre" (portraitFramed: false) : pas d'illustration de
+   cadre autour, donc pas besoin de la marge réservée à sa couronne/ses
+   plumes — le disque peut occuper un peu plus d'espace et rester centré. */
+.character-card__disc-wrap--plain {
+  width: 78%;
+}
+
+.character-card__disc-wrap--plain .character-card__disc {
+  border: 1px solid var(--line-strong);
+}
+
 .character-card__disc {
   position: absolute;
+  inset: 0;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
