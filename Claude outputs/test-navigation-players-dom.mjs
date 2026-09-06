@@ -105,7 +105,9 @@ test('DOM: universal navigation, account access, public players, nested spoilers
     assert(document.body.textContent.includes('CONTENUSECRET'))
     await mount(h(About), '/aether')
     assert(document.body.textContent.includes('GPT-5.6 Luna'))
-    assert(document.querySelector('details summary'))
+    // Popover compact (bouton "À propos d'Aether") plutôt que le grand
+    // panneau <details> précédent — voir src/components/AetherAbout.
+    assert(document.querySelector('.aether-about__toggle'))
     await mount(h(Chat, { title: 'Aether', sendMessage: async () => 'Réponse', greeting: 'Bonjour' }), '/chat')
     assert.equal(window.localStorage.length, 0)
     assert.equal(window.sessionStorage.length, 0)

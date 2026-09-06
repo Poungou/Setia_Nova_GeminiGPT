@@ -48,10 +48,6 @@ export default function Aether() {
           <motion.p className="aether-hero__lead" {...itemMotion}>
             Suis ton cœur. Pour le reste, demande-moi.
           </motion.p>
-          <motion.p className="aether-hero__sub" {...itemMotion}>
-            Personnages, histoires, relations ou simple envie de trouver un RP qui te plaît :
-            je peux t&rsquo;orienter.
-          </motion.p>
         </motion.div>
       </section>
 
