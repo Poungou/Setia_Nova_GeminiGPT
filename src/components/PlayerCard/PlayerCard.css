@@ -1,0 +1,140 @@
+/* src/components/PlayerCard/PlayerCard.css
+   Carte "annuaire" de /joueurs — composition centrée (maquette validée).
+   `.players-card` reste dans la liste des "cartes claires" du thème woltar
+   (voir src/styles/theme.css) : apparence ivoire automatique dans ce thème,
+   rien à dupliquer ici. */
+
+.players-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--gradient-card);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 6px 20px -16px rgba(0, 0, 0, 0.55);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.players-card:hover,
+.players-card:focus-visible {
+  border-color: var(--wine-bright);
+  box-shadow: var(--glow-wine);
+  transform: translateY(-3px);
+}
+
+.players-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--wine-soft);
+  color: var(--ivory);
+  font-family: var(--font-display);
+}
+
+.players-avatar--md {
+  width: 76px;
+  height: 76px;
+  font-size: 1.6rem;
+}
+
+.players-avatar--lg {
+  width: 132px;
+  height: 132px;
+  font-size: 2.6rem;
+  box-shadow: 0 0 0 4px var(--bg-base), 0 0 0 5px var(--line), var(--glow-wine);
+}
+
+.players-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.players-card__name {
+  margin-top: 0.1rem;
+  font-size: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.players-card__intro {
+  margin: 0;
+  max-width: 32ch;
+  color: var(--ivory-dim);
+  font-family: var(--font-reading);
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.players-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.players-card__count {
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.players-card__characters {
+  display: flex;
+  justify-content: center;
+}
+
+.players-card__mini-portrait {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-raised);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--bg-raised-2);
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+}
+
+.players-card__mini-portrait:first-child {
+  margin-left: 0;
+}
+
+.players-card__mini-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.players-card__mini-portrait--more {
+  color: var(--ivory-dim);
+  font-size: 0.62rem;
+}
+
+.players-card__cta {
+  margin-top: 0.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--wine-bright);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
