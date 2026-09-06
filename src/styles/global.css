@@ -123,4 +123,9 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+  /* Garde-fou anti-débordement : un badge ne doit jamais étirer la page,
+     même si son contenu est inhabituellement long. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -49,10 +49,10 @@ export default function PlayerCard({ player, characters = [] }) {
 
       {badges.length > 0 && (
         <div className="players-card__badges">
-          {badges.map(({ field, label, Icon, value }) => (
+          {badges.map(({ field, label, Icon }) => (
             <span key={field} className="badge">
               <Icon size={12} aria-hidden="true" />
-              {label} : {value}
+              {label}
             </span>
           ))}
         </div>

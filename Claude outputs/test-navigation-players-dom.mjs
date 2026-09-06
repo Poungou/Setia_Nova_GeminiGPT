@@ -88,7 +88,11 @@ test('DOM: universal navigation, account access, public players, nested spoilers
     globalThis.fetch = async () => ({ ok: true, json: async () => ({ data: [player] }) })
     await mount(h(Players), '/joueurs')
     assert(document.querySelector('a[href="/joueurs/alice"]'))
-    assert(document.body.textContent.includes('Hebdomadaire'))
+    // Le badge n'affiche que le libellé court ("Rythme"), jamais la valeur
+    // brute du champ (qui peut être un paragraphe entier côté prod) — voir
+    // PlayerCard.jsx/playerBadges.
+    assert(document.body.textContent.includes('Rythme'))
+    assert(!document.body.textContent.includes('Hebdomadaire'))
     const events = normalizeTimelineEvents([{ id: 'spoiler', title: 'Un événement', description: 'CONTENUSECRET', spoiler: true }, { id: 'normal', title: 'Un autre', description: 'CONTENUVISIBLE', spoiler: 'false' }])
     assert.equal(events[1].spoiler, false)
     const timeline = { id: 'test', title: 'Chronologie', spoiler: true, events }
