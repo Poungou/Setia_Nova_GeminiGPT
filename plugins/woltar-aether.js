@@ -17,6 +17,7 @@
 // contourne le champ `enabled`, réservé à un compte admin.
 
 import OpenAI from 'openai'
+import { textOnlyRequest, isImageRequest, IMAGE_UNAVAILABLE } from './lib/aetherPolicy.js'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { loadEnv } from 'vite'
@@ -30,8 +31,6 @@ const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 20
 const REQUEST_TIMEOUT_MS = 25_000
 const DEFAULT_MODEL = 'gpt-5.6-luna'
-const DEFAULT_REASONING_EFFORT = 'none'
-const MAX_OUTPUT_TOKENS = 500
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -77,14 +76,14 @@ function openAiErrorResponse(err) {
   if (status === 403) {
     return {
       status: 403,
-      error: "La clé API OpenAI n'a pas accès au modèle configuré. Vérifie OPENAI_MODEL ou les droits du projet.",
+      error: "La clé API OpenAI n’a pas accès à GPT-5.6 Luna. Vérifie les droits du projet.",
     }
   }
 
   if (status === 404) {
     return {
       status: 502,
-      error: "Modèle OpenAI introuvable. Vérifie OPENAI_MODEL dans .env.local ou retire cette variable.",
+      error: "GPT-5.6 Luna est introuvable pour ce projet OpenAI.",
     }
   }
 
@@ -104,8 +103,8 @@ export default function woltarAether() {
       const dataDir = path.join(root, 'src', 'data')
       const env = loadEnv(server.config.mode, root, '')
       const apiKey = env.OPENAI_API_KEY || ''
-      const model = env.OPENAI_MODEL || DEFAULT_MODEL
-      const openai = apiKey ? new OpenAI({ apiKey }) : null
+      const model = DEFAULT_MODEL
+      const openai = apiKey ? new OpenAI({ apiKey, logLevel: 'off' }) : null
 
       const hits = new Map()
       function isRateLimited(key) {
@@ -120,6 +119,7 @@ export default function woltarAether() {
         const send = (code, obj) => {
           res.statusCode = code
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.setHeader('Cache-Control', 'no-store')
           res.end(JSON.stringify(obj))
         }
 
@@ -164,6 +164,8 @@ export default function woltarAether() {
 
           if (trimmed.length === 0) return send(400, { error: 'Message vide.' })
 
+          if (isImageRequest(trimmed)) return send(200, { reply: IMAGE_UNAVAILABLE })
+
           if (!apiKey || !openai) {
             return send(500, {
               error:
@@ -195,20 +197,13 @@ export default function woltarAether() {
           let aiResponse
           try {
             aiResponse = await openai.responses.create(
-              {
-                model,
-                reasoning: { effort: DEFAULT_REASONING_EFFORT },
-                max_output_tokens: MAX_OUTPUT_TOKENS,
-                temperature: 0.7,
-                instructions: system,
-                input: trimmed,
-              },
+              textOnlyRequest({ model, instructions: system, input: trimmed }),
               { signal: controller.signal },
             )
           } catch (err) {
             clearTimeout(timeout)
             const response = openAiErrorResponse(err)
-            console.error('[woltar-aether] erreur OpenAI', err?.status, err?.code || err?.message)
+            console.error('[aether] request_failed')
             return send(response.status, { error: response.error })
           }
           clearTimeout(timeout)
@@ -217,11 +212,9 @@ export default function woltarAether() {
 
           if (!reply) return send(502, { error: 'Réponse vide du service IA.' })
           return send(200, { reply })
-        } catch (err) {
-          console.error('[woltar-aether]', err)
-          res.statusCode = 500
-          res.setHeader('Content-Type', 'application/json; charset=utf-8')
-          res.end(JSON.stringify({ error: 'Erreur interne du serveur de développement.' }))
+        } catch {
+          console.error('[aether] request_failed')
+          return send(500, { error: 'Erreur interne du serveur de développement.' })
         }
       })
     },

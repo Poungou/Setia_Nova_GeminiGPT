@@ -1,7 +1,6 @@
 import { isCharacterLinked } from '../../lib/characterLinks.js'
 import { useMemo, useState } from 'react'
 import { usePublicCharacters, usePublicPlayers } from '../../lib/publicData.js'
-import { imgSrc } from '../../lib/image.js'
 import { Link, useSearchParams } from 'react-router-dom'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
@@ -40,40 +39,6 @@ function compareByName(a, b) {
   const nameA = [a.firstName, a.lastName].filter(Boolean).join(' ')
   const nameB = [b.firstName, b.lastName].filter(Boolean).join(' ')
   return nameA.localeCompare(nameB, 'fr')
-}
-
-const PROFILE_SECTIONS = [['player_intro', 'Quelques mots'], ['writing_style', 'Style d’écriture'], ['univers', 'Univers'], ['tw', 'TW'], ['rhythm', 'Rythme']]
-
-function PlayerCard({ player }) {
-  const avatar = imgSrc(player.profile?.avatar)
-  return <details className="player-card">
-    <summary className="player-card__summary">
-      <span className="player-card__avatar">{avatar ? <img src={avatar} alt="" /> : player.name?.[0] || 'N'}</span>
-      <span><strong>{player.name}</strong>{player.status === 'RPiste' && <small>RPiste</small>}</span>
-      <span className="player-card__marker" aria-hidden="true" />
-    </summary>
-    <div className="player-card__content">
-      {PROFILE_SECTIONS.map(([key, label]) => player.profile?.[key] && <section key={key}><h3>{label}</h3><p>{player.profile[key]}</p></section>)}
-      <section>
-        <h3>Pseudo IG &amp; Personnages</h3>
-        {player.profile?.ig_username && <p>Pseudo IG : {player.profile.ig_username}</p>}
-        {player.characters?.length ? (
-          <>
-            <ul>
-              {player.characters.slice(0, 3).map((character) => (
-                <li key={character.id}><Link to={`/personnages/${character.id}`}>{character.name}</Link></li>
-              ))}
-            </ul>
-            <Link to={`/personnages?joueur=${encodeURIComponent(player.userId)}#gallery-title`} className="player-card__see-all">
-              Voir tous ses personnages →
-            </Link>
-          </>
-        ) : (
-          <p className="player-card__empty">Aucun personnage lié pour le moment.</p>
-        )}
-      </section>
-    </div>
-  </details>
 }
 
 function matchesQuery(character, query) {
@@ -180,7 +145,7 @@ export default function Characters() {
 
         <Reveal as="section" className="players-section" aria-labelledby="players-title">
           <div className="characters-page__section-head"><span className="eyebrow">Communauté RP</span><h2 id="players-title">Les joueurs — qui sont-ils ?</h2></div>
-          <div className="players-grid">{players.map((player) => <PlayerCard key={player.userId} player={player} />)}</div>
+          <Link to="/joueurs" className="btn">Rencontrer les joueurs →</Link>
         </Reveal>
 
         <Reveal as="section" className="characters-featured" aria-labelledby="characters-featured-title">

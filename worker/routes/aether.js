@@ -12,9 +12,11 @@
 // prompt et la source de configuration changent (voir plugins/lib/aetherPrompt.js).
 
 import OpenAI from 'openai'
+import { textOnlyRequest, isImageRequest, IMAGE_UNAVAILABLE } from '../../plugins/lib/aetherPolicy.js'
 import { buildAetherSystemPrompt } from '../../plugins/lib/aetherPrompt.js'
 import { getRequestUser, isAdmin } from '../lib/authStore.js'
-import { STATIC_COLLECTIONS, getAetherConfig, listCharactersWithFallback, listClansWithFallback } from '../lib/contentStore.js'
+import { getAetherConfig } from '../lib/contentStore.js'
+import { listPublicCharacters, listPublicClans, listPublicLocations } from '../lib/publicStore.js'
 
 const MAX_MESSAGE_LEN = 4000
 const MAX_HISTORY = 20
@@ -22,8 +24,6 @@ const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 20 // requêtes / minute / clé — voir note ci-dessous
 const REQUEST_TIMEOUT_MS = 25_000
 const DEFAULT_MODEL = 'gpt-5.6-luna'
-const DEFAULT_REASONING_EFFORT = 'none'
-const MAX_OUTPUT_TOKENS = 500
 
 // Compteur de débit en mémoire, best-effort : un isolate Worker peut être
 // recyclé à tout moment, donc ce n'est PAS une garantie dure contrairement à
@@ -41,7 +41,7 @@ function isRateLimited(key) {
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
     ...init,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...(init.headers || {}) },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...(init.headers || {}) },
   })
 }
 
@@ -72,11 +72,11 @@ function openAiErrorResponse(err) {
   }
 
   if (status === 403) {
-    return { status: 403, error: "La clé API OpenAI n'a pas accès au modèle configuré (OPENAI_MODEL)." }
+    return { status: 403, error: 'Aether est momentanément indisponible.' }
   }
 
   if (status === 404) {
-    return { status: 502, error: 'Modèle OpenAI introuvable. Vérifie la variable OPENAI_MODEL.' }
+    return { status: 502, error: 'Le modèle d’Aether est momentanément indisponible.' }
   }
 
   if (status === 429) {
@@ -125,6 +125,8 @@ export async function handleAether(request, env, parts) {
 
     if (trimmed.length === 0) return json({ error: 'Message vide.' }, { status: 400 })
 
+    if (isImageRequest(trimmed)) return json({ reply: IMAGE_UNAVAILABLE })
+
     const apiKey = env.OPENAI_API_KEY || ''
     if (!apiKey) {
       return json(
@@ -139,40 +141,34 @@ export async function handleAether(request, env, parts) {
       return json({ error: 'Trop de messages envoyés en peu de temps — patiente un instant.' }, { status: 429 })
     }
 
-    const characters = await listCharactersWithFallback(env)
+    const characters = await listPublicCharacters(env)
     // Les clans crees par un compte joueur (D1) doivent aussi etre connus
     // d'Aether, pas seulement le clan canon Nakamura -- voir contentStore.js.
-    const clans = await listClansWithFallback(env)
+    const clans = await listPublicClans(env)
     const system = buildAetherSystemPrompt({
       config,
       characters,
-      locations: STATIC_COLLECTIONS.locations,
+      locations: await listPublicLocations(env),
       clans,
       context: context && typeof context.characterId === 'string' ? context : null,
     })
-    const model = env.OPENAI_MODEL || DEFAULT_MODEL
+    // Keep the actual model aligned with the public disclosure.
+    const model = DEFAULT_MODEL
 
-    const openai = new OpenAI({ apiKey })
+    const openai = new OpenAI({ apiKey, logLevel: 'off' })
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
     let aiResponse
     try {
       aiResponse = await openai.responses.create(
-        {
-          model,
-          reasoning: { effort: DEFAULT_REASONING_EFFORT },
-          max_output_tokens: MAX_OUTPUT_TOKENS,
-          temperature: 0.7,
-          instructions: system,
-          input: trimmed,
-        },
+        textOnlyRequest({ model, instructions: system, input: trimmed }),
         { signal: controller.signal },
       )
     } catch (err) {
       clearTimeout(timeout)
       const response = openAiErrorResponse(err)
-      console.error('[worker/aether] erreur OpenAI', err?.status, err?.code || err?.message)
+      console.error('[aether] request_failed')
       return json({ error: response.error }, { status: response.status })
     }
     clearTimeout(timeout)
@@ -180,8 +176,8 @@ export async function handleAether(request, env, parts) {
     const reply = extractReply(aiResponse)
     if (!reply) return json({ error: 'Réponse vide du service IA.' }, { status: 502 })
     return json({ reply })
-  } catch (err) {
-    console.error('[worker/aether]', err)
+  } catch {
+    console.error('[aether] request_failed')
     return json({ error: 'Erreur interne du serveur.' }, { status: 500 })
   }
 }

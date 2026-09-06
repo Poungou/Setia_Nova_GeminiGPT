@@ -12,6 +12,7 @@ import Gallery from './pages/Gallery/Gallery.jsx'
 import Tag from './pages/Tag/Tag.jsx'
 import Characters from './pages/Characters/Characters.jsx'
 import CharacterDetail from './pages/CharacterDetail/CharacterDetail.jsx'
+import Players, { PlayerDetail } from './pages/Players/Players.jsx'
 import Universe from './pages/Universe/Universe.jsx'
 import Clans from './pages/Clans/Clans.jsx'
 import ClanDetail from './pages/ClanDetail/ClanDetail.jsx'
@@ -41,6 +42,8 @@ function SiteShell() {
           <Route path="/tag/:tag" element={<Tag />} />
           <Route path="/personnages" element={<Characters />} />
           <Route path="/personnages/:id" element={<CharacterDetail />} />
+          <Route path="/joueurs" element={<Players />} />
+          <Route path="/joueurs/:id" element={<PlayerDetail />} />
           <Route path="/univers" element={<Universe />} />
           <Route path="/clans" element={<Clans />} />
           <Route path="/clans/:id" element={<ClanDetail />} />

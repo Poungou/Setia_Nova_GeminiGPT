@@ -144,14 +144,20 @@ export function usePublicCharacterOwners() {
   return owners
 }
 
-export function usePublicPlayers() {
+export function usePublicPlayersState() {
   const [players, setPlayers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   useEffect(() => {
     let alive = true
-    getJson(`${BASE}/players`).then((data) => { if (alive && Array.isArray(data)) setPlayers(data) }).catch(() => {})
+    getJson(`${BASE}/players`).then((data) => { if (alive && Array.isArray(data)) setPlayers(data) }).catch(() => { if (alive) setError(true) }).finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
-  return players
+  return { players, loading, error }
+}
+
+export function usePublicPlayers() {
+  return usePublicPlayersState().players
 }
 
 export function usePublicPosts() {

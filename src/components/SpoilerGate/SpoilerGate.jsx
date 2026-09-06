@@ -11,10 +11,10 @@
 import { useState } from 'react'
 import './SpoilerGate.css'
 
-export default function SpoilerGate({ message, buttonLabel = 'Afficher quand même', children, className = '' }) {
+export default function SpoilerGate({ message, buttonLabel = 'Afficher quand même', children, disabled = false, className = '' }) {
   const [revealed, setRevealed] = useState(false)
 
-  if (revealed) return children
+  if (disabled || revealed) return children
 
   return (
     <div className={`spoiler-gate ${className}`.trim()}>

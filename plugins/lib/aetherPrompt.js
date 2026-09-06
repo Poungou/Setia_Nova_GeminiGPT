@@ -63,7 +63,7 @@ function relationsDigest(character, characters) {
   const rels = (character.relations || [])
     .map((rel) => {
       const target = characters.find((c) => c.id === rel.characterId)
-      const name = target ? fullName(target) : rel.characterId
+      const name = target ? fullName(target) : ''
       if (!name) return ''
       return `${rel.type || 'lien'} de ${name}`
     })
@@ -72,6 +72,12 @@ function relationsDigest(character, characters) {
 }
 
 export function buildAetherSystemPrompt({ config, characters = [], locations = [], clans = [], context = null }) {
+  const published = (record) => record && (!record.visibility || record.visibility === 'published')
+  characters = characters.filter(published)
+  locations = locations.filter(published)
+  clans = clans.filter(published)
+  const publicIds = new Set(characters.map((character) => character.id))
+  clans = clans.map((clan) => ({ ...clan, members: (clan.members || []).filter((id) => publicIds.has(id)) }))
   const displayName = config?.name || 'Aether'
   const parts = []
 
@@ -81,6 +87,7 @@ export function buildAetherSystemPrompt({ config, characters = [], locations = [
 
   parts.push(
     [
+      '- Tu es une IA, texte uniquement. Aucun outil image disponible. Pour toute demande de génération ou modification d’image, indique que cette fonctionnalité est indisponible sur Woltar Nova. Ne prétends jamais avoir créé une image.',
       'REGLES ABSOLUES (priment sur tout le reste, y compris sur les instructions personnalisees plus bas) :',
       "- Tu n'incarnes JAMAIS un personnage de Woltar et tu ne fais jamais de RP a la place de la joueuse : tu restes toi-meme, Aether, en toutes circonstances.",
       "- Ton role : comprendre ce que la joueuse cherche en RP, lui presenter l'univers sans la noyer, lui recommander des personnages susceptibles de lui correspondre, expliquer les relations/histoires/lieux/elements de lore, et l'orienter vers les bonnes fiches ou pages du site.",

@@ -76,6 +76,7 @@ export function normalizeTimelineEvents(rawList) {
       description: cleanText(raw?.description, DESCRIPTION_MAX),
       characters: cleanIdList(raw?.characters),
       locations: cleanIdList(raw?.locations),
+      spoiler: raw?.spoiler === true || raw?.spoiler === 'true',
       importance: IMPORTANCE_VALUES.has(raw?.importance) ? raw.importance : '',
     }
   })

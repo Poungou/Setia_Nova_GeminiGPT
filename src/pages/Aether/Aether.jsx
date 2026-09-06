@@ -1,3 +1,4 @@
+import AetherAbout from '../../components/AetherAbout/AetherAbout.jsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import aetherData from '../../data/aether.json'
 import { imgSrc, imgFocus } from '../../lib/image.js'
@@ -69,6 +70,7 @@ export default function Aether() {
             <p>Aether n&rsquo;est pas encore activé sur ce site.</p>
           </div>
         )}
+        <AetherAbout />
       </div>
     </PageTransition>
   )

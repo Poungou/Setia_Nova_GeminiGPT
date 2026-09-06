@@ -1,0 +1,5 @@
+.aether-about { margin-top: 1rem; color: var(--ivory-dim); font-size: .8rem; line-height: 1.7; overflow-wrap: anywhere; }
+.aether-about > p { text-align: center; }
+.aether-about details { max-width: 70ch; margin-inline: auto; }
+.aether-about summary { cursor: pointer; padding-block: .75rem; text-align: center; }
+.aether-about details[open] { border-top: 1px solid var(--line); }

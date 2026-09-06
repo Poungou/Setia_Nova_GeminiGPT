@@ -20,6 +20,6 @@
     "ALLOW_PUBLIC_REGISTRATION": "true"
   },
   "observability": {
-    "enabled": true
+    "enabled": false
   }
 }

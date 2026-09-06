@@ -137,8 +137,7 @@
   color: var(--ivory);
 }
 
-.site-header__group:hover .site-header__caret,
-.site-header__group:focus-within .site-header__caret {
+.site-header__caret[aria-expanded='true'] {
   transform: rotate(180deg);
 }
 
@@ -161,8 +160,6 @@
   z-index: 60;
 }
 
-.site-header__group:hover .site-header__submenu,
-.site-header__group:focus-within .site-header__submenu,
 .site-header__submenu.is-open {
   opacity: 1;
   pointer-events: auto;
@@ -215,7 +212,7 @@
   border-left: 1px solid var(--line);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1280px) {
   .site-header__nav--desktop {
     display: flex;
   }
@@ -223,3 +220,12 @@
     display: none;
   }
 }
+
+.site-header__submenu[hidden] { display: none; }
+.site-header__inner { gap: .75rem; }
+.site-header__account { margin-left: auto; max-width: 10rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; padding-block: .8rem; }
+.site-header__caret, .site-header__toggle { min-width: 44px; min-height: 44px; }
+.site-header__nav--mobile { max-height: calc(100dvh - 76px); overflow-y: auto; }
+.site-header__nav--mobile .site-header__link { min-height: 44px; display: flex; align-items: center; }
+@media (max-width: 420px) { .site-header__brand-text { font-size: .85rem; letter-spacing: .04em; } .site-header__brand { gap: .4rem; } .site-header__account { max-width: 6rem; } }
+@media (min-width: 1280px) { .site-header__nav--mobile { display: none; } .site-header__nav--desktop { gap: 1rem; } }

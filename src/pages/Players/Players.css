@@ -1,0 +1,15 @@
+.players-page { padding-block: var(--space-6); overflow-wrap: anywhere; }
+.players-search { display: grid; gap: .5rem; max-width: 32rem; margin-block: 2rem; }
+.players-search input { padding: .8rem; color: var(--ivory); background: var(--bg-header); border: 1px solid var(--line-strong); border-radius: var(--radius-s); width: 100%; min-width: 0; }
+.players-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1.25rem; }
+.players-card { display: flex; flex-direction: column; align-items: flex-start; padding: 1.5rem; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--bg-header); transition: border-color .2s; }
+.players-card:hover, .players-card:focus-visible { border-color: var(--wine-bright); }
+.players-avatar { width: 88px; height: 88px; flex-shrink: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--wine-soft); font-size: 2rem; }
+.players-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.players-card h2 { margin-block: 1rem .5rem; }
+.players-card__intro, .players-card__rhythm { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.players-card__rhythm, .players-card small { color: var(--ivory-dim); font-size: .85rem; }
+.players-card small { margin-top: auto; padding-top: 1rem; }
+.players-detail-head { display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin-block: 2rem; }
+.players-profile { display: grid; gap: 1.5rem; margin-block: 2rem 3rem; max-width: 70ch; }
+.players-profile h2 { font-size: 1.2rem; }

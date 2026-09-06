@@ -58,6 +58,7 @@ function EventHeart({ color, size = 14 }) {
 
 function EventRow({ event }) {
   const [expanded, setExpanded] = useState(false)
+  const spoiler = event.spoiler === true || event.spoiler === 'true'
   const chars = (event.characters || []).map(getCharacterById).filter(Boolean)
   const locs = (event.locations || []).map(getLocationById).filter(Boolean)
   const heartColor = getEventHeartColor(event, chars)
@@ -74,6 +75,7 @@ function EventRow({ event }) {
           <h3 className="chrono-event__title">{event.title}</h3>
         </div>
 
+        <SpoilerGate key={`${event.id}-${spoiler}`} disabled={!spoiler} message="Cet événement contient un spoiler." buttonLabel="Afficher ce spoiler">
         {!expanded && excerpt && <p className="chrono-event__excerpt">{excerpt}</p>}
         {expanded && event.description && (
           <div className="chrono-event__full">
@@ -116,6 +118,7 @@ function EventRow({ event }) {
             ))}
           </div>
         )}
+        </SpoilerGate>
       </div>
     </li>
   )

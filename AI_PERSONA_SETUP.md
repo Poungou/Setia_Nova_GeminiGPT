@@ -1,5 +1,12 @@
 # Woltarien IA — mise en place et test (prototype Fudo)
 
+> Archive du prototype Fudo, remplacé par Aether. Pour l’architecture actuelle,
+> les réglages de confidentialité et les tests, consulter
+> [l’audit Aether](docs/JOUEURS_AETHER_AUDIT.md). Aether est accessible sur
+> `/aether`, en développement et via le Worker en production. Sa clé reste
+> `OPENAI_API_KEY` côté serveur ; `OPENAI_MODEL` ne remplace plus son modèle,
+> fixé à GPT-5.6 Luna. Les instructions ci-dessous sont historiques.
+
 Fonctionne **en local uniquement**, pendant `npm run dev` — même limite que
 l'admin (voir `ADMIN_LOCAL.md`). Aucun serveur en ligne, aucune donnée envoyée
 nulle part sauf à l'API OpenAI au moment où tu discutes.

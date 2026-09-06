@@ -172,7 +172,7 @@ export default function CharacterDetail() {
               )}
               {owner && (
                 <motion.p className="character-hero__summary" {...itemMotion}>
-                  Propriétaire : <Link to="/personnages#players-title">{owner.name}</Link>
+                  Propriétaire : <Link to={`/joueurs/${encodeURIComponent(owner.userId)}`}>#{owner.name}</Link>
                 </motion.p>
               )}
               {character.clan && (

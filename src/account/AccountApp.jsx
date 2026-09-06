@@ -839,7 +839,7 @@ function ClanMembersEditor({ clanId, data, user }) {
 // réordonnancement se fait par boutons haut/bas plutôt que par glisser-
 // déposer, pour rester simple et accessible au clavier.
 function emptyTimelineEvent() {
-  return { id: '', title: '', dateRP: '', description: '', characters: [], locations: [], importance: '' }
+  return { id: '', title: '', dateRP: '', description: '', characters: [], locations: [], importance: '', spoiler: false }
 }
 
 function TimelineEventsEditor({ events, onChange, data, disabled }) {
@@ -940,6 +940,7 @@ function TimelineEventsEditor({ events, onChange, data, disabled }) {
               </select>
             </div>
             <div className="adm-field">
+              <label className="adm-check"><input type="checkbox" checked={event.spoiler === true || event.spoiler === 'true'} disabled={disabled} onChange={(e) => updateEvent(index, { spoiler: e.target.checked })} />Masquer le contenu de cet événement (spoiler)</label>
               <label htmlFor={`event-${index}-description`}>Résumé</label>
               <textarea
                 id={`event-${index}-description`}
