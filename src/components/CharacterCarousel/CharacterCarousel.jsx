@@ -12,13 +12,19 @@
 // une carte parallèle — seule la présentation change (pas de titre RP, pas
 // de résumé, pas de bouton "voir la fiche" : juste portrait + nom +
 // hashtag joueur + clan/statut discret), pour garder une bande compacte.
+//
+// `shuffle` (nouveau, optionnel, défaut `true`) : la page d'accueil veut un
+// ordre aléatoire à chaque chargement (comportement historique, inchangé) ;
+// la fiche joueur (refonte /joueurs) réutilise ce même composant pour ses
+// "Personnages rattachés" mais veut un ordre stable (numéro de fiche), donc
+// passe `shuffle={false}` — voir src/pages/Players/Players.jsx.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useReducedMotion } from 'framer-motion'
 import CharacterCard from '../CharacterCard/CharacterCard.jsx'
 import './CharacterCarousel.css'
 
-function shuffle(list) {
+function shuffleList(list) {
   const arr = [...list]
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
@@ -38,13 +44,14 @@ function hashtagFor(character, ownerNameById) {
   return name ? `#${name}` : null
 }
 
-export default function CharacterCarousel({ characters, owners = [] }) {
+export default function CharacterCarousel({ characters, owners = [], shuffle: shouldShuffle = true }) {
   const reduceMotion = useReducedMotion()
   const ownerNameById = useMemo(() => new Map(owners.map((o) => [o.userId, o.name])), [owners])
   // Rotation légère : un nouvel ordre à chaque chargement de la page plutôt
   // que toujours les mêmes personnages en tête — sans aller jusqu'à un
   // auto-défilement, qui serait plus agressif que ce que demande la DA.
-  const shuffled = useMemo(() => shuffle(characters), [characters])
+  // Désactivable via `shuffle={false}` (voir en-tête de fichier).
+  const ordered = useMemo(() => (shouldShuffle ? shuffleList(characters) : characters), [characters, shouldShuffle])
 
   const trackRef = useRef(null)
   const [atStart, setAtStart] = useState(true)
@@ -61,7 +68,7 @@ export default function CharacterCarousel({ characters, owners = [] }) {
     updateEdges()
     window.addEventListener('resize', updateEdges)
     return () => window.removeEventListener('resize', updateEdges)
-  }, [shuffled, updateEdges])
+  }, [ordered, updateEdges])
 
   const scrollByCards = (direction) => {
     const el = trackRef.current
@@ -70,7 +77,7 @@ export default function CharacterCarousel({ characters, owners = [] }) {
     el.scrollBy({ left: amount, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
-  if (shuffled.length === 0) return null
+  if (ordered.length === 0) return null
 
   return (
     <div className="character-carousel">
@@ -91,7 +98,7 @@ export default function CharacterCarousel({ characters, owners = [] }) {
         role="region"
         aria-label="Visages de Woltar"
       >
-        {shuffled.map((c, i) => (
+        {ordered.map((c, i) => (
           <div className="character-carousel__slide" key={c.id}>
             <CharacterCard character={c} index={i} compact hashtag={hashtagFor(c, ownerNameById)} />
           </div>

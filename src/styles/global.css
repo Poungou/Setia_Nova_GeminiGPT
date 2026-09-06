@@ -74,6 +74,10 @@
   padding: var(--space-4);
   text-align: center;
   color: var(--ivory-dim);
+  /* Fond opaque requis : en thème woltar/clair, .empty-state est aussi une
+     "carte claire" (texte encre sombre réaliasé) donc a besoin d'un fond
+     clair sous ce texte, sinon illisible sur le fond sombre de la page. */
+  background: var(--bg-raised);
 }
 
 .empty-state strong {
@@ -98,4 +102,25 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Petit badge synthétique réutilisable (pastille discrète, fond translucide)
+   — introduit pour la refonte de la section Joueurs (cartes /joueurs, fiche
+   publique), volontairement générique pour pouvoir resservir ailleurs.
+   Cohérent avec les 3 thèmes via les tokens existants (--wine-soft/
+   --wine-bright), pas de couleur en dur. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--wine-soft);
+  color: var(--wine-bright);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }

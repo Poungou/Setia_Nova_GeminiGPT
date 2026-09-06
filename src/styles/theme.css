@@ -217,9 +217,12 @@
    deux), carte lieu, blocs latéraux de fiche (Relations/Lieux associés/
    Chronologie/Aether), barre d'identité + ses cellules, panneau de détail
    du sociogramme (clic sur une liaison) + sa variante liste mobile, cartes
-   "Qui suis-je"/règles RP. Le portrait en grand format du hero et les
-   médaillons du sociogramme restent volontairement sur le fond sombre du
-   chrome (ce sont des vignettes, pas des panneaux d'info) — non inclus ici.
+   "Qui suis-je"/règles RP. Depuis la refonte de la section Joueurs : carte-
+   annuaire (.players-card, components/PlayerCard) et sections de la fiche
+   publique joueur (.players-section, À propos/Style RP/Univers/TW/Rythme),
+   même logique. Le portrait en grand format du hero et les médaillons du
+   sociogramme restent volontairement sur le fond sombre du chrome (ce sont
+   des vignettes, pas des panneaux d'info) — non inclus ici.
    Chaque sélecteur ré-aliase localement le sous-ensemble de tokens
    fond/texte/ligne : tout composant qui les consomme déjà (100% du site,
    voir audit) prend la nouvelle apparence par cascade normale, sans
@@ -235,7 +238,9 @@
 :root[data-theme='woltar'] .identity-bar,
 :root[data-theme='woltar'] .identity-chip,
 :root[data-theme='woltar'] .relation-graph__panel,
-:root[data-theme='woltar'] .relation-graph__mobile-row {
+:root[data-theme='woltar'] .relation-graph__mobile-row,
+:root[data-theme='woltar'] .players-card,
+:root[data-theme='woltar'] .players-section {
   --bg-raised: var(--woltar-card-bg);
   --bg-raised-2: var(--woltar-card-bg-2);
   --gradient-card: var(--woltar-card-gradient);

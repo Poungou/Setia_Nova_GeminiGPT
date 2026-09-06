@@ -379,9 +379,13 @@
   position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
+  /* Couche opaque var(--bg-raised) requise en plus des dégradés translucides :
+     sans elle, le fond sombre de la page transparaît sous la carte en thème
+     woltar/clair (contraste illisible) — même correctif que PlayerCard.css. */
   background:
     linear-gradient(160deg, rgba(139, 36, 56, 0.05), rgba(51, 64, 122, 0.04)),
-    var(--gradient-card);
+    var(--gradient-card),
+    var(--bg-raised);
   padding: var(--space-2);
   /* Relief léger : fine bordure interne + ombre discrète, en plus de la
      bordure existante — pas de style "carte MMORPG", juste un peu de
