@@ -1,11 +1,18 @@
 [
   {
-    "id": "nakamura",
     "title": "Le clan Nakamura",
     "description": "Histoire et événements majeurs de la famille Nakamura.",
+    "spoiler": true,
+    "characters": [
+      "kazuko-nakamura",
+      "hachiro-nakamura",
+      "fudo-nakamura",
+      "marie-chat-nakamura",
+      "salut-nakamura",
+      "calion"
+    ],
     "ownerUserId": "system",
     "visibility": "published",
-    "spoiler": true,
-    "characters": []
+    "id": "nakamura"
   }
 ]

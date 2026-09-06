@@ -101,7 +101,7 @@
       "Famille",
       "Principal"
     ],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
     "ownerUserId": "system",
     "is_featured": true,
@@ -166,10 +166,10 @@
       "Sétia",
       "Famille"
     ],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
-    "ownerUserId": "system",
-    "is_featured": true,
+    "ownerUserId": "",
+    "is_featured": false,
     "image_source": "",
     "gallery_sources": {},
     "id": "hachiro-nakamura"
@@ -231,10 +231,10 @@
       "Joyeux Lutin",
       "Famille"
     ],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
-    "ownerUserId": "system",
-    "is_featured": true,
+    "ownerUserId": "",
+    "is_featured": false,
     "image_source": "",
     "gallery_sources": {},
     "id": "fudo-nakamura"
@@ -299,7 +299,7 @@
     "tags": [
       "Entourage Nakamura"
     ],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
     "ownerUserId": "system",
     "is_featured": false,
@@ -313,8 +313,8 @@
     "lastName": "Nakamura",
     "nickname": "",
     "title": "La tisseuse de rêve ",
-    "clan": "Nakamura ",
-    "clanId": "Nakamura",
+    "clan": "Nakamura",
+    "clanId": "nakamura",
     "status": "active",
     "canon": "confirmed",
     "age": "20",
@@ -361,9 +361,12 @@
       "planetarium"
     ],
     "tags": [],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
     "ownerUserId": "system",
+    "is_featured": false,
+    "image_source": "",
+    "gallery_sources": {},
     "id": "shizuka-nakamura"
   },
   {
@@ -400,7 +403,7 @@
     "relations": [],
     "locations": [],
     "tags": [],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
     "ownerUserId": "system",
     "is_featured": false,
@@ -456,7 +459,7 @@
     ],
     "locations": [],
     "tags": [],
-    "author": "",
+    "author": "Poungou",
     "visibility": "published",
     "ownerUserId": "system",
     "is_featured": false,
@@ -465,7 +468,7 @@
     "id": "salut-nakamura"
   },
   {
-    "number": "",
+    "number": "1819",
     "firstName": "Kumiko",
     "lastName": "Lolita",
     "nickname": "",
@@ -510,7 +513,7 @@
     "tags": [
       "Entourage Nakamura"
     ],
-    "author": "",
+    "author": "Test Kazu",
     "visibility": "published",
     "ownerUserId": "system",
     "is_featured": false,
