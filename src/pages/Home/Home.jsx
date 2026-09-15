@@ -60,6 +60,7 @@ export default function Home() {
       <div id="top" className="home-page">
         <section className="hero">
           <motion.div className="container hero__inner" {...heroMotion}>
+            <div className="hero__welcome">
             <motion.span className="eyebrow hero__eyebrow" {...itemMotion}>
               {homeConfig.eyebrow}
             </motion.span>
@@ -74,6 +75,7 @@ export default function Home() {
                 {homeConfig.communityNote}
               </motion.p>
             )}
+            </div>
             <motion.div className="hero__actions" {...itemMotion}>
               <Link to={homeConfig.primaryCtaUrl || '/personnages'} className="btn btn-primary">
                 {homeConfig.primaryCtaLabel}

@@ -177,6 +177,27 @@
 }
 
 /* Preserve the original welcome layout; add depth through surfaces. */
+.home-page .hero__welcome {
+  position: relative;
+  isolation: isolate;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 3rem;
+}
+.home-page .hero__welcome::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.5rem;
+  pointer-events: none;
+  border: 1px solid var(--line-strong);
+  border-top-color: color-mix(in srgb, var(--bg-raised) 80%, var(--line-strong));
+  border-radius: 1.25rem;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--bg-raised) 86%, transparent), color-mix(in srgb, var(--bg-raised) 48%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 16px 40px -22px rgba(35, 16, 32, .35);
+}
+.home-page .hero__welcome .hero__community-note { margin-bottom: 0; color: var(--ivory-dim); border-left-color: var(--wine-bright); }
+.home-page .hero__welcome .hero__title { padding-right: .5rem; }
 .home-page .hero__title { text-shadow: 0 3px 18px color-mix(in srgb, var(--wine-bright) 15%, transparent); }
 .home-page .hero__actions .btn,
 .home-page .hero__aether-cta { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 5px 12px rgba(35, 16, 32, .12); }
@@ -206,6 +227,7 @@
 .home-page .location-card__media { overflow: hidden; }
 .home-page .location-card__body { padding: 1.25rem; gap: .6rem; }
 @media (max-width: 640px) {
+  .home-page .hero__welcome::before { inset: -1.25rem -.75rem; border-radius: 1rem; }
   .home-page .hero__stats { gap: 1.25rem; padding: 1rem; }
   .home-page .character-carousel__slide { flex-basis: 150px; }
   .home-page .home-grid--locations { grid-template-columns: minmax(0, 1fr); }
