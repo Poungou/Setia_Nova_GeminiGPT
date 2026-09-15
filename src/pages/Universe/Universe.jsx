@@ -9,11 +9,6 @@ const EASE = [0.22, 1, 0.36, 1]
 
 const CHAPTERS = [
   {
-    title: 'Woltar',
-    text: "Le monde d'origine des personnages. Les habitants sont appelés « woltarien » / « woltarienne » (pluriel employé en RP : « woltarions »).",
-    to: null,
-  },
-  {
     title: 'Sétia',
     text: 'Un repère central pour cette vitrine RP personnelle.',
     to: '/lieux',

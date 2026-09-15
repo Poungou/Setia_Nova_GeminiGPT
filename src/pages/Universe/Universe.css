@@ -35,3 +35,9 @@
 .universe-card--static {
   opacity: 0.85;
 }
+
+/* Center the final row when the number of chapters is uneven. */
+.universe-grid { display: flex; flex-wrap: wrap; justify-content: center; }
+.universe-card { flex: 0 1 calc((100% - 2 * var(--space-3)) / 3); min-width: 0; }
+@media (max-width: 900px) { .universe-card { flex-basis: calc((100% - var(--space-3)) / 2); } }
+@media (max-width: 560px) { .universe-card { flex-basis: 100%; } }
