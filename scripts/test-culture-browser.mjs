@@ -60,6 +60,16 @@ try {
   await page.getByRole('button', { name: 'Supprimer', exact: true }).click()
   await page.getByRole('button', { name: 'Oui, supprimer' }).click()
   await page.waitForURL(`${base}/culture`)
+  user = { id: 'rpiste', name: 'Rina', role: 'user', status: 'RPiste' }
+  await page.goto(`${base}/culture`)
+  await page.getByRole('link', { name: 'Partager ma culture' }).click()
+  await page.getByLabel('Titre', { exact: true }).fill('Une page RPiste')
+  await page.getByLabel('Votre récit').fill('Une contribution RPiste.')
+  await page.getByRole('button', { name: 'Publier ma culture' }).click()
+  await page.getByRole('heading', { name: 'Une page RPiste' }).waitFor()
+  await page.getByRole('button', { name: 'Supprimer', exact: true }).click()
+  await page.getByRole('button', { name: 'Oui, supprimer' }).click()
+  await page.waitForURL(`${base}/culture`)
   user = { id: 'admin', name: 'Admin', role: 'admin' }
   await page.goto(`${base}/admin/culture`)
   await page.getByLabel('Nouveau hashtag').fill('Rituels')

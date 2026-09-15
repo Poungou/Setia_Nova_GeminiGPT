@@ -34,6 +34,7 @@ function setup() {
 }
 const alice = { id: 'alice', name: 'Alice', role: 'user' }
 const bob = { id: 'bob', name: 'Bob', role: 'user' }
+const rpiste = { id: 'rpiste', name: 'Rina', role: 'user', status: 'RPiste' }
 const admin = { id: 'admin', name: 'Admin', role: 'admin' }
 const draft = { title: 'Le thé des retrouvailles', summary: 'Une coutume familiale.', body: '## Au crépuscule\nOn partage une tasse.', tagIds: ['coutumes'] }
 
@@ -58,6 +59,12 @@ test('Culture: publication immédiate, identité fiable, contrôle des propriét
     assert.equal(updated.data.authorName, alice.name)
     assert.equal((await request(admin, 'DELETE', url)).status, 200)
     assert.equal((await request(null, 'GET', url)).status, 404)
+    const rpisteResult = await request(rpiste, 'POST', 'posts', { ...draft, title: 'Chronique RPiste', tagIds: [] })
+    assert.equal(rpisteResult.status, 201)
+    assert.equal(rpisteResult.data.ownerUserId, rpiste.id)
+    assert.equal((await request(alice, 'PUT', `posts/${rpisteResult.data.id}`, { ...rpisteResult.data, title: 'Détournement' })).status, 403)
+    assert.equal((await request(rpiste, 'PUT', `posts/${rpisteResult.data.id}`, { ...rpisteResult.data, title: 'Chronique RPiste modifiée' })).status, 200)
+    assert.equal((await request(rpiste, 'DELETE', `posts/${rpisteResult.data.id}`)).status, 200)
     assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM culture_post_tags').get().n, 0)
   } finally { sql.close() }
 })
