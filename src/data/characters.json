@@ -394,12 +394,13 @@
     "biography": "",
     "quote": "",
     "portrait": {
-      "src": "/media/851-mtkkxc9b.png",
-      "focus": "0% 22%"
+      "src": "/media/marie-nakamura-mtqa6k1i.webp",
+      "focus": "69% 11%"
     },
     "gallery": [],
     "color": "",
     "frameColor": "rouge",
+    "portraitFramed": true,
     "relations": [],
     "locations": [],
     "tags": [],
@@ -409,6 +410,7 @@
     "is_featured": false,
     "image_source": "",
     "gallery_sources": {},
+    "isPnj": false,
     "id": "marie-chat-nakamura"
   },
   {
@@ -434,12 +436,13 @@
     "biography": "",
     "quote": "",
     "portrait": {
-      "src": "/media/850-mtkkze4s.png",
-      "focus": "0% 48%"
+      "src": "/media/bd2-6-mtqabxii.webp",
+      "focus": "64% 19%"
     },
     "gallery": [],
     "color": "",
     "frameColor": "rouge",
+    "portraitFramed": true,
     "relations": [
       {
         "characterId": "marie-chat-nakamura",
@@ -465,6 +468,7 @@
     "is_featured": false,
     "image_source": "",
     "gallery_sources": {},
+    "isPnj": false,
     "id": "salut-nakamura"
   },
   {

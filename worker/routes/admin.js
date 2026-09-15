@@ -10,6 +10,7 @@ import { getCharacter, insertRow, listCharactersWithFallback, updateRow } from '
 import { saveMedia } from '../lib/mediaStore.js'
 import { getSiteSetting, setSiteSetting } from '../lib/siteSettings.js'
 import { normalizeMusicSettings } from '../../src/lib/musicSettings.js'
+import { normalizeHomeSettings } from '../../src/lib/homeSettings.js'
 import homeJson from '../../src/data/home.json' with { type: 'json' }
 import locationsJson from '../../src/data/locations.json' with { type: 'json' }
 import clansJson from '../../src/data/clans.json' with { type: 'json' }
@@ -107,6 +108,7 @@ export async function handleAdmin(request, env, parts) {
       if (!COLLECTIONS.has(name)) return json({ error: 'Collection inconnue' }, { status: 404 })
 
       if (request.method === 'GET' && parts.length === 2) {
+        if (name === 'home') return json({ data: [normalizeHomeSettings(await getSiteSetting(env, 'home'))] })
         if (name === 'characters') return json({ data: await listCharactersWithFallback(env) })
         return json({ data: STATIC_COLLECTIONS[name] || [] })
       }
@@ -114,6 +116,12 @@ export async function handleAdmin(request, env, parts) {
       if (request.method === 'PUT' && parts.length === 2) {
         const rows = await readJson(request)
         if (!Array.isArray(rows)) throw httpError(400, 'Tableau attendu.')
+        if (name === 'home') {
+          if (rows.length !== 1 || !rows[0] || typeof rows[0] !== 'object' || Array.isArray(rows[0])) throw httpError(400, 'Une seule fiche accueil est attendue.')
+          const clean = normalizeHomeSettings(rows[0])
+          await setSiteSetting(env, 'home', clean)
+          return json({ ok: true, count: 1, data: [clean] })
+        }
 
         if (name === 'characters') {
           const saved = await saveCharacters(env, rows)

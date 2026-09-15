@@ -27,6 +27,8 @@ import { Field } from '../admin/Fields.jsx'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 import ClanComposer from '../components/ClanComposer/ClanComposer.jsx'
 import '../admin/admin.css'
+import AccountDashboard from './AccountDashboard.jsx'
+import './Account.css'
 
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
 
@@ -587,71 +589,6 @@ function PlayerProfileSection() {
   return <div className="adm-edit"><header className="adm-edit__head"><div className="adm-edit__title"><h1>Mon profil joueur</h1><p className="adm-muted">Les personnages dont tu es propriétaire sont automatiquement rattachés. Les liens complémentaires sont gérés dans Admin &gt; Utilisateurs.</p></div></header><form className="adm-form" onSubmit={save}><fieldset className="adm-fieldset"><legend>Profil public</legend><div className="adm-field"><label htmlFor="profile-avatar">Photo de profil</label><Field field={{ type: 'image', key: 'avatar' }} value={profile.avatar} onChange={(v) => set('avatar', v)} disabled={false} uploadEnabled uploadFn={uploadAvatar} allowFocus={false} /></div><div className="adm-field"><label htmlFor="profile-image-source">Source / crédit image</label><input id="profile-image-source" className="adm-input" value={profile.image_source} onChange={(e) => set('image_source', e.target.value)} /></div>{fields.map(([key, label]) => <div className="adm-field" key={key}><label htmlFor={`profile-${key}`}>{label}</label><textarea id={`profile-${key}`} className="adm-input" rows="4" value={profile[key]} onChange={(e) => set(key, e.target.value)} /></div>)}<div className="adm-field"><label htmlFor="profile-ig">Pseudo IG</label><input id="profile-ig" className="adm-input" value={profile.ig_username} onChange={(e) => set('ig_username', e.target.value)} /></div><div className="adm-field"><span>Personnages liés</span>{characters.length === 0 ? <span className="adm-muted">Aucun personnage créé par ce compte.</span> : characters.map((character) => <label className="adm-check" key={character.id}><input type="checkbox" disabled={character.ownerUserId === profile.userId} checked={character.ownerUserId === profile.userId || (profile.linked_character_ids || []).includes(character.id)} onChange={(e) => set('linked_character_ids', e.target.checked ? [...(profile.linked_character_ids || []), character.id] : (profile.linked_character_ids || []).filter((id) => id !== character.id))} />{[character.firstName, character.lastName].filter(Boolean).join(' ') || character.name || character.id}</label>)}</div><label className="adm-check"><input type="checkbox" checked={profile.profile_public} onChange={(e) => set('profile_public', e.target.checked)} />Profil public</label>{flash.startsWith('ok:') && <div className="adm-banner adm-banner--ok">{flash.slice(3)}</div>}{flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}<button type="submit" className="adm-btn adm-btn--primary">{profile.exists ? 'Enregistrer' : 'Créer ma fiche joueur'}</button></fieldset></form></div>
 }
 
-function Dashboard({ data, user }) {
-  const characters = data?.characters || []
-  const clans = data?.clans || []
-  const locations = data?.locations || []
-  const posts = data?.posts || []
-  const timelines = data?.timelines || []
-  return (
-    <div className="adm-list">
-      <header className="adm-list__head">
-        <div>
-          <h1>Mon espace</h1>
-          <p className="adm-muted">Statut : {user.status || 'Membre'}</p>
-        </div>
-      </header>
-      <ul className="adm-cards">
-        {canManagePlayerProfile(user) && <li>
-          <Link to="/compte/profil" className="adm-card">
-            <div className="adm-card__body"><strong>Mon profil joueur</strong><span className="adm-muted">Créer ou modifier ma fiche publique</span></div>
-            <Plus size={16} />
-          </Link>
-        </li>}
-        {(canCreate(user, 'characters') || characters.length > 0) && <li>
-          <Link to="/compte/personnages" className="adm-card">
-            <div className="adm-card__body">
-              <strong>Mes personnages</strong>
-              <span className="adm-muted">{characters.length} fiche(s)</span>
-            </div>
-            <Plus size={16} />
-          </Link>
-        </li>}
-        {(canCreate(user, 'clans') || clans.length > 0) && <li>
-          <Link to="/compte/clans" className="adm-card">
-            <div className="adm-card__body">
-              <strong>Mes clans</strong>
-              <span className="adm-muted">{clans.length} fiche(s)</span>
-            </div>
-            <Plus size={16} />
-          </Link>
-        </li>}
-        {(canCreate(user, 'locations') || locations.length > 0) && <li>
-          <Link to="/compte/lieux" className="adm-card">
-            <div className="adm-card__body">
-              <strong>Mes lieux</strong>
-              <span className="adm-muted">{locations.length} fiche(s)</span>
-            </div>
-            <MapPin size={16} />
-          </Link>
-        </li>}
-        {(canCreate(user, 'posts') || posts.length > 0) && <li>
-          <Link to="/compte/articles" className="adm-card">
-            <div className="adm-card__body"><strong>Mes articles</strong><span className="adm-muted">{posts.length} fiche(s)</span></div>
-            <PenLine size={16} />
-          </Link>
-        </li>}
-        {(canCreate(user, 'timelines') || timelines.length > 0) && <li>
-          <Link to="/compte/chronologies" className="adm-card">
-            <div className="adm-card__body"><strong>Mes chronologies</strong><span className="adm-muted">{timelines.length} fiche(s)</span></div>
-            <CalendarClock size={16} />
-          </Link>
-        </li>}
-      </ul>
-    </div>
-  )
-}
-
 function AccountList({ data, user, reload }) {
   const { section } = useParams()
   const [deleting, setDeleting] = useState(null)
@@ -1091,7 +1028,7 @@ function Workspace({ user, onLogout }) {
   }, [])
 
   return (
-    <div className="adm">
+    <div className="adm account-workspace">
       <aside className="adm-side">
         <div className="adm-side__head">
           <Link to="/" className="adm-side__logo">Woltar Nova</Link>
@@ -1156,7 +1093,7 @@ function Workspace({ user, onLogout }) {
         {error && <div className="adm-banner adm-banner--error">{error}</div>}
         {data && (
           <Routes>
-            <Route index element={<Dashboard data={data} user={user} />} />
+            <Route index element={<AccountDashboard data={data} user={user} canCreate={canCreate} profileAllowed={canManagePlayerProfile(user)} />} />
             <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
             {canManagePlayerProfile(user) && <Route path="profil" element={<PlayerProfileSection />} />}
             <Route path=":section" element={<AccountList data={data} user={user} reload={load} />} />

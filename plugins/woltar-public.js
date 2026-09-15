@@ -20,6 +20,7 @@ import { getSiteSetting } from './lib/siteSettings.js'
 import { loadUsers } from './lib/authStore.js'
 import { resolveTimelineEvents } from '../src/lib/timelineEvents.js'
 import { normalizeMusicSettings, activeTracksFor } from '../src/lib/musicSettings.js'
+import { normalizeHomeSettings } from '../src/lib/homeSettings.js'
 
 function isPublished(character) {
   return Boolean(character) && character.visibility !== 'draft'
@@ -65,6 +66,7 @@ export default function woltarPublic() {
 
           const url = new URL(req.url, 'http://localhost')
           const parts = url.pathname.split('/').filter(Boolean)
+          if (parts[0] === 'home' && parts.length === 1) return send(200, { data: normalizeHomeSettings((await readCollection('home'))[0]) })
 
           if (parts[0] === 'characters' && parts.length === 1) {
             const characters = (await readCollection('characters')).filter(isPublished)

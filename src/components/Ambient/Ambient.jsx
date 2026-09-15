@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
-import homeData from '../../data/home.json'
+import useHomeSettings from '../../lib/useHomeSettings.js'
 import './Ambient.css'
 
-const DARK_BACKGROUND_IMAGE = '/media/fond_sombre.jfif'
-const DARK_BACKGROUND_VIDEO = '/media/fond_sombre_anime.mp4'
-const homeConfig = homeData[0] || {}
-const LIGHT_BACKGROUND_IMAGE = homeConfig.lightBackgroundFallback || '/media/fond_sombre.jfif'
-const LIGHT_BACKGROUND_VIDEO = homeConfig.lightBackgroundVideo || '/media/fond_sombre_anime.mp4'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const DESKTOP_VIDEO_QUERY = '(min-width: 769px)'
 
@@ -41,6 +36,7 @@ function onMediaQueryChange(query, callback) {
 }
 
 export default function Ambient() {
+  const homeConfig = useHomeSettings()
   const [mediaState, setMediaState] = useState(readAmbientMediaState)
   const [videoError, setVideoError] = useState(false)
 
@@ -63,13 +59,13 @@ export default function Ambient() {
 
   useEffect(() => {
     setVideoError(false)
-  }, [mediaState.theme])
+  }, [mediaState.theme, homeConfig.lightBackgroundVideo, homeConfig.darkBackgroundVideo])
 
   const isDark = mediaState.theme === 'dark'
   const isLight = mediaState.theme === 'light'
-  const showVideo = mediaState.useVideo && !videoError && (isDark || isLight)
-  const videoSrc = isLight ? LIGHT_BACKGROUND_VIDEO : DARK_BACKGROUND_VIDEO
-  const posterSrc = isLight ? LIGHT_BACKGROUND_IMAGE : DARK_BACKGROUND_IMAGE
+  const showVideo = mediaState.useVideo && !videoError && (isDark || isLight) && Boolean(isLight ? homeConfig.lightBackgroundVideo : homeConfig.darkBackgroundVideo)
+  const videoSrc = isLight ? homeConfig.lightBackgroundVideo : homeConfig.darkBackgroundVideo
+  const posterSrc = isLight ? homeConfig.lightBackgroundFallback : homeConfig.darkBackgroundFallback
 
   return (
     <div
@@ -83,6 +79,7 @@ export default function Ambient() {
       <div className="ambient__media-fallback" style={{ '--ambient-fallback': `url("${posterSrc}")` }} />
       {showVideo && (
         <video
+          key={videoSrc}
           className="ambient__video"
           autoPlay
           muted

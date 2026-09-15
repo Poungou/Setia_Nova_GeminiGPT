@@ -20,6 +20,7 @@ import { getRequestUser, httpError, isAdmin } from './lib/authStore.js'
 import { saveMediaLocal } from './lib/mediaStore.js'
 import { getSiteSetting, setSiteSetting } from './lib/siteSettings.js'
 import { normalizeMusicSettings } from '../src/lib/musicSettings.js'
+import { normalizeHomeSettings } from '../src/lib/homeSettings.js'
 
 const COLLECTIONS = ['home', 'characters', 'locations', 'clans', 'events', 'archives', 'posts', 'aether', 'timelines']
 
@@ -66,14 +67,18 @@ export default function woltarAdmin() {
 
             if (req.method === 'GET') {
               const txt = await readFile(file, 'utf8')
-              return send(200, { data: JSON.parse(txt) })
+              return send(200, { data: name === 'home' ? [normalizeHomeSettings(JSON.parse(txt)[0])] : JSON.parse(txt) })
             }
             if (req.method === 'PUT') {
               const body = await readBody(req)
-              const parsed = JSON.parse(body)
+              let parsed = JSON.parse(body)
               if (!Array.isArray(parsed)) return send(400, { error: 'Tableau attendu' })
+              if (name === 'home') {
+                if (parsed.length !== 1 || !parsed[0] || typeof parsed[0] !== 'object' || Array.isArray(parsed[0])) return send(400, { error: 'Une seule fiche accueil est attendue.' })
+                parsed = [normalizeHomeSettings(parsed[0])]
+              }
               await writeFile(file, JSON.stringify(parsed, null, 2) + '\n', 'utf8')
-              return send(200, { ok: true, count: parsed.length })
+              return send(200, { ok: true, count: parsed.length, data: parsed })
             }
             return send(405, { error: 'Méthode non autorisée' })
           }
@@ -82,6 +87,7 @@ export default function woltarAdmin() {
           if (parts[0] === 'upload' && req.method === 'POST') {
             const user = await getRequestUser(root, req)
             if (!user) throw httpError(401, 'Connexion requise.')
+            if (!isAdmin(user)) throw httpError(403, 'Réservé admin.')
 
             const { filename, dataUrl, kind } = JSON.parse(await readBody(req))
             const result = await saveMediaLocal(root, { filename, dataUrl, kind })

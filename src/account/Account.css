@@ -1,0 +1,45 @@
+.account-workspace { background: var(--gradient-hero), var(--bg-base); grid-template-columns: 235px minmax(0, 1fr); }
+.account-workspace .adm-side { background: var(--bg-header); padding: 1.75rem 1.25rem; overflow-y: auto; }
+.account-workspace .adm-side__head { padding: .5rem .5rem 1.5rem; border-bottom: 1px solid var(--line); }
+.account-workspace .adm-nav { gap: .35rem; }
+.account-workspace .adm-nav__link { min-height: 44px; border-radius: .65rem; font-size: .82rem; }
+.account-workspace .adm-nav__link.active { background: var(--wine-soft); color: var(--ivory); box-shadow: inset 3px 0 var(--wine-bright); }
+.account-workspace .adm-main { width: 100%; max-width: 1500px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3.5rem); min-width: 0; }
+.account-welcome { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: center; }
+.account-welcome h1 { font-size: clamp(2.2rem, 4vw, 3.8rem); font-weight: 400; line-height: 1.12; margin: 1rem 0; overflow-wrap: anywhere; }
+.account-welcome h1 em { font-weight: 400; }
+.account-welcome p { color: var(--ivory-dim); line-height: 1.8; font-size: .95rem; }
+.account-status { display: inline-block; border: 1px solid var(--line-strong); border-radius: 999px; padding: .4rem .8rem; font-size: .7rem; }
+.account-welcome__note { padding: 1.8rem; border: 1px solid var(--line-strong); border-radius: 3.5rem .6rem 3.5rem .6rem; background: var(--gradient-card), var(--bg-raised); }
+.account-welcome__note > svg { color: var(--wine-bright); }
+.account-welcome__note p { font: italic 1.5rem/1.5 var(--font-display); color: var(--ivory); }
+.account-link { display: inline-flex; gap: .7rem; align-items: center; font-size: .75rem; min-height: 44px; }
+.account-overview { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; padding: 1.4rem 0; margin: 2rem 0; border-block: 1px solid var(--line); color: var(--ivory-dim); font-size: .75rem; }
+.account-overview strong { font: 1.8rem var(--font-display); color: var(--ivory); margin-right: .4rem; }
+.account-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.3rem; }
+.account-heading h2 { font: 2rem var(--font-display); margin: 0; }
+.account-heading > span { font-size: .75rem; color: var(--ivory-dim); }
+.account-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.account-tile { display: flex; flex-direction: column; padding: 1.5rem; border: 1px solid var(--line-strong); border-radius: .65rem .65rem 2.5rem .65rem; background: var(--gradient-card), var(--bg-raised); transition: border-color .2s, transform .2s; }
+.account-tile:hover { transform: translateY(-3px); border-color: var(--wine-bright); }
+.account-tile__top { display: flex; justify-content: space-between; align-items: center; color: var(--ivory-dim); }
+.account-tile__top > svg { color: var(--wine-bright); }
+.account-tile__top > span { font: 2.2rem var(--font-display); }
+.account-tile h3 { font: 1.65rem var(--font-display); margin: 1rem 0 .6rem; }
+.account-tile p { color: var(--ivory-dim); font-size: .82rem; line-height: 1.75; margin: 0 0 1.3rem; }
+.account-tile__foot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .72rem; }
+.account-tile--culture { border-radius: 2.5rem .65rem .65rem .65rem; }
+.account-personal { display: grid; gap: .75rem; margin-top: 2rem; }
+.account-personal > a { display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.5rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--bg-header); }
+.account-personal > a > svg:last-child { margin-left: auto; flex-shrink: 0; }
+.account-personal h3 { font: 1.3rem var(--font-display); margin: 0 0 .3rem; }
+.account-personal p { font-size: .8rem; color: var(--ivory-dim); margin: 0; }
+.account-workspace .adm-list h1, .account-workspace .adm-edit h1 { font-size: 2.4rem; font-weight: 400; }
+.account-workspace .adm-card { border-radius: .8rem; padding: 1.2rem; background: var(--gradient-card), var(--bg-raised); }
+.account-workspace .adm-fieldset { border-radius: 1rem; padding: 1.5rem; background: var(--bg-raised); }
+.account-workspace .adm-input { border-radius: .5rem; }
+.account-workspace :is(a, button, input, textarea):focus-visible { outline: 2px solid var(--wine-bright); outline-offset: 3px; }
+@media (max-width: 1100px) { .account-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .account-welcome { grid-template-columns: 1fr; } .account-welcome__note { display: none; } }
+@media (max-width: 780px) { .account-workspace { grid-template-columns: minmax(0, 1fr); } .account-workspace .adm-side { position: relative; height: auto; padding: 1rem .5rem; } .account-workspace .adm-side__head { padding: .25rem 1rem 1rem; } .account-workspace .adm-main { padding: 1.5rem; } }
+@media (max-width: 520px) { .account-grid { grid-template-columns: minmax(0, 1fr); } .account-overview { gap: .75rem; } .account-overview > span { flex: 1 1 85px; } .account-overview strong { display: block; } .account-personal > a { padding: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .account-tile { transition: none; } .account-tile:hover { transform: none; } }

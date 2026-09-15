@@ -124,7 +124,7 @@ export default function CollectionEditPage() {
   }
 
   return (
-    <div className="adm-edit">
+    <div className={`adm-edit${collection === 'home' ? ' adm-home-edit' : ''}`}>
       <header className="adm-edit__head">
         <Link to={`/admin/${collection}`} className="adm-btn adm-btn--ghost">
           <ArrowLeft size={15} /> {s.label}
@@ -145,6 +145,12 @@ export default function CollectionEditPage() {
         </div>
       </header>
 
+      {collection === 'home' && <div className="adm-home-guide">
+        <p>Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>
+        <a href="/" target="_blank" rel="noreferrer" className="adm-btn">Voir l’accueil ↗</a>
+        <nav aria-label="Rubriques de l’accueil">{Object.keys(groups).map((group, index) => <a key={group} href={`#home-group-${index}`}>{group}</a>)}</nav>
+      </div>}
+
       {flash === 'saved' && (
         <div className="adm-banner adm-banner--ok">Enregistré dans {adminStorageLabel}</div>
       )}
@@ -160,8 +166,8 @@ export default function CollectionEditPage() {
           onSave()
         }}
       >
-        {Object.entries(groups).map(([group, fields]) => (
-          <fieldset key={group} className="adm-fieldset">
+        {Object.entries(groups).map(([group, fields], index) => (
+          <fieldset key={group} id={collection === 'home' ? `home-group-${index}` : undefined} className="adm-fieldset">
             <legend>{group}</legend>
             {fields.map((f) => (
               <div key={f.key} className={`adm-field adm-field--${f.type}`}>

@@ -16,6 +16,7 @@
 //                les renseigne pas — voir RelationGraph.jsx
 
 import { slug } from './slug.js'
+import { HOME_DEFAULTS, HOME_FIELDS } from '../lib/homeSettings.js'
 import { POST_CATEGORIES } from '../data/posts.js'
 
 const STATUS = [
@@ -54,34 +55,8 @@ export const SCHEMA = {
     title: () => 'Accueil',
     subtitle: (r) => r.title || '',
     makeId: () => 'home',
-    defaults: {
-      id: 'home', eyebrow: '', title: '', subtitle: '', intro: '',
-      primaryCtaLabel: '', primaryCtaUrl: '/personnages',
-      secondaryCtaLabel: '', secondaryCtaUrl: '/univers',
-      aetherCtaLabel: '', aetherCtaUrl: '/aether',
-      lightBackgroundVideo: '/media/fond_sombre_anime.mp4',
-      lightBackgroundFallback: '/media/fond_sombre.jfif',
-    },
-    fields: [
-      { key: 'eyebrow', label: 'Petit libellé au-dessus du titre', type: 'text', group: 'Textes' },
-      { key: 'title', label: 'Titre principal', type: 'textarea', group: 'Textes' },
-      { key: 'subtitle', label: 'Sous-titre', type: 'textarea', group: 'Textes' },
-      { key: 'intro', label: 'Texte d’intro', type: 'textarea', group: 'Textes' },
-      { key: 'primaryCtaLabel', label: 'Bouton principal', type: 'text', group: 'Boutons' },
-      { key: 'primaryCtaUrl', label: 'Lien du bouton principal', type: 'text', group: 'Boutons' },
-      { key: 'secondaryCtaLabel', label: 'Bouton secondaire', type: 'text', group: 'Boutons' },
-      { key: 'secondaryCtaUrl', label: 'Lien du bouton secondaire', type: 'text', group: 'Boutons' },
-      { key: 'aetherCtaLabel', label: 'Bouton Aether', type: 'text', group: 'Boutons' },
-      { key: 'aetherCtaUrl', label: 'Lien du bouton Aether', type: 'text', group: 'Boutons' },
-      {
-        key: 'lightBackgroundVideo', label: 'Fond clair animé', type: 'text', group: 'Médias',
-        hint: 'Préparé pour plus tard : le fond clair actuel est servi par le composant d’ambiance.',
-      },
-      {
-        key: 'lightBackgroundFallback', label: 'Fond clair statique', type: 'text', group: 'Médias',
-        hint: 'Image utilisée quand la vidéo est coupée, indisponible, ou évitée par préférence de mouvement.',
-      },
-    ],
+    defaults: HOME_DEFAULTS,
+    fields: HOME_FIELDS,
   },
 
   characters: {

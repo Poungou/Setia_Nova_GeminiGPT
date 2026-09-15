@@ -24,6 +24,7 @@ import {
 } from '../lib/publicStore.js'
 import { listPublicPlayerProfiles } from '../lib/playerProfiles.js'
 import { safeGetSiteSetting } from '../lib/siteSettings.js'
+import { normalizeHomeSettings } from '../../src/lib/homeSettings.js'
 import { normalizeMusicSettings, activeTracksFor } from '../../src/lib/musicSettings.js'
 
 function json(body, init = {}) {
@@ -41,6 +42,8 @@ function json(body, init = {}) {
 export async function handlePublic(request, env, parts) {
   try {
     if (request.method !== 'GET') return json({ error: 'Méthode non autorisée' }, { status: 405 })
+
+    if (parts[0] === 'home' && parts.length === 1) return json({ data: normalizeHomeSettings(await safeGetSiteSetting(env, 'home')) })
 
     if (parts[0] === 'characters' && parts.length === 1) {
       return json({ data: await listPublicCharacters(env) })
