@@ -17,8 +17,10 @@ import { handleAether } from './routes/aether.js'
 import { handleAuth } from './routes/auth.js'
 import { handleMediaGet } from './routes/media.js'
 import { handlePublic } from './routes/public.js'
+import { handleCulture } from './routes/culture.js'
 
 const API_HANDLERS = {
+  __culture: handleCulture,
   __auth: handleAuth,
   __account: handleAccount,
   __admin: handleAdmin,

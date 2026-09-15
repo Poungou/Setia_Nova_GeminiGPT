@@ -109,24 +109,33 @@ export function usePublicClans() {
 }
 
 // Une fiche clan précise (pour /clans/:id).
-export function usePublicClan(id) {
+export function usePublicClanState(id) {
   const [clan, setClan] = useState(() => getStaticClanById(id) || null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     setClan(getStaticClanById(id) || null)
+    setLoading(true)
+    setError(false)
     if (!id) return undefined
     let alive = true
     getJson(`${BASE}/clans/${encodeURIComponent(id)}`)
       .then((data) => {
         if (alive && data) setClan(data)
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
     return () => {
       alive = false
     }
   }, [id])
 
-  return clan
+  return { clan, loading, error }
+}
+
+export function usePublicClan(id) {
+  return usePublicClanState(id).clan
 }
 
 // Pseudo des propriétaires de personnages publiés — voir

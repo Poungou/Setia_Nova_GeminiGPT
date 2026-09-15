@@ -5,10 +5,11 @@ import woltarAdmin from './plugins/woltar-admin.js'
 import woltarAccount from './plugins/woltar-account.js'
 import woltarAether from './plugins/woltar-aether.js'
 import woltarPublic from './plugins/woltar-public.js'
+import woltarCulture from './plugins/woltar-culture.js'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), woltarAuth(), woltarAdmin(), woltarAccount(), woltarAether(), woltarPublic()],
+  plugins: [react(), woltarAuth(), woltarAdmin(), woltarAccount(), woltarAether(), woltarPublic(), woltarCulture()],
   server: {
     port: 5173,
   },

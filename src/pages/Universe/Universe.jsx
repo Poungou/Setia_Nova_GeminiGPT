@@ -30,8 +30,8 @@ const CHAPTERS = [
   },
   {
     title: 'Culture',
-    text: 'Coutumes, société, politique, magie, technologie : des notes à documenter progressivement.',
-    to: null,
+    text: 'Coutumes, croyances et traditions : un carnet vivant, écrit par les joueurs. Partagez votre propre culture.',
+    to: '/culture',
   },
 ]
 

@@ -29,6 +29,7 @@ export default function AdminLayout({ onLock, currentUser }) {
             <Music size={16} />
             Musique du site
           </NavLink>
+          <NavLink to="/admin/culture" className="adm-nav__link"><PenLine size={16} />Culture & hashtags</NavLink>
           {COLLECTION_NAMES.map((name) => {
             const s = SCHEMA[name]
             const Icon = ICONS[s.icon] || Circle

@@ -1122,6 +1122,7 @@ function Workspace({ user, onLogout }) {
               <CalendarClock size={16} /> Mes chronologies
             </NavLink>
           )}
+          <NavLink to="/culture?mes=1" className="adm-nav__link">Mes cultures</NavLink>
           <NavLink to="/compte/securite" className="adm-nav__link">
             <Lock size={16} /> Sécurité
           </NavLink>

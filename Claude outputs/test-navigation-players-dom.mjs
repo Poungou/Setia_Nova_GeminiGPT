@@ -53,7 +53,7 @@ test('DOM: universal navigation, account access, public players, nested spoilers
     await click(document.querySelector('.site-header__toggle'))
     const mobile = document.getElementById('navigation-mobile')
     await click(mobile.querySelector('.site-header__caret'))
-    assert.equal(document.querySelectorAll('#universe-mobile a').length, 3)
+    assert.equal(document.querySelectorAll('#universe-mobile a').length, 4)
     await click(document.querySelector('#universe-mobile a[href="/lieux"]'))
     assert.equal(document.getElementById('navigation-mobile'), null)
     await click(document.querySelector('.site-header__toggle'))

@@ -19,6 +19,7 @@ const NAV_LINKS = [
       { to: '/clans', label: 'Clans' },
       { to: '/lieux', label: 'Lieux' },
       { to: '/chronologie', label: 'Chronologies' },
+      { to: '/culture', label: 'Culture' },
     ],
   },
   { to: '/journal', label: 'Journal' },

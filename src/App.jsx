@@ -14,6 +14,9 @@ import Characters from './pages/Characters/Characters.jsx'
 import CharacterDetail from './pages/CharacterDetail/CharacterDetail.jsx'
 import Players, { PlayerDetail } from './pages/Players/Players.jsx'
 import Universe from './pages/Universe/Universe.jsx'
+import Culture from './pages/Culture/Culture.jsx'
+import CultureDetail from './pages/Culture/CultureDetail.jsx'
+import CultureComposer from './pages/Culture/CultureComposer.jsx'
 import Clans from './pages/Clans/Clans.jsx'
 import ClanDetail from './pages/ClanDetail/ClanDetail.jsx'
 import Locations from './pages/Locations/Locations.jsx'
@@ -45,6 +48,10 @@ function SiteShell() {
           <Route path="/joueurs" element={<Players />} />
           <Route path="/joueurs/:id" element={<PlayerDetail />} />
           <Route path="/univers" element={<Universe />} />
+          <Route path="/culture" element={<Culture />} />
+          <Route path="/culture/nouveau" element={<CultureComposer />} />
+          <Route path="/culture/:id/modifier" element={<CultureComposer />} />
+          <Route path="/culture/:id" element={<CultureDetail />} />
           <Route path="/clans" element={<Clans />} />
           <Route path="/clans/:id" element={<ClanDetail />} />
           <Route path="/lieux" element={<Locations />} />

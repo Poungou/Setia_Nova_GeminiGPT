@@ -1,13 +1,41 @@
-.clan-detail {
-  padding: var(--space-4) 0 var(--space-5);
-}
-
-.clan-detail__lead {
-  color: var(--ivory-dim);
-  max-width: 60ch;
-}
-
-.clan-detail .character-section {
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--line);
-}
+.container.clan-detail { padding-top: 2rem; padding-bottom: 4rem; }
+.clan-detail__back { display: inline-block; color: var(--ivory-dim); font-size: .85rem; margin-bottom: 1.5rem; }
+.clan-hero { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 3rem; align-items: center; padding: clamp(1.5rem, 4vw, 3.5rem); background: radial-gradient(ellipse at top right, var(--wine-soft), transparent 65%), var(--gradient-card); border: 1px solid var(--line-strong); border-radius: 1rem 1rem 0 0; position: relative; overflow: hidden; }
+.clan-hero__identity > .eyebrow { display: flex; align-items: center; gap: .5rem; }
+.clan-hero h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 400; line-height: 1.12; margin: 1rem 0; overflow-wrap: anywhere; }
+.clan-detail__lead { color: var(--ivory-dim); max-width: 56ch; font-size: 1.1rem; }
+.clan-hero__nav { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.8rem; }
+.clan-hero__nav a { display: flex; align-items: center; gap: .5rem; min-height: 44px; padding: .6rem .9rem; font-size: .8rem; border: 1px solid var(--line-strong); border-radius: 999px; }
+.clan-hero__nav a:hover { background: var(--wine-soft); }
+.clan-hero__seal { width: 220px; aspect-ratio: 1; border: 1px solid var(--line-strong); border-radius: 50%; padding: 12px; justify-self: center; position: relative; }
+.clan-hero__seal::before, .clan-hero__seal::after { content: '✦'; position: absolute; top: 50%; transform: translateY(-50%); color: var(--wine-bright); font-size: 1.3rem; }
+.clan-hero__seal::before { left: -22px; }.clan-hero__seal::after { right: -22px; }
+.clan-hero__seal-inner { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; border: 1px dashed var(--line-strong); border-radius: 50%; background: var(--bg-header); overflow: hidden; }
+.clan-hero__seal-inner > span { font: 4.5rem/1.15 var(--font-display); }
+.clan-hero__seal-inner > svg { color: var(--wine-bright); }
+.clan-hero__seal-inner small { font: .65rem var(--font-mono); text-transform: uppercase; letter-spacing: .3em; }
+.clan-hero__seal img { width: 100%; height: 100%; object-fit: contain; }
+.clan-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line-strong); border-top: 0; border-radius: 0 0 1rem 1rem; background: var(--bg-header); }
+.clan-facts > div { display: flex; align-items: center; gap: .85rem; padding: 1.5rem; }
+.clan-facts > div + div { border-left: 1px solid var(--line); }
+.clan-facts > div > svg { flex-shrink: 0; color: var(--wine-bright); }
+.clan-facts small { display: block; font: .65rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ivory-dim); margin-bottom: .4rem; }
+.clan-facts strong, .clan-facts a { font-size: .95rem; font-weight: 400; overflow-wrap: anywhere; }
+.clan-facts a { display: flex; align-items: center; gap: .4rem; }
+.clan-panel { margin-top: 3rem; scroll-margin-top: 110px; min-width: 0; }
+.clan-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.clan-section-heading h2, .clan-panel--history h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 400; margin: .5rem 0 0; }
+.clan-section-heading > svg { color: var(--wine-bright); flex-shrink: 0; }
+.clan-count { font: 3rem var(--font-display); color: var(--ivory-faint); }
+.clan-members-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
+.clan-places { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
+.clan-place { display: block; border: 1px solid var(--line-strong); border-left: 3px solid var(--wine-bright); border-radius: .5rem; background: var(--gradient-card); padding: 1.5rem; }
+.clan-place h3 { font-size: 1.6rem; margin: .5rem 0; }
+.clan-place p { color: var(--ivory-dim); max-width: 75ch; }
+.clan-place__link { display: flex; align-items: center; gap: .4rem; margin-top: 1rem; font-size: .8rem; }
+.clan-panel--relations, .clan-panel--history { padding: clamp(1rem, 3vw, 2rem); border: 1px solid var(--line-strong); background: var(--gradient-card); border-radius: 1rem; }
+.clan-panel--history .prose { max-width: 75ch; margin-top: 1.5rem; }
+.clan-detail__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); margin-top: 3rem; padding-top: 2rem; font-size: .85rem; }
+@media (max-width: 1000px) { .clan-members-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .clan-hero { grid-template-columns: minmax(0, 1fr) 180px; gap: 2rem; } .clan-hero__seal { width: 160px; } .clan-hero__seal-inner > span { font-size: 3.5rem; } }
+@media (max-width: 700px) { .clan-hero { grid-template-columns: 1fr; gap: 1.5rem; } .clan-hero__seal { grid-row: 1; width: 130px; } .clan-hero__seal-inner > span { font-size: 2.5rem; } .clan-hero__identity { text-align: center; } .clan-hero__identity > .eyebrow, .clan-hero__nav { justify-content: center; } .clan-facts { grid-template-columns: 1fr; } .clan-facts > div { padding: 1rem 1.25rem; } .clan-facts > div + div { border-left: 0; border-top: 1px solid var(--line); } .clan-members-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 440px) { .clan-members-grid { grid-template-columns: 1fr; } }

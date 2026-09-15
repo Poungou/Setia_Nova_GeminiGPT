@@ -22,6 +22,8 @@ const browserGlobals = {
 }
 
 const nodeGlobals = {
+  Request: 'readonly',
+  fetch: 'readonly',
   process: 'readonly',
   Buffer: 'readonly',
   URL: 'readonly',
@@ -30,6 +32,7 @@ const nodeGlobals = {
 }
 
 const workerGlobals = {
+  crypto: 'readonly',
   ...browserGlobals,
   ...nodeGlobals,
   AbortController: 'readonly',
