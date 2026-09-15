@@ -1,3 +1,4 @@
-.image-fallback { display: grid; place-items: center; min-height: 9rem; width: 100%; padding: 1rem; text-align: center; color: var(--ivory-dim); background: var(--wine-soft); font: .85rem var(--font-mono); }
+.image-fallback { display: grid; place-items: center; min-width: 0; min-height: 9rem; width: 100%; padding: 1rem; overflow-wrap: anywhere; text-align: center; color: var(--ivory-dim); background: var(--wine-soft); font: .85rem var(--font-mono); }
 .players-avatar .image-fallback { height: 100%; min-height: 0; padding: 0; font: inherit; color: inherit; }
+.players-card__mini-portrait .image-fallback { min-height: 0; height: 100%; padding: 0; font-size: .65rem; }
 .lightbox-figure > .image-fallback { min-height: 16rem; max-width: 80vw; color: #fff; background: #29232d; }

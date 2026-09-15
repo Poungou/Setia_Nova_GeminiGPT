@@ -68,7 +68,7 @@ export default function PlayerCard({ player, characters = [] }) {
           {shown.map((character) => (
             <span key={character.id} className="players-card__mini-portrait">
               {imgSrc(character.portrait) ? (
-                <img src={imgSrc(character.portrait)} alt="" loading="lazy" />
+                <SafeImage src={imgSrc(character.portrait)} alt="" loading="lazy" fallback={(character.firstName?.[0] || '') + (character.lastName?.[0] || '')} />
               ) : (
                 <span>{(character.firstName?.[0] || '') + (character.lastName?.[0] || '')}</span>
               )}
