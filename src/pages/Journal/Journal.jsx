@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ImageOff } from 'lucide-react'
 import { categoryLabel, POST_CATEGORIES } from '../../data/posts.js'
 import { usePublicPosts } from '../../lib/publicData.js'
 import { articleText } from '../../components/ArticleEditor/articleContent.js'
@@ -54,6 +55,7 @@ export default function Journal() {
                   {imgSrc(post.cover) && (
                     <div className="journal-entry__illustration">
                       <SafeImage
+                        fallback={<ImageOff size={24} aria-hidden="true" />}
                         src={imgSrc(post.cover)}
                         alt=""
                         loading="lazy"
