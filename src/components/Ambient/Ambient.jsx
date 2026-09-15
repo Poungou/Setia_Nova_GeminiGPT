@@ -5,8 +5,8 @@ import './Ambient.css'
 const DARK_BACKGROUND_IMAGE = '/media/fond_sombre.jfif'
 const DARK_BACKGROUND_VIDEO = '/media/fond_sombre_anime.mp4'
 const homeConfig = homeData[0] || {}
-const LIGHT_BACKGROUND_IMAGE = homeConfig.lightBackgroundFallback || '/media/fond_clair_statique.webp'
-const LIGHT_BACKGROUND_VIDEO = homeConfig.lightBackgroundVideo || '/media/fond_clair_anime.mp4'
+const LIGHT_BACKGROUND_IMAGE = homeConfig.lightBackgroundFallback || '/media/fond_sombre.jfif'
+const LIGHT_BACKGROUND_VIDEO = homeConfig.lightBackgroundVideo || '/media/fond_sombre_anime.mp4'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const DESKTOP_VIDEO_QUERY = '(min-width: 769px)'
 

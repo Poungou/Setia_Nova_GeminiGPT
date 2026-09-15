@@ -1,10 +1,6 @@
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
-import { locations } from '../../data/locations.js'
-import { getSiteStats } from '../../utils/stats.js'
-import aetherData from '../../data/aether.json'
-import { imgSrc, imgFocus } from '../../lib/image.js'
-import { usePublicCharacterOwners, usePublicCharacters } from '../../lib/publicData.js'
+import { ArrowUpRight, Sparkles, BookOpen, Feather } from 'lucide-react'
+import { usePublicCharacterOwners, usePublicCharacters, usePublicLocations } from '../../lib/publicData.js'
 import CharacterCarousel from '../../components/CharacterCarousel/CharacterCarousel.jsx'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
@@ -12,7 +8,6 @@ import Reveal from '../../components/Reveal/Reveal.jsx'
 import homeData from '../../data/home.json'
 import './Home.css'
 
-const aetherConfig = aetherData[0] || null
 const DEFAULT_HOME = {
   eyebrow: 'Woltar Nova · vitrine RP communautaire',
   title: 'Bienvenue sur Woltar Nova.',
@@ -31,128 +26,49 @@ const DEFAULT_HOME = {
 }
 const homeConfig = { ...DEFAULT_HOME, ...(homeData[0] || {}) }
 
-const EASE = [0.22, 1, 0.36, 1]
-
-const heroContainer = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
-}
-
-const heroItem = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-}
 
 export default function Home() {
-  const stats = getSiteStats()
   const characters = usePublicCharacters()
   const characterOwners = usePublicCharacterOwners()
-  const featuredLocations = locations.filter((l) => l.canon === 'confirmed')
-  const reduce = useReducedMotion()
-
-  const heroMotion = reduce
-    ? {}
-    : { variants: heroContainer, initial: 'hidden', animate: 'show' }
-  const itemMotion = reduce ? {} : { variants: heroItem }
-
+  const locations = usePublicLocations()
+  const featuredLocations = locations.filter(location => location.canon === 'confirmed')
   return (
     <PageTransition>
-      <div id="top" className="home-page">
-        <section className="hero">
-          <motion.div className="container hero__inner" {...heroMotion}>
-            <div className="hero__welcome">
-            <motion.span className="eyebrow hero__eyebrow" {...itemMotion}>
-              {homeConfig.eyebrow}
-            </motion.span>
-            <motion.h1 className="hero__title" {...itemMotion}>
-              {homeConfig.title}
-            </motion.h1>
-            <motion.p className="hero__subtitle" {...itemMotion}>
-              {homeConfig.subtitle}
-            </motion.p>
-            {homeConfig.communityNote && (
-              <motion.p className="hero__community-note" {...itemMotion}>
-                {homeConfig.communityNote}
-              </motion.p>
-            )}
+      <div id="top" className="home-page container">
+        <section className="home-intro" aria-labelledby="home-title">
+          <Reveal className="home-intro__copy">
+            <span className="eyebrow">{homeConfig.eyebrow}</span>
+            <h1 id="home-title">{homeConfig.title}</h1>
+            <p className="home-intro__subtitle">{homeConfig.subtitle}</p>
+            <div className="home-intro__actions">
+              <Link to={homeConfig.primaryCtaUrl || '/personnages'} className="btn btn-primary">{homeConfig.primaryCtaLabel}<ArrowUpRight size={16} aria-hidden="true" /></Link>
+              <Link to={homeConfig.secondaryCtaUrl || '/univers'} className="home-text-link">{homeConfig.secondaryCtaLabel}<ArrowUpRight size={16} aria-hidden="true" /></Link>
             </div>
-            <motion.div className="hero__actions" {...itemMotion}>
-              <Link to={homeConfig.primaryCtaUrl || '/personnages'} className="btn btn-primary">
-                {homeConfig.primaryCtaLabel}
-              </Link>
-              <Link to={homeConfig.secondaryCtaUrl || '/univers'} className="btn">
-                {homeConfig.secondaryCtaLabel}
-              </Link>
-              {homeConfig.journalCtaLabel && (
-                <Link to={homeConfig.journalCtaUrl || '/journal'} className="btn">
-                  {homeConfig.journalCtaLabel}
-                </Link>
-              )}
-              <Link to={homeConfig.aetherCtaUrl || '/aether'} className="hero__aether-cta">
-                <span className="hero__aether-avatar" aria-hidden="true">
-                  {imgSrc(aetherConfig?.avatar) ? (
-                    <img
-                      src={imgSrc(aetherConfig?.avatar)}
-                      alt=""
-                      style={{ objectPosition: imgFocus(aetherConfig?.avatar) }}
-                    />
-                  ) : (
-                    <span>A</span>
-                  )}
-                </span>
-                {homeConfig.aetherCtaLabel}
-              </Link>
-            </motion.div>
-
-            <motion.dl className="hero__stats" {...itemMotion}>
-              <div>
-                <dt>Personnages</dt>
-                <dd>{String(stats.characterCount).padStart(2, '0')}+</dd>
-              </div>
-              <div>
-                <dt>Lieux</dt>
-                <dd>{String(stats.locationCount).padStart(2, '0')}+</dd>
-              </div>
-              <div>
-                <dt>Histoires à écrire</dt>
-                <dd>∞</dd>
-              </div>
-            </motion.dl>
-
-            <motion.div {...itemMotion}>
-              <Link to="/joueurs" className="hero__players-link">
-                Voir les joueurs de Woltar Nova →
-              </Link>
-            </motion.div>
-          </motion.div>
-        </section>
-
-        <Reveal as="section" className="container home-quote">
-          <p>« {homeConfig.intro} »</p>
-        </Reveal>
-
-        <section className="container home-section">
-          <Reveal className="section-heading">
-            <span className="eyebrow">Galerie</span>
-            <h2 className="section-title">Visages de Woltar</h2>
+            {homeConfig.communityNote && <p className="home-intro__note">{homeConfig.communityNote}</p>}
           </Reveal>
+          <Reveal className="home-window">
+            <div className="home-window__scene" aria-hidden="true"><span>Woltar Nova</span><Sparkles size={26} /></div>
+            <div className="home-window__caption"><span className="eyebrow">Un univers, mille histoires</span><p>« {homeConfig.intro} »</p><Link className="home-text-link" to="/joueurs">Rencontrer les joueurs<ArrowUpRight size={16} aria-hidden="true" /></Link></div>
+          </Reveal>
+        </section>
+        <dl className="home-numbers">
+          <div><dd>{String(characters.length).padStart(2, '0')}</dd><dt>Personnages à découvrir</dt></div>
+          <div><dd>{String(locations.length).padStart(2, '0')}</dd><dt>Lieux à explorer</dt></div>
+          <div><dd>∞</dd><dt>Histoires à écrire</dt></div>
+        </dl>
+        <section className="home-paths" aria-label="Entrer dans les récits">
+          <Link className="home-path" to="/culture"><span className="home-path__top"><span>01 / TRANSMETTRE</span><Feather size={20} aria-hidden="true" /></span><h2>Les cultures vivantes</h2><p>Coutumes, croyances et petits rituels : découvrez ce que chacun fait vivre dans son univers.</p><span className="home-path__bottom">Découvrir les cultures<ArrowUpRight size={18} aria-hidden="true" /></span></Link>
+          {homeConfig.journalCtaLabel && <Link className="home-path" to={homeConfig.journalCtaUrl || '/journal'}><span className="home-path__top"><span>02 / FEUILLETER</span><BookOpen size={20} aria-hidden="true" /></span><h2>Au fil des récits</h2><p>Des nouvelles, des instants partagés et les traces laissées par les histoires.</p><span className="home-path__bottom">{homeConfig.journalCtaLabel}<ArrowUpRight size={18} aria-hidden="true" /></span></Link>}
+          <Link className="home-path" to={homeConfig.aetherCtaUrl || '/aether'}><span className="home-path__top"><span>03 / S’INSPIRER</span><Sparkles size={20} aria-hidden="true" /></span><h2>Une rencontre avec Aether</h2><p>Une présence pour échanger et laisser naître de nouvelles idées.</p><span className="home-path__bottom">{homeConfig.aetherCtaLabel}<ArrowUpRight size={18} aria-hidden="true" /></span></Link>
+        </section>
+        <section className="home-section" aria-labelledby="home-characters">
+          <Reveal className="home-heading"><div><span className="eyebrow">Les visages derrière les histoires</span><h2 id="home-characters">Visages de Woltar</h2></div><Link className="home-text-link" to="/personnages">Tous les personnages<ArrowUpRight size={16} aria-hidden="true" /></Link></Reveal>
           <CharacterCarousel characters={characters} owners={characterOwners} />
-          <Link to="/personnages" className="btn home-section__more">
-            Voir tous les personnages →
-          </Link>
         </section>
-
-        <section className="container home-section">
-          <Reveal className="section-heading">
-            <span className="eyebrow">Coins à explorer</span>
-            <h2 className="section-title">Les lieux de Woltar Nova</h2>
-          </Reveal>
-          <div className="home-grid home-grid--locations">
-            {featuredLocations.map((l, i) => (
-              <LocationCard key={l.id} location={l} index={i} />
-            ))}
-          </div>
-        </section>
+        {featuredLocations.length > 0 && <section className="home-section" aria-labelledby="home-locations">
+          <Reveal className="home-heading"><div><span className="eyebrow">D’un lieu à l’autre</span><h2 id="home-locations">Les lieux de Woltar Nova</h2></div><Link className="home-text-link" to="/univers">Explorer l’univers<ArrowUpRight size={16} aria-hidden="true" /></Link></Reveal>
+          <div className="home-grid">{featuredLocations.map((location, index) => <LocationCard key={location.id} location={location} index={index} />)}</div>
+        </section>}
       </div>
     </PageTransition>
   )

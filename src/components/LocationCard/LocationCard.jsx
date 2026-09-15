@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { imgSrc, imgFocus } from '../../lib/image.js'
+import SafeImage from '../SafeImage/SafeImage.jsx'
 import './LocationCard.css'
 
 const MotionLink = motion(Link)
@@ -24,7 +25,8 @@ export default function LocationCard({ location, index = 0 }) {
     <MotionLink to={`/lieux/${location.id}`} className="location-card" {...motionProps}>
       <div className="location-card__media">
         {imgSrc(location.image) ? (
-          <img
+          <SafeImage
+            fallback={<span className="location-card__glyph" aria-hidden="true" />}
             src={imgSrc(location.image)}
             alt={location.name}
             loading="lazy"

@@ -59,8 +59,8 @@ export const SCHEMA = {
       primaryCtaLabel: '', primaryCtaUrl: '/personnages',
       secondaryCtaLabel: '', secondaryCtaUrl: '/univers',
       aetherCtaLabel: '', aetherCtaUrl: '/aether',
-      lightBackgroundVideo: '/media/fond_clair_anime.mp4',
-      lightBackgroundFallback: '/media/fond_clair_statique.webp',
+      lightBackgroundVideo: '/media/fond_sombre_anime.mp4',
+      lightBackgroundFallback: '/media/fond_sombre.jfif',
     },
     fields: [
       { key: 'eyebrow', label: 'Petit libellé au-dessus du titre', type: 'text', group: 'Textes' },

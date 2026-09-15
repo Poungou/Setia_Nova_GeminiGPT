@@ -14,7 +14,7 @@
     "journalCtaUrl": "/journal",
     "aetherCtaLabel": "Parler à Aether",
     "aetherCtaUrl": "/aether",
-    "lightBackgroundVideo": "/media/fond_clair_anime.mp4",
-    "lightBackgroundFallback": "/media/fond_clair_statique.webp"
+    "lightBackgroundVideo": "/media/fond_sombre_anime.mp4",
+    "lightBackgroundFallback": "/media/fond_sombre.jfif"
   }
 ]

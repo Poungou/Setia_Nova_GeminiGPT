@@ -26,6 +26,12 @@
   transition: transform 0.4s ease;
 }
 
+.location-card__media > .image-fallback {
+  height: 100%;
+  min-height: 0;
+  background: transparent;
+}
+
 .location-card:hover .location-card__media img {
   transform: scale(1.04);
 }
