@@ -1,6 +1,7 @@
 import { archives } from '../../data/archives.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import Prose from '../../components/Prose/Prose.jsx'
 import '../Universe/Universe.css'
 
 export default function Archives() {
@@ -19,6 +20,7 @@ export default function Archives() {
                 <span className="eyebrow">{arc.arc}</span>
                 <h2>{arc.title}</h2>
                 <p>{arc.dateRP}</p>
+                {arc.text && <details className="archive-reading"><summary>Lire le texte RP</summary><Prose markdown={arc.text} /></details>}
               </div>
             ))}
           </div>

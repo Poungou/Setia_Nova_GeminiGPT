@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { collectArtworks, ARTWORK_SOURCES } from '../../lib/artworks.js'
+import { usePublicCharacters, usePublicLocations, usePublicPosts } from '../../lib/publicData.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
@@ -7,7 +8,10 @@ import Lightbox from '../../components/Lightbox/Lightbox.jsx'
 import './Gallery.css'
 
 export default function Gallery() {
-  const all = useMemo(() => collectArtworks(), [])
+  const people = usePublicCharacters()
+  const places = usePublicLocations()
+  const posts = usePublicPosts()
+  const all = useMemo(() => collectArtworks({ people, places, posts }), [people, places, posts])
   const [source, setSource] = useState('all')
 
   const items = useMemo(

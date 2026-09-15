@@ -1,7 +1,5 @@
-import { useParams, Link, Navigate } from 'react-router-dom'
-import { getLocationById, getLocationParent } from '../../data/locations.js'
-import { usePublicLocation, usePublicLocations } from '../../lib/publicData.js'
-import { characters } from '../../data/characters.js'
+import { useParams, Link } from 'react-router-dom'
+import { usePublicLocationState, usePublicLocations, usePublicCharacters } from '../../lib/publicData.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import RelationCard from '../../components/RelationCard/RelationCard.jsx'
 import LocationCard from '../../components/LocationCard/LocationCard.jsx'
@@ -23,14 +21,16 @@ function Field({ label, value }) {
 export default function LocationDetail() {
   const { id } = useParams()
   const liveLocations = usePublicLocations()
-  const liveLocation = usePublicLocation(id)
-  const location = liveLocation || getLocationById(id)
+  const { location, loading, error } = usePublicLocationState(id)
+  const characters = usePublicCharacters()
+
+  if (loading) return <section className="container"><p role="status">Chargement du lieu…</p></section>
 
   if (!location) {
-    return <Navigate to="/lieux" replace />
+    return <section className="container"><h1>{error ? 'Lieu indisponible' : 'Lieu introuvable'}</h1><p>{error ? 'Le chargement a échoué. Réessayez dans un instant.' : 'Ce lieu n’existe plus ou n’est pas public.'}</p><Link className="btn" to="/lieux">Explorer les lieux</Link></section>
   }
 
-  const parent = liveLocations.find((item) => item.id === location.parentId) || getLocationParent(location)
+  const parent = liveLocations.find((item) => item.id === location.parentId)
   const children = liveLocations.filter((item) => item.parentId === location.id)
   const placement = [location.wing, location.zone].filter(Boolean).join(' · ')
   const associatedCharacters = (location.characters || [])

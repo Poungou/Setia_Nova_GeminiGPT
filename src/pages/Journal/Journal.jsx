@@ -6,6 +6,7 @@ import { articleText } from '../../components/ArticleEditor/articleContent.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import SafeImage from '../../components/SafeImage/SafeImage.jsx'
 import './Journal.css'
 
 const FILTERS = [{ value: 'all', label: 'Tout' }, ...POST_CATEGORIES]
@@ -52,7 +53,7 @@ export default function Journal() {
                 >
                   {imgSrc(post.cover) && (
                     <div className="journal-entry__illustration">
-                      <img
+                      <SafeImage
                         src={imgSrc(post.cover)}
                         alt=""
                         loading="lazy"

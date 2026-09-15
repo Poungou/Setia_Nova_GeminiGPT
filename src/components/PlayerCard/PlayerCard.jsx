@@ -8,6 +8,7 @@
 import { Link } from 'react-router-dom'
 import { PenLine, Globe, Clock, ShieldAlert, ArrowRight } from 'lucide-react'
 import { imgSrc } from '../../lib/image.js'
+import SafeImage from '../SafeImage/SafeImage.jsx'
 import './PlayerCard.css'
 
 // Les 4 seuls champs "courts" du profil RP servent de badges synthétiques —
@@ -30,7 +31,7 @@ export function PlayerAvatar({ player, size = 'md' }) {
   const src = imgSrc(player.profile?.avatar)
   return (
     <span className={`players-avatar players-avatar--${size}`}>
-      {src ? <img src={src} alt="" loading="lazy" /> : (player.name?.[0] || '?').toUpperCase()}
+      <SafeImage src={src} alt={`Avatar de ${player.name}`} fallback={(player.name?.[0] || '?').toUpperCase()} loading="lazy" />
     </span>
   )
 }

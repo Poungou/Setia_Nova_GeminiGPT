@@ -129,3 +129,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Keep keyboard access and long archive text readable across themes. */
+.skip-link { position: fixed; top: .5rem; left: .5rem; z-index: 1000; transform: translateY(-200%); padding: .75rem 1rem; background: var(--bg-raised); color: var(--ivory); border: 2px solid var(--wine-bright); border-radius: .5rem; }
+.skip-link:focus { transform: none; }
+.archive-reading { margin-top: 1rem; overflow-wrap: anywhere; }
+.archive-reading summary { cursor: pointer; padding-block: .75rem; color: var(--ivory); }
+.archive-reading .prose { margin-top: 1rem; }

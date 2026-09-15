@@ -24,6 +24,7 @@ import LocationDetail from './pages/LocationDetail/LocationDetail.jsx'
 import Chronology from './pages/Chronology/Chronology.jsx'
 import Archives from './pages/Archives/Archives.jsx'
 import NotFound from './pages/NotFound/NotFound.jsx'
+import RouteScroll from './components/RouteScroll.jsx'
 
 // L'admin est chargé à la demande : son code n'alourdit pas le site public.
 const AdminApp = lazy(() => import('./admin/AdminApp.jsx'))
@@ -32,10 +33,11 @@ const AccountApp = lazy(() => import('./account/AccountApp.jsx'))
 function SiteShell() {
   return (
     <div className="page">
+      <a className="skip-link" href="#main-content">Aller au contenu</a>
       <Ambient />
       <AmbientAudio />
       <Header />
-      <main className="page-main">
+      <main className="page-main" id="main-content" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/aether" element={<Aether />} />
@@ -68,6 +70,7 @@ function SiteShell() {
 
 export default function App() {
   return (
+    <><RouteScroll />
     <Routes>
       <Route
         path="/admin/*"
@@ -86,6 +89,6 @@ export default function App() {
         }
       />
       <Route path="*" element={<SiteShell />} />
-    </Routes>
+    </Routes></>
   )
 }

@@ -1,0 +1,91 @@
+/* global document, localStorage, window */
+// Vite on port 5182; all failure fixtures are local to this browser context.
+import assert from 'node:assert/strict'
+import { setTimeout as delay } from 'node:timers/promises'
+import { chromium } from '../node_modules/.cache/header-browser/node_modules/playwright-core/index.mjs'
+
+const base = 'http://127.0.0.1:5182'
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true })
+try {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
+  let cultureFailure = true
+  const character = { id: 'audit-person', firstName: 'Ari', lastName: 'Test', tags: ['100%'], visibility: 'public' }
+  const location = { id: 'audit-place', name: 'Lieu du joueur', description: 'Une fiche chargée depuis le serveur.', characters: [character.id], image: '/audit-missing-image.png', visibility: 'public' }
+  const post = { id: 'audit-post', title: 'Article du joueur', body: 'Récit.', tags: ['100%'], characters: [character.id], locations: [location.id], cover: '/audit-missing-cover.png', visibility: 'public' }
+  await context.addInitScript(() => localStorage.setItem('woltar-theme', 'light'))
+  await context.route('**/*', async route => {
+    const url = new URL(route.request().url())
+    if (url.origin !== base) return route.abort()
+    if (url.pathname.includes('audit-missing')) return route.fulfill({ status: 404, body: '' })
+    if (url.pathname === '/__auth/api/session') return route.fulfill({ json: { user: null } })
+    if (url.pathname.startsWith('/__culture/api/')) return cultureFailure ? route.fulfill({ contentType: 'text/html', body: '<html>Unexpected proxy page</html>' }) : route.fulfill({ json: { data: [] } })
+    const api = url.pathname.replace('/__public/api/', '')
+    if (api === 'locations/audit-place') { await delay(500); return route.fulfill({ json: { data: location } }) }
+    if (['locations/manoir-de-setia', 'clans/nakamura'].includes(api)) return route.fulfill({ status: 404, json: { error: 'Not found' } })
+    if (api === 'locations') return route.fulfill({ json: { data: [location] } })
+    if (api === 'characters') return route.fulfill({ json: { data: [character] } })
+    if (api === 'posts') return route.fulfill({ json: { data: [post] } })
+    if (api === 'posts/audit-post') return route.fulfill({ json: { data: post } })
+    return route.continue()
+  })
+  const page = await context.newPage()
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto(base + '/culture')
+  await page.getByRole('alert').filter({ hasText: 'réponse inattendue' }).waitFor()
+  cultureFailure = false
+  await page.getByRole('button', { name: 'Réessayer' }).click()
+  await page.getByRole('heading', { name: 'La première page vous attend' }).waitFor()
+  await page.goto(base + '/lieux/audit-place')
+  await page.getByRole('heading', { name: location.name, exact: true }).waitFor()
+  assert(page.url().endsWith('/lieux/audit-place'))
+  assert.equal(await page.locator('a[href="/personnages/audit-person"]').count(), 1)
+  await page.goto(base + '/lieux/manoir-de-setia')
+  await page.getByRole('heading', { name: 'Lieu introuvable' }).waitFor()
+  assert.equal(await page.locator('.location-hero').count(), 0)
+  await page.goto(base + '/clans/nakamura')
+  await page.getByRole('alert').waitFor()
+  assert.equal(await page.locator('.clan-hero').count(), 0)
+  await page.goto(base + '/tag/100%25')
+  await page.getByRole('heading', { name: '#100%' }).waitFor()
+  await page.getByRole('link', { name: /Article du joueur/ }).waitFor()
+  await page.locator('a[href="/personnages/audit-person"]').waitFor()
+  await page.goto(base + '/journal/audit-post')
+  await page.locator('a[href="/personnages/audit-person"]').waitFor()
+  await page.locator('a[href="/lieux/audit-place"]').waitFor()
+  await page.goto(base + '/galerie')
+  const thumb = page.getByRole('button', { name: 'Agrandir Article du joueur', exact: true })
+  await thumb.waitFor()
+  await thumb.locator('.image-fallback').waitFor()
+  await thumb.click()
+  const dialog = page.getByRole('dialog', { name: 'Illustration agrandie' })
+  await dialog.waitFor()
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'Fermer')
+  await page.keyboard.press('Shift+Tab')
+  assert(await dialog.evaluate(el => el.contains(document.activeElement)))
+  await page.keyboard.press('Tab')
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'Fermer')
+  await page.keyboard.press('Escape')
+  assert.equal(await page.getByRole('dialog').count(), 0)
+  assert(await thumb.evaluate(el => el === document.activeElement))
+  await thumb.click()
+  await page.getByRole('link', { name: 'voir la source' }).click()
+  await page.waitForURL(base + '/journal/audit-post')
+  assert.equal(await page.evaluate(() => document.body.style.overflow), '')
+  await page.goto(base + '/culture')
+  assert(await page.locator('.site-header__nav--desktop a[href="/univers"]').evaluate(el => el.classList.contains('is-active')))
+  await page.getByRole('button', { name: 'Sous-menu Univers' }).click()
+  assert.equal(await page.locator('#universe-desktop .is-active').count(), 1)
+  await page.evaluate(() => { document.body.style.minHeight = '2500px'; window.scrollTo(0, 800) })
+  await page.evaluate(() => document.querySelector('.site-header__nav--desktop a[href="/journal"]').click())
+  await page.waitForURL(base + '/journal')
+  assert.equal(await page.evaluate(() => window.scrollY), 0)
+  await page.evaluate(() => { window.scrollTo(0, 800); document.querySelector('.site-header__nav--desktop a[href="/culture"]').click() })
+  await page.waitForURL(base + '/culture')
+  await page.getByRole('heading', { name: 'La première page vous attend' }).waitFor()
+  await page.evaluate(() => window.scrollTo(0, 400))
+  await page.evaluate(() => document.querySelector('.culture-filters button').click())
+  assert.equal(await page.evaluate(() => window.scrollY), 400)
+  assert.deepEqual(errors, [])
+  console.log('Audit regressions: malformed API, retry, slow live place, server 404s, percent tags, live references/gallery, image fallback, keyboard dialog, navigation OK.')
+} finally { await browser.close() }

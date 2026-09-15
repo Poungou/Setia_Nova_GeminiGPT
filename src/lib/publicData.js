@@ -33,6 +33,7 @@ async function getJson(url) {
     throw error
   }
   const body = await res.json().catch(() => ({}))
+  if (!Object.prototype.hasOwnProperty.call(body, 'data')) throw new Error('Réponse du serveur invalide.')
   return body.data
 }
 
@@ -89,7 +90,7 @@ export function usePublicCharacter(id) {
 // Liste des clans publiés (pour /univers, /clans) — inclut le clan canon
 // (Nakamura) et les clans créés depuis un compte joueur, une fois publiés.
 export function usePublicClans() {
-  const [clans, setClans] = useState(staticClans)
+  const [clans, setClans] = useState(() => staticClans.filter(item => item.visibility !== 'draft'))
 
   useEffect(() => {
     let alive = true
@@ -109,34 +110,26 @@ export function usePublicClans() {
 }
 
 // Une fiche clan précise (pour /clans/:id).
-export function usePublicClanState(id) {
-  const [clan, setClan] = useState(() => getStaticClanById(id) || null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-
+// Keep asynchronous detail results bound to their route and respect a server 404.
+function usePublicRecord(collection, id, fallback) {
+  const safeFallback = fallback?.visibility === 'draft' ? null : fallback
+  const [result, setResult] = useState({ id: null, record: null, loading: true, error: false })
   useEffect(() => {
-    setClan(getStaticClanById(id) || null)
-    setLoading(true)
-    setError(false)
     if (!id) return undefined
     let alive = true
-    getJson(`${BASE}/clans/${encodeURIComponent(id)}`)
-      .then((data) => {
-        if (alive && data) setClan(data)
-      })
-      .catch(() => { if (alive) setError(true) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => {
-      alive = false
-    }
-  }, [id])
-
-  return { clan, loading, error }
+    getJson(BASE + '/' + collection + '/' + encodeURIComponent(id))
+      .then(data => { if (alive) setResult({ id, record: data?.visibility === 'draft' ? null : data || null, loading: false, error: false }) })
+      .catch(error => { if (alive) setResult({ id, record: error.status === 404 ? null : safeFallback, loading: false, error: error.status !== 404 }) })
+    return () => { alive = false }
+  }, [collection, id, safeFallback])
+  return result.id === id ? result : { record: safeFallback, loading: Boolean(id), error: false }
 }
 
-export function usePublicClan(id) {
-  return usePublicClanState(id).clan
+export function usePublicClanState(id) {
+  const { record: clan, ...state } = usePublicRecord('clans', id, getStaticClanById(id))
+  return { clan, ...state }
 }
+export function usePublicClan(id) { return usePublicClanState(id).clan }
 
 // Pseudo des propriétaires de personnages publiés — voir
 // worker/lib/publicStore.js#listPublicCharacterOwners. Volontairement
@@ -180,24 +173,12 @@ export function usePublicPosts() {
 }
 
 export function usePublicPost(id) {
-  const [post, setPost] = useState(() => getStaticPostById(id) || null)
-  const [loading, setLoading] = useState(Boolean(id))
-  useEffect(() => {
-    setPost(getStaticPostById(id) || null)
-    setLoading(Boolean(id))
-    if (!id) return undefined
-    let alive = true
-    getJson(`${BASE}/posts/${encodeURIComponent(id)}`)
-      .then((data) => { if (alive && data) setPost(data) })
-      .catch(() => {})
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [id])
-  return { post, loading }
+  const { record: post, ...state } = usePublicRecord('posts', id, getStaticPostById(id))
+  return { post, ...state }
 }
 
 export function usePublicLocations() {
-  const [locations, setLocations] = useState(staticLocations)
+  const [locations, setLocations] = useState(() => staticLocations.filter(item => item.visibility !== 'draft'))
 
   useEffect(() => {
     let alive = true
@@ -214,25 +195,11 @@ export function usePublicLocations() {
   return locations
 }
 
-export function usePublicLocation(id) {
-  const [location, setLocation] = useState(() => getStaticLocationById(id) || null)
-
-  useEffect(() => {
-    setLocation(getStaticLocationById(id) || null)
-    if (!id) return undefined
-    let alive = true
-    getJson(`${BASE}/locations/${encodeURIComponent(id)}`)
-      .then((data) => {
-        if (alive && data) setLocation(data)
-      })
-      .catch(() => {})
-    return () => {
-      alive = false
-    }
-  }, [id])
-
-  return location
+export function usePublicLocationState(id) {
+  const { record: location, ...state } = usePublicRecord('locations', id, getStaticLocationById(id))
+  return { location, ...state }
 }
+export function usePublicLocation(id) { return usePublicLocationState(id).location }
 
 // Liste des chronologies publiées (pour /chronologie) — inclut la
 // chronologie canon (clan Nakamura) et celles créées depuis un compte

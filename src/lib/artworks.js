@@ -14,21 +14,21 @@ export const ARTWORK_SOURCES = [
   { value: 'lieux', label: 'Lieux' },
 ]
 
-export function collectArtworks() {
+export function collectArtworks({ posts = publishedPosts, people = characters, places = locations } = {}) {
   const items = []
   const push = (value, base) => {
     if (!imgSrc(value)) return
     items.push({ src: imgSrc(value), ...base })
   }
 
-  publishedPosts.forEach((p) => {
+  posts.filter(p => p.visibility !== 'draft').forEach((p) => {
     push(p.cover, { title: p.title, credit: p.author, to: `/journal/${p.id}`, source: 'journal', date: p.date, tags: p.tags || [] })
     ;(p.gallery || []).forEach((v) =>
       push(v, { title: p.title, credit: p.author, to: `/journal/${p.id}`, source: 'journal', date: p.date, tags: p.tags || [] }),
     )
   })
 
-  characters.forEach((c) => {
+  people.filter(c => c.visibility !== 'draft').forEach((c) => {
     const name = [c.firstName, c.lastName].filter(Boolean).join(' ')
     push(c.portrait, { title: name, credit: imgCredit(c.portrait, c.image_source), to: `/personnages/${c.id}`, source: 'personnages', tags: c.tags || [] })
     ;(c.gallery || []).forEach((v) =>
@@ -36,7 +36,7 @@ export function collectArtworks() {
     )
   })
 
-  locations.forEach((l) => {
+  places.filter(l => l.visibility !== 'draft').forEach((l) => {
     push(l.image, { title: l.name, to: `/lieux/${l.id}`, source: 'lieux', tags: [] })
     ;(l.gallery || []).forEach((v) =>
       push(v, { title: l.name, to: `/lieux/${l.id}`, source: 'lieux', tags: [] }),

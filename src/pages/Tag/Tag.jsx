@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { characters } from '../../data/characters.js'
-import { publishedPosts, categoryLabel } from '../../data/posts.js'
+import { categoryLabel } from '../../data/posts.js'
+import { usePublicCharacters, usePublicPosts } from '../../lib/publicData.js'
 import { events } from '../../data/events.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
@@ -12,7 +12,9 @@ const has = (arr, tag) => (arr || []).some((t) => t.toLowerCase() === tag.toLowe
 
 export default function Tag() {
   const { tag: raw } = useParams()
-  const tag = decodeURIComponent(raw || '')
+  const tag = raw || ''
+  const characters = usePublicCharacters()
+  const publishedPosts = usePublicPosts()
 
   const { chars, posts, evts } = useMemo(
     () => ({
@@ -20,7 +22,7 @@ export default function Tag() {
       posts: publishedPosts.filter((p) => has(p.tags, tag)),
       evts: events.filter((e) => has(e.tags, tag)),
     }),
-    [tag],
+    [tag, characters, publishedPosts],
   )
 
   const total = chars.length + posts.length + evts.length

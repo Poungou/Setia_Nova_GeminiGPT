@@ -13,6 +13,7 @@ export default function ClanDetail() {
   const { clan, loading, error } = usePublicClanState(id)
   const characters = usePublicCharacters()
   const locations = usePublicLocations()
+  if (loading) return <section className="container clan-detail"><p role="status">À la rencontre du clan…</p></section>
   if (!clan) return <section className="container clan-detail"><p role={loading ? 'status' : 'alert'}>{loading ? 'À la rencontre du clan…' : error ? 'Cette fiche est indisponible pour le moment.' : 'Ce clan est introuvable.'}</p><Link className="btn" to="/clans">← Les clans</Link></section>
   const members = (clan.members || []).map(cid => characters.find(c => c.id === cid)).filter(Boolean)
   const places = (clan.locations || []).map(lid => locations.find(l => l.id === lid)).filter(Boolean)

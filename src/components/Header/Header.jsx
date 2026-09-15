@@ -111,7 +111,7 @@ export default function Header() {
                   <NavLink
                     to={link.to}
                     onClick={() => setDesktopGroupOpen(null)}
-                    className={({ isActive }) => 'site-header__link' + (isActive ? ' is-active' : '')}
+                    className={({ isActive }) => 'site-header__link' + ((isActive || link.children?.some(child => pathname === child.to || pathname.startsWith(child.to + '/'))) ? ' is-active' : '')}
                   >
                     {link.label}
                   </NavLink>
@@ -153,7 +153,7 @@ export default function Header() {
                 key={link.to}
                 to={link.to}
                 end={link.end}
-                className={({ isActive }) => 'site-header__link' + (isActive ? ' is-active' : '')}
+                className={({ isActive }) => 'site-header__link' + ((isActive || link.children?.some(child => pathname === child.to || pathname.startsWith(child.to + '/'))) ? ' is-active' : '')}
               >
                 {link.label}
               </NavLink>
@@ -183,7 +183,7 @@ export default function Header() {
                   <NavLink
                     to={link.to}
                     onClick={() => setOpen(false)}
-                    className={({ isActive }) => 'site-header__link' + (isActive ? ' is-active' : '')}
+                    className={({ isActive }) => 'site-header__link' + ((isActive || link.children?.some(child => pathname === child.to || pathname.startsWith(child.to + '/'))) ? ' is-active' : '')}
                   >
                     {link.label}
                   </NavLink>
@@ -220,7 +220,7 @@ export default function Header() {
                 to={link.to}
                 end={link.end}
                 onClick={() => setOpen(false)}
-                className={({ isActive }) => 'site-header__link' + (isActive ? ' is-active' : '')}
+                className={({ isActive }) => 'site-header__link' + ((isActive || link.children?.some(child => pathname === child.to || pathname.startsWith(child.to + '/'))) ? ' is-active' : '')}
               >
                 {link.label}
               </NavLink>
