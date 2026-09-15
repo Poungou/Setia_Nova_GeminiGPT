@@ -175,3 +175,45 @@
 .home-section__more {
   display: inline-flex;
 }
+
+/* A gentle editorial frame for the existing home content. */
+.home-page .hero { padding: clamp(2.5rem, 6vw, 5rem) 0 2.5rem; background: none; }
+.home-page .hero__inner { max-width: 1050px; text-align: center; }
+.home-page .hero__eyebrow { color: var(--ivory-dim); font-size: .65rem; letter-spacing: .16em; }
+.home-page .hero__title { max-width: 17ch; margin: .5rem auto 1.5rem; font-weight: 400; letter-spacing: -.025em; line-height: 1.1; text-wrap: balance; }
+.home-page .hero__subtitle { max-width: 58ch; margin: 0 auto 1.25rem; line-height: 1.8; }
+.home-page .hero__community-note { max-width: 70ch; margin: 0 auto 2rem; padding: 0; border: 0; font-size: .85rem; line-height: 1.75; color: var(--ivory-dim); }
+.home-page .hero__actions { justify-content: center; gap: .75rem; margin-bottom: 2rem; }
+.home-page .hero__actions .btn,
+.home-page .hero__aether-cta { min-height: 46px; border-radius: 999px; }
+.home-page .hero__stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; max-width: 660px; margin: 0 auto; padding: 1.25rem 0; border: 1px solid var(--line); border-radius: 1rem; background: var(--gradient-card); }
+.home-page .hero__stats > div { padding: .25rem 1rem; }
+.home-page .hero__stats > div + div { border-left: 1px solid var(--line); }
+.home-page .hero__stats dt { font-size: .6rem; color: var(--ivory-dim); }
+.home-page .hero__stats dd { font-size: 2rem; }
+.home-page .hero__players-link { margin-top: 1.25rem; font-size: .65rem; }
+.home-page .home-quote { padding-top: 1.5rem; padding-bottom: 2.5rem; }
+.home-page .home-quote p::before { content: ''; display: block; width: 48px; height: 1px; background: var(--line-strong); margin: 0 auto 1.5rem; }
+.home-page .home-section { padding-top: 2rem; padding-bottom: 2.5rem; }
+.home-page .section-heading { border-top: 1px solid var(--line); padding-top: 1.75rem; margin-bottom: 1.5rem; }
+.home-page .section-title { margin-top: .5rem; font-weight: 400; }
+.home-page .home-section__more { display: table; margin: 1.25rem auto 0; border-radius: 999px; }
+.home-page .character-carousel__track { gap: 1rem; align-items: stretch; }
+.home-page .character-carousel__slide { flex: 0 0 166px; display: flex; }
+.home-page .character-carousel__slide .character-card { width: 100%; height: 100%; border-radius: .85rem; box-shadow: none; }
+.home-page .character-carousel .character-card__body { padding: .85rem; }
+.home-page .character-carousel .character-card__name { font-size: 1rem; line-height: 1.4; }
+.home-page .location-card { border-radius: 1rem; background: var(--gradient-card); }
+.home-page .home-grid--locations { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.home-page .location-card__media { overflow: hidden; }
+.home-page .location-card__body { padding: 1.25rem; gap: .6rem; }
+@media (max-width: 640px) {
+  .home-page .hero__title { font-size: clamp(2.4rem, 10vw, 3.4rem); }
+  .home-page .hero__actions { display: grid; grid-template-columns: 1fr; }
+  .home-page .hero__actions > a { justify-content: center; }
+  .home-page .hero__stats > div { padding: .25rem .5rem; }
+  .home-page .hero__stats dt { font-size: .53rem; letter-spacing: .03em; }
+  .home-page .hero__stats dd { font-size: 1.75rem; }
+  .home-page .character-carousel__slide { flex-basis: 150px; }
+  .home-page .home-grid--locations { grid-template-columns: minmax(0, 1fr); }
+}

@@ -57,7 +57,7 @@ export default function Home() {
 
   return (
     <PageTransition>
-      <div id="top">
+      <div id="top" className="home-page">
         <section className="hero">
           <motion.div className="container hero__inner" {...heroMotion}>
             <motion.span className="eyebrow hero__eyebrow" {...itemMotion}>
