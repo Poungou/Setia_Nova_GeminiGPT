@@ -49,14 +49,14 @@
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
-  background: var(--bg-base);
+  background: linear-gradient(115deg, rgba(12, 13, 22, .98) 0%, rgba(31, 20, 35, .9) 52%, rgba(12, 18, 29, .7) 100%), url('/media/fond_compte_setia.jpg') center / cover fixed;
 }
 .adm-side {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: 1.25rem .9rem;
-  background: linear-gradient(180deg, var(--bg-void), rgba(139, 36, 56, .06));
+  background: linear-gradient(180deg, rgba(12, 13, 22, .88), rgba(12, 13, 22, .68));
   border-right: 1px solid var(--line);
   position: sticky;
   top: 0;
@@ -280,7 +280,7 @@
   padding: clamp(1.5rem, 4vw, 3rem);
   overflow: hidden;
   border: 1px solid var(--line-strong);
-  background: linear-gradient(90deg, rgba(23, 15, 27, .98) 0%, rgba(38, 21, 38, .92) 42%, rgba(17, 21, 34, .68) 100%), url('/media/fond_compte_setia.jpg') center / cover;
+  background: linear-gradient(90deg, rgba(23, 15, 27, .92) 0%, rgba(38, 21, 38, .72) 42%, rgba(17, 21, 34, .55) 100%);
   box-shadow: 0 22px 50px -32px rgba(0, 0, 0, .8);
 }
 .adm-home-dashboard::after {
