@@ -15,13 +15,16 @@ export default function Home() {
   const characterOwners = usePublicCharacterOwners()
   const locations = usePublicLocations()
   const featuredLocations = locations.filter(location => location.canon === 'confirmed')
+  const titleWords = homeConfig.title.trim().split(/\s+/)
+  const titleLead = titleWords.slice(0, -1).join(' ')
+  const titleAccent = titleWords.at(-1) || ''
   return (
     <PageTransition>
       <div id="top" className="home-page container">
         <section className="home-intro" aria-labelledby="home-title">
           <Reveal className="home-intro__copy">
             <span className="eyebrow">{homeConfig.eyebrow}</span>
-            <h1 id="home-title">{homeConfig.title}</h1>
+            <h1 id="home-title" className="section-title"><span>{titleLead}{titleLead ? ' ' : ''}</span><em>{titleAccent}</em></h1>
             <p className="home-intro__subtitle">{homeConfig.subtitle}</p>
             <div className="home-intro__actions">
               <Link to={homeConfig.primaryCtaUrl || '/personnages'} className="btn btn-primary">{homeConfig.primaryCtaLabel}<ArrowUpRight size={16} aria-hidden="true" /></Link>

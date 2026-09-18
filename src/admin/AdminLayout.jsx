@@ -1,6 +1,6 @@
 // src/admin/AdminLayout.jsx
 import { NavLink, Outlet, Link } from 'react-router-dom'
-import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House, Music, Images, UserRound } from 'lucide-react'
+import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House, Music, Images, UserRound, LayoutDashboard } from 'lucide-react'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
@@ -13,10 +13,17 @@ export default function AdminLayout({ onLock, currentUser }) {
     <div className="adm">
       <aside className="adm-side">
         <div className="adm-side__head">
-          <Link to="/" className="adm-side__logo">Woltar Nova</Link>
-          <span className="adm-side__tag">Administration</span>
+          <Link to="/" className="adm-side__brand">
+            <span className="adm-side__brand-mark">W</span>
+            <span><strong>Woltar Nova</strong><small>Administration</small></span>
+          </Link>
         </div>
         <nav className="adm-nav">
+          <span className="adm-nav__label">Pilotage</span>
+          <NavLink to="/admin/home" className="adm-nav__link">
+            <LayoutDashboard size={16} />
+            Accueil
+          </NavLink>
           <NavLink to="/admin/users" className="adm-nav__link">
             <UserCog size={16} />
             Utilisateurs
@@ -25,13 +32,15 @@ export default function AdminLayout({ onLock, currentUser }) {
             <Users size={16} />
             Joueurs
           </NavLink>
+          <span className="adm-nav__label">Publication</span>
           <NavLink to="/admin/music" className="adm-nav__link">
             <Music size={16} />
             Musique du site
           </NavLink>
           <NavLink to="/admin/culture" className="adm-nav__link"><PenLine size={16} />Culture & hashtags</NavLink>
           <NavLink to="/admin/home/home#home-group-8" className="adm-nav__link"><Images size={16} />Galerie</NavLink>
-          {COLLECTION_NAMES.map((name) => {
+          <span className="adm-nav__label">Univers</span>
+          {COLLECTION_NAMES.filter((name) => name !== 'home').map((name) => {
             const s = SCHEMA[name]
             const Icon = ICONS[s.icon] || Circle
             return (
@@ -59,6 +68,13 @@ export default function AdminLayout({ onLock, currentUser }) {
       </aside>
 
       <main className="adm-main">
+        <div className="adm-topbar">
+          <span className="adm-topbar__path">Woltar Nova <b>/</b> Administration</span>
+          <span className={`adm-topbar__status${readOnly ? ' is-readonly' : ''}`}>
+            <span className="adm-topbar__dot" aria-hidden="true" />
+            {readOnly ? 'Lecture seule' : 'Espace actif'}
+          </span>
+        </div>
         {readOnly && (
           <div className="adm-banner adm-banner--warn">
             Mode lecture seule — le backend admin n’est pas joignable sur ce build.

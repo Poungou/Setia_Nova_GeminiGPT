@@ -55,8 +55,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--bg-void);
+  padding: 1.25rem .9rem;
+  background: linear-gradient(180deg, var(--bg-void), rgba(139, 36, 56, .06));
   border-right: 1px solid var(--line);
   position: sticky;
   top: 0;
@@ -66,10 +66,41 @@
   display: flex;
   flex-direction: column;
 }
-.adm-side__logo {
+.adm-side__brand {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  color: var(--ivory);
+}
+.adm-side__brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--wine-bright);
+  border-radius: var(--radius-s);
+  color: var(--wine-bright);
   font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 0.06em;
+  font-size: 1.2rem;
+  background: var(--wine-soft);
+}
+.adm-side__brand strong,
+.adm-side__brand small {
+  display: block;
+}
+.adm-side__brand strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: .04em;
+  line-height: 1;
+}
+.adm-side__brand small {
+  margin-top: .3rem;
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: .56rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
 }
 .adm-side__tag {
   font-family: var(--font-mono);
@@ -83,10 +114,20 @@
   flex-direction: column;
   gap: 2px;
 }
+.adm-nav__label {
+  margin: .9rem .7rem .3rem;
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.adm-nav__label:first-child { margin-top: 0; }
 .adm-nav__link {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  min-height: 40px;
   padding: 0.55rem 0.7rem;
   border-radius: var(--radius-s);
   color: var(--ivory-dim);
@@ -109,9 +150,28 @@
 }
 
 .adm-main {
-  padding: var(--space-4);
+  width: 100%;
+  max-width: 1180px;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
   overflow-x: hidden;
 }
+.adm-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 30px;
+  margin-bottom: 1.5rem;
+  color: var(--ivory-faint);
+  font-family: var(--font-mono);
+  font-size: .64rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.adm-topbar__path b { margin: 0 .45rem; color: var(--wine-bright); font-weight: 400; }
+.adm-topbar__status { display: inline-flex; align-items: center; gap: .4rem; color: var(--ok); }
+.adm-topbar__status.is-readonly { color: var(--violet); }
+.adm-topbar__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgba(113, 185, 128, .16); }
 
 /* --- bandeaux --------------------------------------------------------- */
 .adm-banner {
@@ -148,15 +208,43 @@
   margin-bottom: var(--space-3);
 }
 .adm-list__head h1 {
-  font-size: 1.8rem;
+  margin: .25rem 0 .35rem;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: -.02em;
+}
+.adm-list__eyebrow {
+  color: var(--wine-bright);
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.adm-list__lead {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--ivory-dim);
+  font-size: .9rem;
+  line-height: 1.55;
 }
 .adm-search {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: var(--space-2);
+  max-width: 680px;
+  margin: 0 0 var(--space-3);
+  padding: .35rem .65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--bg-raised);
   color: var(--ivory-faint);
 }
+.adm-search .adm-input {
+  min-height: 2rem;
+  padding: .35rem .45rem;
+  border: 0;
+  background: transparent;
+}
+.adm-search .adm-input:focus-visible { outline: none; }
 .adm-cards {
   list-style: none;
   margin: 0;
@@ -173,6 +261,95 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-s);
   transition: border-color 0.15s ease;
+}
+.adm-list--home .adm-cards { max-width: 680px; }
+.adm-list--home .adm-card {
+  min-height: 76px;
+  padding: 1rem 1.1rem;
+  border-color: var(--line-strong);
+  background: linear-gradient(110deg, rgba(139, 36, 56, .08), transparent 58%), var(--bg-raised);
+}
+.adm-list--home .adm-card__body strong { font-family: var(--font-display); font-size: 1.1rem; }
+.adm-home-dashboard {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(220px, .8fr) minmax(0, 1.4fr);
+  gap: clamp(1.5rem, 5vw, 5rem);
+  min-height: 300px;
+  margin: 0 0 2.25rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(90deg, rgba(23, 15, 27, .98) 0%, rgba(38, 21, 38, .92) 42%, rgba(17, 21, 34, .68) 100%), url('/media/fond_compte_setia.jpg') center / cover;
+  box-shadow: 0 22px 50px -32px rgba(0, 0, 0, .8);
+}
+.adm-home-dashboard::after {
+  content: 'NOVA / 01';
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1rem;
+  color: rgba(239, 230, 218, .35);
+  font: .58rem var(--font-mono);
+  letter-spacing: .18em;
+}
+.adm-home-dashboard__signal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  overflow: hidden;
+  border-right: 1px solid rgba(239, 230, 218, .18);
+}
+.adm-home-dashboard__mark {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 116px;
+  height: 116px;
+  border: 1px solid rgba(255, 214, 230, .7);
+  border-radius: 50%;
+  color: #ffd2e2;
+  font: 4.8rem var(--font-display);
+  line-height: 1;
+  background: linear-gradient(145deg, rgba(231, 89, 137, .9), rgba(108, 24, 58, .7));
+  box-shadow: 0 0 0 10px rgba(231, 89, 137, .08), 0 0 55px rgba(231, 89, 137, .25);
+}
+.adm-home-dashboard__caption {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  color: var(--ivory-faint);
+  font: .6rem var(--font-mono);
+  letter-spacing: .14em;
+  line-height: 1.6;
+  text-align: right;
+  text-transform: uppercase;
+}
+.adm-home-dashboard__orbit {
+  position: absolute;
+  display: block;
+  width: 220px;
+  height: 70px;
+  border: 1px solid rgba(255, 214, 230, .2);
+  border-radius: 50%;
+  transform: rotate(-28deg);
+}
+.adm-home-dashboard__orbit--one { transform: rotate(-28deg) translateY(-18px); }
+.adm-home-dashboard__orbit--two { width: 150px; transform: rotate(52deg); }
+.adm-home-dashboard__copy { align-self: center; max-width: 540px; }
+.adm-home-dashboard__copy .adm-list__eyebrow { display: inline-flex; align-items: center; gap: .35rem; }
+.adm-home-dashboard h2 { margin: .7rem 0 1rem; color: var(--ivory); font: 400 clamp(2.2rem, 5vw, 4.5rem)/.88 var(--font-display); letter-spacing: -.04em; }
+.adm-home-dashboard h2 em { color: #ef8db4; font-style: italic; }
+.adm-home-dashboard__copy p { max-width: 50ch; margin: 0; color: rgba(239, 230, 218, .72); line-height: 1.7; }
+.adm-home-dashboard__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+.adm-home-dashboard__preview { display: inline-flex; align-items: center; gap: .35rem; color: #f3b4cb; font: .7rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.adm-home-dashboard__preview:hover { color: var(--ivory); }
+@media (max-width: 700px) {
+  .adm-home-dashboard { grid-template-columns: 1fr; gap: 1.5rem; }
+  .adm-home-dashboard__signal { min-height: 170px; border-right: 0; border-bottom: 1px solid rgba(239, 230, 218, .18); }
+  .adm-home-dashboard__mark { width: 88px; height: 88px; font-size: 3.7rem; }
+  .adm-home-dashboard h2 { font-size: clamp(2.6rem, 14vw, 4rem); }
 }
 .adm-card:hover {
   border-color: var(--wine-bright);
@@ -242,6 +419,7 @@
   color: var(--ivory-faint);
   padding: 0 0.4rem;
 }
+
 .adm-field {
   display: grid;
   gap: 0.35rem;
@@ -856,6 +1034,9 @@ textarea.adm-input {
     white-space: nowrap;
     font-size: 0.82rem;
   }
+  .adm-nav__label {
+    display: none;
+  }
   .adm-side__foot {
     margin-top: 0;
   }
@@ -867,6 +1048,11 @@ textarea.adm-input {
   .adm-main {
     padding: var(--space-2);
     overflow-x: hidden;
+  }
+  .adm-topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
   }
 
   /* Liste : le titre passe au-dessus du bouton "Nouveau…" au lieu de le

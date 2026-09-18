@@ -1,7 +1,7 @@
 // src/admin/CollectionListPage.jsx
 import { useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { Pencil, Plus, Search } from 'lucide-react'
+import { ArrowUpRight, Pencil, Plus, Search, Sparkles } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 
@@ -27,11 +27,12 @@ export default function CollectionListPage() {
   if (!s) return <p className="adm-muted">Collection inconnue.</p>
 
   return (
-    <div className="adm-list">
+    <div className={`adm-list adm-list--${collection}`}>
       <header className="adm-list__head">
         <div>
+          <span className="adm-list__eyebrow">Espace administration</span>
           <h1>{s.label}</h1>
-          <p className="adm-muted">{rows.length} fiche(s)</p>
+          <p className="adm-list__lead">{collection === 'home' ? 'Pilote les textes, images et repères visibles sur la page d’accueil.' : `${rows.length} fiche${rows.length > 1 ? 's' : ''} à gérer`}</p>
         </div>
         <Link to={createHref} className="adm-btn adm-btn--primary">
           {singletonRow ? <Pencil size={16} /> : <Plus size={16} />}
@@ -39,7 +40,27 @@ export default function CollectionListPage() {
         </Link>
       </header>
 
-      <div className="adm-search">
+      {collection === 'home' && singletonRow && (
+        <section className="adm-home-dashboard" aria-labelledby="adm-home-dashboard-title">
+          <div className="adm-home-dashboard__signal" aria-hidden="true">
+            <span className="adm-home-dashboard__orbit adm-home-dashboard__orbit--one" />
+            <span className="adm-home-dashboard__orbit adm-home-dashboard__orbit--two" />
+            <span className="adm-home-dashboard__mark">W</span>
+            <span className="adm-home-dashboard__caption">Vitrine<br />vivante</span>
+          </div>
+          <div className="adm-home-dashboard__copy">
+            <span className="adm-list__eyebrow"><Sparkles size={13} /> Atelier de la vitrine</span>
+            <h2 id="adm-home-dashboard-title">Donne le ton à<br /><em>l’accueil.</em></h2>
+            <p>Les réglages de cette page donnent sa première impression à Woltar Nova. Ajuste le récit, les images et le rythme de découverte depuis un seul atelier.</p>
+            <div className="adm-home-dashboard__actions">
+              <Link to={createHref} className="adm-btn adm-btn--primary"><Pencil size={15} /> Ouvrir l’atelier</Link>
+              <a href="/" target="_blank" rel="noreferrer" className="adm-home-dashboard__preview">Voir la vitrine <ArrowUpRight size={15} /></a>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <div className="adm-search" role="search">
         <Search size={15} />
         <input
           className="adm-input"

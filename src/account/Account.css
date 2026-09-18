@@ -5,12 +5,14 @@
 .account-workspace .adm-nav__link { min-height: 44px; border-radius: .65rem; font-size: .82rem; }
 .account-workspace .adm-nav__link.active { background: var(--wine-soft); color: var(--ivory); box-shadow: inset 3px 0 var(--wine-bright); }
 .account-workspace .adm-main { width: 100%; max-width: 1500px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3.5rem); min-width: 0; }
-.account-welcome { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: center; }
+.account-welcome { position: relative; display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: center; min-height: 360px; padding: clamp(1.5rem, 5vw, 3.5rem); overflow: hidden; border: 1px solid var(--line-strong); border-radius: 1.5rem .5rem 1.5rem .5rem; background: linear-gradient(90deg, var(--bg-base) 0%, color-mix(in srgb, var(--bg-base) 92%, transparent) 34%, rgba(20, 18, 30, .22) 100%), url('/media/fond_compte_setia.jpg') center / cover; box-shadow: 0 24px 55px -36px rgba(0, 0, 0, .8); }
+.account-welcome::after { content: 'ÉCRIRE · HABITER · TRANSMETTRE'; position: absolute; right: 1.25rem; bottom: .85rem; color: rgba(255, 246, 241, .58); font: .58rem var(--font-mono); letter-spacing: .15em; }
+.account-welcome > div { position: relative; z-index: 1; }
 .account-welcome h1 { font-size: clamp(2.2rem, 4vw, 3.8rem); font-weight: 400; line-height: 1.12; margin: 1rem 0; overflow-wrap: anywhere; }
 .account-welcome h1 em { font-weight: 400; }
 .account-welcome p { color: var(--ivory-dim); line-height: 1.8; font-size: .95rem; }
 .account-status { display: inline-block; border: 1px solid var(--line-strong); border-radius: 999px; padding: .4rem .8rem; font-size: .7rem; }
-.account-welcome__note { padding: 1.8rem; border: 1px solid var(--line-strong); border-radius: 3.5rem .6rem 3.5rem .6rem; background: var(--gradient-card), var(--bg-raised); }
+.account-welcome__note { padding: 1.8rem; border: 1px solid rgba(255, 246, 241, .28); border-radius: 3.5rem .6rem 3.5rem .6rem; background: rgba(20, 18, 30, .68); backdrop-filter: blur(8px); }
 .account-welcome__note > svg { color: var(--wine-bright); }
 .account-welcome__note p { font: italic 1.5rem/1.5 var(--font-display); color: var(--ivory); }
 .account-link { display: inline-flex; gap: .7rem; align-items: center; font-size: .75rem; min-height: 44px; }
