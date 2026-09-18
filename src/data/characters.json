@@ -55,6 +55,7 @@
     ],
     "color": "#4dd8d0",
     "frameColor": "gris",
+    "portraitFramed": true,
     "relations": [
       {
         "characterId": "hachiro-nakamura",
@@ -103,10 +104,11 @@
     ],
     "author": "Poungou",
     "visibility": "published",
-    "ownerUserId": "system",
+    "ownerUserId": "",
     "is_featured": true,
     "image_source": "",
     "gallery_sources": {},
+    "isPnj": false,
     "id": "kazuko-nakamura"
   },
   {
@@ -285,6 +287,7 @@
     ],
     "color": "#8a5cd6",
     "frameColor": "violet",
+    "portraitFramed": true,
     "relations": [
       {
         "characterId": "",
@@ -301,10 +304,11 @@
     ],
     "author": "Poungou",
     "visibility": "published",
-    "ownerUserId": "system",
+    "ownerUserId": "",
     "is_featured": false,
     "image_source": "",
     "gallery_sources": {},
+    "isPnj": false,
     "id": "calion"
   },
   {
@@ -406,7 +410,7 @@
     "tags": [],
     "author": "Poungou",
     "visibility": "published",
-    "ownerUserId": "system",
+    "ownerUserId": "",
     "is_featured": false,
     "image_source": "",
     "gallery_sources": {},
@@ -464,7 +468,7 @@
     "tags": [],
     "author": "Poungou",
     "visibility": "published",
-    "ownerUserId": "system",
+    "ownerUserId": "",
     "is_featured": false,
     "image_source": "",
     "gallery_sources": {},

@@ -15,7 +15,6 @@ import homeJson from '../../src/data/home.json' with { type: 'json' }
 import locationsJson from '../../src/data/locations.json' with { type: 'json' }
 import clansJson from '../../src/data/clans.json' with { type: 'json' }
 import eventsJson from '../../src/data/events.json' with { type: 'json' }
-import archivesJson from '../../src/data/archives.json' with { type: 'json' }
 import postsJson from '../../src/data/posts.json' with { type: 'json' }
 import aetherJson from '../../src/data/aether.json' with { type: 'json' }
 import timelinesJson from '../../src/data/timelines.json' with { type: 'json' }
@@ -26,7 +25,6 @@ const STATIC_COLLECTIONS = {
   locations: locationsJson,
   clans: clansJson,
   events: eventsJson,
-  archives: archivesJson,
   posts: postsJson,
   aether: aetherJson,
   timelines: timelinesJson,

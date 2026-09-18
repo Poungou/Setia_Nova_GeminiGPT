@@ -47,7 +47,7 @@ import { normalizeTimelineEvents } from '../src/lib/timelineEvents.js'
 // a besoin de plus de marge — jusqu'à ~8 Mo d'image + ~33% d'overhead
 // base64 + l'enveloppe JSON.
 const MAX_BODY_BYTES = 12 * 1024 * 1024
-const REFERENCE_COLLECTIONS = ['events', 'archives']
+const REFERENCE_COLLECTIONS = ['events']
 const OWNED_COLLECTIONS = new Set(['characters', 'clans', 'locations', 'posts', 'timelines'])
 
 function readBody(req) {

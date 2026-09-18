@@ -24,7 +24,6 @@ const NAV_LINKS = [
   },
   { to: '/journal', label: 'Journal' },
   { to: '/galerie', label: 'Galerie' },
-  { to: '/archives', label: 'Textes RP' },
   { to: '/aether', label: 'Aether' },
 ]
 

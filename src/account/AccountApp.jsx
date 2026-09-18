@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, CalendarClock, ChevronDown, ChevronUp, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound, X } from 'lucide-react'
+import { ArrowLeft, CalendarClock, ChevronDown, ChevronUp, Images, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound, X } from 'lucide-react'
 import {
   accountBackendAvailable,
   confirmEmail,
@@ -1060,6 +1060,7 @@ function Workspace({ user, onLogout }) {
             </NavLink>
           )}
           <NavLink to="/culture?mes=1" className="adm-nav__link">Mes cultures</NavLink>
+          {user.role === 'admin' && <NavLink to="/galerie" className="adm-nav__link"><Images size={16} /> Galerie</NavLink>}
           <NavLink to="/compte/securite" className="adm-nav__link">
             <Lock size={16} /> Sécurité
           </NavLink>
@@ -1068,7 +1069,7 @@ function Workspace({ user, onLogout }) {
           </NavLink>}
           {user.role === 'admin' && (
             <NavLink to="/admin" className="adm-nav__link">
-              Admin
+              Administration
             </NavLink>
           )}
         </nav>

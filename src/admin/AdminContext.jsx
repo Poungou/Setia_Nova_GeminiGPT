@@ -9,7 +9,6 @@ import charactersJson from '../data/characters.json'
 import locationsJson from '../data/locations.json'
 import clansJson from '../data/clans.json'
 import eventsJson from '../data/events.json'
-import archivesJson from '../data/archives.json'
 import postsJson from '../data/posts.json'
 import aetherJson from '../data/aether.json'
 import homeJson from '../data/home.json'
@@ -21,7 +20,6 @@ const BUNDLED = {
   locations: locationsJson,
   clans: clansJson,
   events: eventsJson,
-  archives: archivesJson,
   posts: postsJson,
   aether: aetherJson,
   timelines: timelinesJson,

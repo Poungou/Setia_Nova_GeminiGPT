@@ -4,7 +4,7 @@
 // Vite `woltar-admin`; en production, il est fourni par le Worker Cloudflare.
 //
 // Les personnages canon suivent exactement les 6 autres collections
-// (lieux, clans, événements, archives, journal, Personas) : l'admin reste
+// (lieux, clans, événements, journal, Personas) : l'admin reste
 // un outil localhost, jamais un CMS de production — voir Phase 18
 // (« Séparer canon local et personnages utilisateurs D1 ») dans
 // claude/architecture-decisions.md. Les personnages créés en production

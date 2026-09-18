@@ -301,30 +301,6 @@ export const SCHEMA = {
     ],
   },
 
-  archives: {
-    label: 'Archives RP',
-    singular: 'archive',
-    icon: 'ScrollText',
-    order: 5,
-    title: (r) => r.title || r.id,
-    subtitle: (r) => [r.arc, r.dateRP].filter(Boolean).join(' · '),
-    makeId: (r) => slug(`${r.arc || ''} ${r.title || ''}`),
-    defaults: {
-      arc: '', title: '', dateRP: '', characters: [], locations: [], text: '',
-    },
-    fields: [
-      { key: 'arc', label: 'Arc / saga', type: 'text', group: 'Identité' },
-      { key: 'title', label: 'Titre', type: 'text', group: 'Identité' },
-      { key: 'dateRP', label: 'Date RP', type: 'text', group: 'Identité' },
-      {
-        key: 'text', label: 'Texte RP', type: 'prose', group: 'Textes',
-        hint: 'Texte original de la propriétaire — ne jamais réécrire sans demande explicite.',
-      },
-      { key: 'characters', label: 'Personnages', type: 'refs', ref: 'characters', group: 'Liens' },
-      { key: 'locations', label: 'Lieux', type: 'refs', ref: 'locations', group: 'Liens' },
-    ],
-  },
-
   posts: {
     label: 'Journal',
     singular: 'billet',

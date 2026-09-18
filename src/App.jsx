@@ -22,7 +22,6 @@ import ClanDetail from './pages/ClanDetail/ClanDetail.jsx'
 import Locations from './pages/Locations/Locations.jsx'
 import LocationDetail from './pages/LocationDetail/LocationDetail.jsx'
 import Chronology from './pages/Chronology/Chronology.jsx'
-import Archives from './pages/Archives/Archives.jsx'
 import NotFound from './pages/NotFound/NotFound.jsx'
 import RouteScroll from './components/RouteScroll.jsx'
 
@@ -59,7 +58,6 @@ function SiteShell() {
           <Route path="/lieux" element={<Locations />} />
           <Route path="/lieux/:id" element={<LocationDetail />} />
           <Route path="/chronologie" element={<Chronology />} />
-          <Route path="/archives" element={<Archives />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

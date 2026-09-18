@@ -7,7 +7,7 @@ import SafeImage from '../SafeImage/SafeImage.jsx'
 
 // Galerie cliquable + visionneuse plein écran.
 // images : liste de chaînes, ou d'objets { src, alt, label, to, source }
-export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
+export default function Lightbox({ images = [], className = 'lightbox-grid', renderTrigger }) {
   const items = images
     .map((i) => (typeof i === 'string' ? { src: i } : i))
     .filter((i) => i && i.src)
@@ -56,14 +56,14 @@ export default function Lightbox({ images = [], className = 'lightbox-grid' }) {
 
   return (
     <>
-      <div className={className}>
+      {renderTrigger ? renderTrigger(() => setSelected(items[0].src)) : <div className={className}>
         {items.map((img, i) => (
           <button key={`${img.src}-${i}`} type="button" className="lightbox-thumb" aria-label={`Agrandir ${img.alt || img.label || 'l’illustration'}`} onClick={() => setSelected(img.src)}>
             <SafeImage src={img.src} alt={img.alt || img.label || ''} loading="lazy" />
             {img.label && <span className="lightbox-thumb__cap">{img.label}</span>}
           </button>
         ))}
-      </div>
+      </div>}
 
       {open &&
         createPortal(

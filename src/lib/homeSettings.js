@@ -16,6 +16,7 @@ export const HOME_DEFAULTS = {
   charactersEyebrow: 'Les visages derrière les histoires', charactersTitle: 'Visages de Woltar', charactersLinkLabel: 'Tous les personnages',
   locationsEyebrow: 'D’un lieu à l’autre', locationsTitle: 'Les lieux de Woltar Nova', locationsLinkLabel: 'Explorer l’univers',
   darkBackgroundFallback: '/media/fond_sombre.jfif', darkBackgroundVideo: '/media/fond_sombre_anime.mp4',
+  galleryHeroImages: [],
 }
 
 export const HOME_GROUPS = [
@@ -27,6 +28,7 @@ export const HOME_GROUPS = [
   ['Carte Aether', ['aetherEyebrow', 'aetherTitle', 'aetherDescription', 'aetherCtaLabel', 'aetherCtaUrl']],
   ['Galerie de personnages', ['charactersEyebrow', 'charactersTitle', 'charactersLinkLabel']],
   ['Galerie de lieux', ['locationsEyebrow', 'locationsTitle', 'locationsLinkLabel']],
+  ['Accueil de la galerie', ['galleryHeroImages']],
   ['Fonds du site', ['lightBackgroundFallback', 'lightBackgroundVideo', 'darkBackgroundFallback', 'darkBackgroundVideo']],
 ]
 
@@ -35,20 +37,23 @@ const LABELS = {
   primaryCtaLabel: 'Texte du bouton principal', primaryCtaUrl: 'Lien principal', secondaryCtaLabel: 'Texte du lien secondaire', secondaryCtaUrl: 'Lien secondaire',
   windowImage: 'Adresse de l’image', windowTitle: 'Titre sur l’image', windowEyebrow: 'Petit titre de la citation', intro: 'Citation', playersLabel: 'Texte du lien joueurs', playersUrl: 'Lien joueurs',
   charactersStat: 'Libellé personnages', locationsStat: 'Libellé lieux', storiesStat: 'Libellé histoires',
+  galleryHeroImages: 'Images de la mosaïque d’accueil',
   lightBackgroundFallback: 'Image du thème clair', lightBackgroundVideo: 'Vidéo du thème clair', darkBackgroundFallback: 'Image du thème sombre', darkBackgroundVideo: 'Vidéo du thème sombre',
 }
 export const HOME_FIELDS = HOME_GROUPS.flatMap(([group, keys]) => keys.map(key => ({
   key, group,
   label: LABELS[key] || (key.endsWith('Eyebrow') ? 'Petit titre' : key.endsWith('Title') ? 'Titre' : key.endsWith('Description') ? 'Description' : key.endsWith('Url') ? 'Lien' : 'Texte du lien'),
-  type: /Description$/.test(key) || ['subtitle', 'communityNote', 'intro', 'title'].includes(key) ? 'textarea' : 'text',
-  hint: /Video$/.test(key) ? 'Adresse de la vidéo MP4. Laisser vide pour utiliser uniquement l’image.' : /(Image|Fallback)$/.test(key) ? 'Adresse de l’image (https://… ou /media/…). Les images peuvent être remplacées par leur URL.' : /Url$/.test(key) ? 'Chemin du site (/culture par exemple) ou adresse https://…' : group === 'Compteurs automatiques' ? 'Le nombre est calculé à partir des fiches publiques.' : undefined,
+  type: key === 'galleryHeroImages' ? 'gallery' : /Description$/.test(key) || ['subtitle', 'communityNote', 'intro', 'title'].includes(key) ? 'textarea' : 'text',
+  hint: key === 'galleryHeroImages' ? 'Choisis jusqu’à 6 images pour la mosaïque. Si vide, la galerie utilise automatiquement les œuvres disponibles.' : /Video$/.test(key) ? 'Adresse de la vidéo MP4. Laisser vide pour utiliser uniquement l’image.' : /(Image|Fallback)$/.test(key) ? 'Adresse de l’image (https://… ou /media/…). Les images peuvent être remplacées par leur URL.' : /Url$/.test(key) ? 'Chemin du site (/culture par exemple) ou adresse https://…' : group === 'Compteurs automatiques' ? 'Le nombre est calculé à partir des fiches publiques.' : undefined,
 })))
 
 export function normalizeHomeSettings(input) {
   const source = input && typeof input === 'object' && !Array.isArray(input) ? input : {}
   return Object.fromEntries(Object.entries(HOME_DEFAULTS).map(([key, fallback]) => {
-    let value = typeof source[key] === 'string' ? source[key].trim().slice(0, 5000) : fallback
-    if (/(Url|Image|Fallback|Video)$/.test(key) && value) {
+    let value = key === 'galleryHeroImages'
+      ? (Array.isArray(source[key]) ? source[key].filter((item) => typeof item === 'string' || (item && typeof item === 'object')).slice(0, 6) : fallback)
+      : typeof source[key] === 'string' ? source[key].trim().slice(0, 5000) : fallback
+    if (key !== 'galleryHeroImages' && /(Url|Image|Fallback|Video)$/.test(key) && value) {
       // Site-local paths or web URLs only; never script/data/protocol-relative URLs.
       const local = /^\/(?!\/)/.test(value) && !/[\\\s]/.test(value)
       let web = false

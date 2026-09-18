@@ -1,6 +1,6 @@
 // src/admin/AdminLayout.jsx
 import { NavLink, Outlet, Link } from 'react-router-dom'
-import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House, Music } from 'lucide-react'
+import { Users, MapPin, Shield, CalendarClock, History, ScrollText, PenLine, MessageCircle, Circle, UserCog, House, Music, Images, UserRound } from 'lucide-react'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
@@ -30,6 +30,7 @@ export default function AdminLayout({ onLock, currentUser }) {
             Musique du site
           </NavLink>
           <NavLink to="/admin/culture" className="adm-nav__link"><PenLine size={16} />Culture & hashtags</NavLink>
+          <NavLink to="/admin/home/home#home-group-8" className="adm-nav__link"><Images size={16} />Galerie</NavLink>
           {COLLECTION_NAMES.map((name) => {
             const s = SCHEMA[name]
             const Icon = ICONS[s.icon] || Circle
@@ -53,6 +54,7 @@ export default function AdminLayout({ onLock, currentUser }) {
             </button>
           )}
           <Link to="/" className="adm-btn adm-btn--ghost">Voir le site</Link>
+          <Link to="/compte" className="adm-btn adm-btn--ghost"><UserRound size={15} /> Compte Poungou</Link>
         </div>
       </aside>
 

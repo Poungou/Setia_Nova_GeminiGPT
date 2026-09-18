@@ -12,7 +12,6 @@
 import locationsJson from '../../src/data/locations.json' with { type: 'json' }
 import clansJson from '../../src/data/clans.json' with { type: 'json' }
 import eventsJson from '../../src/data/events.json' with { type: 'json' }
-import archivesJson from '../../src/data/archives.json' with { type: 'json' }
 import postsJson from '../../src/data/posts.json' with { type: 'json' }
 import aetherJson from '../../src/data/aether.json' with { type: 'json' }
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
@@ -25,7 +24,6 @@ import { normalizeTimelineEvents, resolveTimelineEvents } from '../../src/lib/ti
 export const STATIC_COLLECTIONS = {
   locations: locationsJson,
   events: eventsJson,
-  archives: archivesJson,
 }
 
 export function getAetherConfig() {
