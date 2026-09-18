@@ -91,7 +91,7 @@ export default function Header() {
     <header className="site-header" ref={headerRef}>
       <div className="container site-header__inner">
         <NavLink to="/" className="site-header__brand" onClick={() => setOpen(false)}>
-          <span className="site-header__mark">N</span>
+          <span className="site-header__mark" aria-hidden="true">W</span>
           <span className="site-header__brand-text">
             Woltar Nova
             <small>vitrine RP</small>
