@@ -18,6 +18,10 @@
   background: var(--gradient-card);
   position: relative;
 }
+.location-card__media { overflow: hidden; }
+.location-card__glyph { display: flex; height: 100%; align-items: center; justify-content: center; color: var(--ivory-dim); background: repeating-radial-gradient(ellipse at 10% 120%, transparent 0 28px, var(--line) 29px 30px, transparent 31px 50px); }
+.location-card__explore { display: flex; justify-content: space-between; align-items: center; gap: .75rem; border-top: 1px solid var(--line); padding-top: .8rem; margin-top: auto; color: var(--ivory); font: .65rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.location-card__body { flex: 1; }
 
 .location-card__media img {
   width: 100%;

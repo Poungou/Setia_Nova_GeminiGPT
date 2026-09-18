@@ -9,9 +9,44 @@
    site) — plutôt que de dupliquer des styles équivalents. */
 
 .players-page {
-  padding-block: var(--space-5);
+  padding: var(--space-4) 0 var(--space-5);
   overflow-wrap: anywhere;
 }
+
+.players-index-hero {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(420px, 1.2fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  align-items: center;
+  min-height: 410px;
+  padding: clamp(2rem, 5vw, 4.5rem) 0 3.5rem;
+}
+.players-index-hero__copy { position: relative; z-index: 1; }
+.players-index-hero .section-title { font-size: clamp(3.8rem, 8vw, 7rem); line-height: .82; letter-spacing: -.055em; margin: 1rem 0 1.5rem; }
+.players-index-hero .section-title em { color: var(--wine-bright); font-weight: 400; }
+.players-index-hero__intro { max-width: 38ch; color: var(--ivory-dim); }
+.players-index-hero__mosaic { position: relative; min-height: 340px; transform: rotate(-2deg); }
+.players-index-hero__tile { position: absolute; display: grid; place-items: center; padding: 0; border: 1px solid var(--line-strong); background: var(--gradient-card); overflow: hidden; cursor: pointer; box-shadow: 0 18px 45px rgba(0,0,0,.25); transition: transform .35s ease, z-index .1s; }
+.players-index-hero__tile .players-avatar { width: 100%; height: 100%; border: 0; border-radius: 0; font-size: 3rem; }
+.players-index-hero__tile span:last-child { position: absolute; left: .75rem; bottom: .65rem; color: var(--ivory); font: .65rem var(--font-mono); text-transform: uppercase; letter-spacing: .05em; opacity: 0; transition: opacity .2s; }
+.players-index-hero__tile::after { content: ''; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.8)); opacity: 0; transition: opacity .2s; }
+.players-index-hero__tile:hover { z-index: 5; transform: scale(1.06) rotate(2deg); }
+.players-index-hero__tile:hover::after, .players-index-hero__tile:hover span:last-child { opacity: 1; }
+.players-index-hero__tile--1 { width: 43%; height: 64%; left: 5%; top: 9%; }
+.players-index-hero__tile--2 { width: 29%; height: 42%; right: 10%; top: 0; }
+.players-index-hero__tile--3 { width: 29%; height: 43%; left: 0; bottom: 0; }
+.players-index-hero__tile--4 { width: 35%; height: 53%; right: 3%; top: 30%; }
+.players-index-hero__tile--5 { width: 24%; height: 35%; left: 40%; bottom: 0; }
+.players-index-hero__tile--6 { width: 20%; height: 28%; right: 36%; top: 3%; }
+.players-index-hero__stamp { position: absolute; left: 41%; top: 42%; display: grid; place-items: center; width: 78px; height: 78px; border-radius: 50%; background: var(--wine-bright); color: var(--on-accent); font: .63rem var(--font-mono); text-align: center; text-transform: uppercase; letter-spacing: .08em; transform: rotate(12deg); z-index: 4; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+.players-page__manifesto { display: flex; align-items: center; gap: clamp(1rem, 5vw, 4rem); padding: 1rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--ivory-faint); font: .68rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.players-page__manifesto strong { color: var(--ivory); font-size: 1.1rem; margin-right: .25rem; }
+.players-page__manifesto-note { margin-left: auto; color: var(--wine-bright); }
+.players-page__manifesto-note span { font-size: 1.15rem; }
+.players-page__controls { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); margin: 3rem 0 var(--space-3); }
+.players-page__select { display: grid; gap: .35rem; min-width: 180px; }
+.players-page__select select { min-height: 2.5rem; padding: .5rem .7rem; border: 1px solid var(--line-strong); border-radius: 0; background: var(--bg-raised); color: var(--ivory); font: .75rem var(--font-mono); }
+.players-page__count { margin: 0 0 var(--space-2); color: var(--ivory-faint); font: .68rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
 
 .players-page__status {
   color: var(--ivory-dim);
@@ -19,9 +54,15 @@
 
 .players-page__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
 }
+
+.players-page__grid .players-card { border-radius: 90px 90px 9px 9px; padding: .9rem .8rem 1.1rem; }
+.players-page__grid .players-avatar--md { width: 112px; height: 112px; border: 2px solid var(--line-strong); }
+.players-page__grid .players-card__name { margin-top: .25rem; font: .72rem var(--font-mono); letter-spacing: .05em; text-transform: uppercase; }
+.players-page__grid .players-card__intro { font-size: .78rem; }
+.players-page__grid .players-card__cta { font-size: .65rem; }
 
 /* -------------------------------------------------------------------------
    Fiche publique — hero + onglets
@@ -270,6 +311,13 @@
 }
 
 @media (max-width: 640px) {
+  .players-index-hero { display: block; min-height: auto; padding-top: 1rem; }
+  .players-index-hero .section-title { font-size: clamp(3.5rem, 19vw, 5.5rem); }
+  .players-index-hero__mosaic { min-height: 300px; margin-top: 2rem; }
+  .players-page__manifesto { flex-wrap: wrap; gap: .75rem 1.3rem; }
+  .players-page__manifesto-note { width: 100%; margin-left: 0; }
+  .players-page__controls { align-items: stretch; margin-top: 2rem; }
+  .players-page__select { width: 100%; }
   .players-hero__inner {
     gap: var(--space-3);
   }

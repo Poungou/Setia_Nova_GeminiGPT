@@ -1,12 +1,14 @@
 import { isCharacterLinked } from '../../lib/characterLinks.js'
 import { useMemo, useState } from 'react'
 import { usePublicCharacters, usePublicPlayers } from '../../lib/publicData.js'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import SearchBar from '../../components/SearchBar/SearchBar.jsx'
 import FilterBar from '../../components/FilterBar/FilterBar.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
+import { ArrowDownRight, Sparkles, UsersRound } from 'lucide-react'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import './Characters.css'
 
 const FILTERS = [
@@ -132,16 +134,27 @@ export default function Characters() {
     () => characters.filter((c) => c.is_featured === true).sort(compareByNumber),
     [characters],
   )
+  const heroCharacters = (featured.length > 0 ? featured : characters).filter((c) => imgSrc(c.portrait)).slice(0, 5)
   return (
     <PageTransition>
       <section className="container characters-page">
-        <Reveal className="section-heading">
-          <span className="eyebrow">Personnages</span>
-          <h1 className="section-title">Visages de Woltar</h1>
-          <p className="characters-page__intro">
-            Chaque visage conserve une histoire. Certaines sont encore en train de s&rsquo;écrire.
-          </p>
+        <Reveal className="characters-hero">
+          <div className="characters-hero__copy">
+            <span className="eyebrow"><UsersRound size={14} /> Rencontres en devenir</span>
+            <h1 className="section-title">Entrez dans<br /><em>leurs histoires.</em></h1>
+            <p className="characters-page__intro">Des visages, des secrets et des liens à inventer : chaque fiche est une invitation à imaginer la prochaine rencontre.</p>
+            <a className="characters-hero__cta" href="#characters-featured-title">Rencontrer les personnages <ArrowDownRight size={17} /></a>
+          </div>
+          {heroCharacters.length > 0 && <div className="characters-hero__portraits" aria-label="Quelques visages de Woltar">
+            {heroCharacters.map((character, index) => <Link key={character.id} to={`/personnages/${character.id}`} className={`characters-hero__portrait characters-hero__portrait--${index + 1}`}>
+              <img src={imgSrc(character.portrait)} alt={[character.firstName, character.lastName].filter(Boolean).join(' ')} style={{ objectPosition: imgFocus(character.portrait) }} />
+              <span>{character.firstName}</span>
+            </Link>)}
+            <span className="characters-hero__seal"><Sparkles size={19} /> à rencontrer</span>
+          </div>}
         </Reveal>
+
+        <div className="characters-manifesto"><span><strong>{characters.length}</strong> personnages</span><span><strong>{joueurOptions.length}</strong> univers de joueurs</span><a href="#gallery-title">Parcourir tous les visages <ArrowDownRight size={16} /></a></div>
 
         <Reveal as="section" className="characters-featured" aria-labelledby="characters-featured-title">
           <div className="characters-page__section-head">

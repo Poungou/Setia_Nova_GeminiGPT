@@ -100,15 +100,34 @@ export default function Players() {
   return (
     <PageTransition>
       <section className="container players-page">
-        <Reveal className="section-heading">
-          <span className="eyebrow">Joueurs</span>
-          <h1 className="section-title">Les joueurs</h1>
-          <p className="characters-page__intro">Des plumes, des univers et des histoires à partager.</p>
+        <Reveal className="players-index-hero">
+          <div className="players-index-hero__copy">
+            <span className="eyebrow">Joueurs</span>
+            <h1 className="section-title">Les voix de<br /><em>Woltar.</em></h1>
+            <p className="players-index-hero__intro">Des plumes, des univers et des histoires à partager.</p>
+          </div>
+          {players.length > 0 && (
+            <div className="players-index-hero__mosaic" aria-label="Aperçu des joueurs">
+              {players.slice(0, 6).map((player, index) => (
+                <Link key={player.userId} to={`/joueurs/${encodeURIComponent(player.userId)}`} className={`players-index-hero__tile players-index-hero__tile--${index + 1}`} aria-label={`Voir le profil de ${player.name}`}>
+                  <PlayerAvatar player={player} size="md" />
+                  <span>#{player.name}</span>
+                </Link>
+              ))}
+              <span className="players-index-hero__stamp">à rencontrer</span>
+            </div>
+          )}
         </Reveal>
 
-        <div className="characters-page__controls">
+        <div className="players-page__manifesto">
+          <span><strong>{players.length}</strong> profils publics</span>
+          <span><strong>{characters.length}</strong> personnages à découvrir</span>
+          <span className="players-page__manifesto-note">des histoires en mouvement <span>✦</span></span>
+        </div>
+
+        <div className="players-page__controls">
           <SearchBar value={query} onChange={setQuery} placeholder="Pseudo, style ou univers…" />
-          <label className="characters-page__select characters-page__select--primary">
+          <label className="players-page__select">
             <span className="eyebrow">Trier par</span>
             <select value={sort} onChange={(e) => setSort(e.target.value)}>
               {SORT_OPTIONS.map((o) => (
@@ -132,7 +151,7 @@ export default function Players() {
         )}
 
         {!loading && !error && (
-          <p className="characters-page__count">
+          <p className="players-page__count">
             {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
           </p>
         )}

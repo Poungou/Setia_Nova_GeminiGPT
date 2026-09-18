@@ -1,4 +1,8 @@
 .location-detail { padding-bottom: 4rem; overflow-wrap: anywhere; }
+.location-hero__explore { display: inline-flex; margin-top: 1.8rem; padding: .9rem 1.25rem; border: 1px solid #eee4d680; border-radius: 999px; background: #17131f80; color: #f5eee5; font-size: .85rem; }
+.location-hero__explore:hover { background: #17131f; }
+.location-detail__collections > .location-detail__section > .eyebrow { display: block; margin-bottom: .7rem; }
+.location-detail__children .location-card__explore { margin-top: 1rem; }
 .location-hero {
   position: relative;
   isolation: isolate;

@@ -1,6 +1,30 @@
 .characters-page {
   padding: var(--space-4) 0 var(--space-5);
 }
+.characters-hero { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(420px, 1.2fr); align-items: center; gap: clamp(2rem, 7vw, 7rem); min-height: 520px; padding: clamp(2rem, 5vw, 4.5rem) 0 3.5rem; }
+.characters-hero__copy { position: relative; z-index: 2; }
+.characters-hero .eyebrow { display: inline-flex; align-items: center; gap: .5rem; }
+.characters-hero .section-title { margin: 1rem 0 1.5rem; font-size: clamp(3.8rem, 7.5vw, 6.7rem); line-height: .82; letter-spacing: -.055em; }
+.characters-hero .section-title em { color: var(--wine-bright); font-weight: 400; }
+.characters-hero__cta { display: inline-flex; align-items: center; gap: .65rem; margin-top: 1.4rem; padding: .8rem 1rem; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--ivory); font: .72rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; transition: .2s ease; }
+.characters-hero__cta:hover { border-color: var(--wine-bright); background: var(--wine-soft); transform: translateY(-2px); }
+.characters-hero__portraits { position: relative; min-height: 430px; transform: rotate(-1.5deg); }
+.characters-hero__portrait { position: absolute; overflow: hidden; border: 1px solid var(--line-strong); background: var(--bg-raised); box-shadow: 0 18px 45px rgba(0,0,0,.28); transition: transform .3s ease, z-index .1s; }
+.characters-hero__portrait img { display: block; width: 100%; height: 100%; object-fit: cover; filter: saturate(.9); transition: transform .35s ease, filter .35s ease; }
+.characters-hero__portrait > span { position: absolute; inset: auto 0 0; z-index: 2; padding: 2.2rem .7rem .65rem; color: #f5eee5; background: linear-gradient(transparent, rgba(10,8,16,.85)); font: .65rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; opacity: 0; transition: opacity .2s; }
+.characters-hero__portrait:hover { z-index: 6; transform: translateY(-6px) rotate(2deg) scale(1.04); }
+.characters-hero__portrait:hover img { transform: scale(1.05); filter: saturate(1.1); }
+.characters-hero__portrait:hover > span { opacity: 1; }
+.characters-hero__portrait--1 { left: 8%; top: 7%; width: 38%; height: 69%; }
+.characters-hero__portrait--2 { right: 9%; top: 0; width: 31%; height: 46%; }
+.characters-hero__portrait--3 { right: 0; bottom: 4%; width: 38%; height: 55%; }
+.characters-hero__portrait--4 { left: 0; bottom: 0; width: 29%; height: 41%; }
+.characters-hero__portrait--5 { left: 38%; bottom: 0; width: 25%; height: 35%; }
+.characters-hero__seal { position: absolute; left: 46%; top: 41%; z-index: 7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; width: 88px; height: 88px; border-radius: 50%; background: var(--wine-bright); color: var(--on-accent); font: .58rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; transform: rotate(9deg); box-shadow: 0 10px 30px #0007; }
+.characters-manifesto { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; padding: 1.3rem 0; margin-bottom: var(--space-5); border-block: 1px solid var(--line); color: var(--ivory-dim); font: .72rem var(--font-mono); letter-spacing: .05em; text-transform: uppercase; }
+.characters-manifesto strong { margin-right: .3rem; color: var(--ivory); font-size: 1.05rem; }
+.characters-manifesto a { display: inline-flex; align-items: center; gap: .65rem; margin-left: auto; color: var(--ivory); }
+#characters-featured-title, #gallery-title { scroll-margin-top: 6rem; }
 
 .characters-page__intro {
   color: var(--ivory-dim);
@@ -360,6 +384,11 @@
 }
 
 @media (max-width: 680px) {
+  .characters-hero { display: block; min-height: auto; padding-top: 1rem; }
+  .characters-hero .section-title { font-size: clamp(3.5rem, 17vw, 5.4rem); }
+  .characters-hero__portraits { min-height: 360px; margin-top: 2.5rem; }
+  .characters-hero__seal { width: 72px; height: 72px; }
+  .characters-manifesto a { width: 100%; margin-left: 0; }
   .creator-header {
     align-items: flex-start;
     gap: var(--space-2);

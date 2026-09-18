@@ -161,13 +161,17 @@ export const SCHEMA = {
     subtitle: (r) => r.type || '',
     makeId: (r) => slug(r.name),
     defaults: {
-      name: '', type: '', canon: 'draft', canonScope: 'personal', parentId: '',
+      name: '', type: '', isCity: false, canon: 'draft', canonScope: 'personal', parentId: '',
       location: '', wing: '', zone: '', floor: '', owner: '', faction: '',
       status: '', shortDescription: '', description: '', lore: '', history: '',
       image: '', characters: [], events: [], gallery: [],
     },
     fields: [
       { key: 'name', label: 'Nom', type: 'text', group: 'Identité' },
+      {
+        key: 'isCity', label: 'Ville (niveau carte du monde)', type: 'boolean', group: 'Identité',
+        hint: 'Active pour une ville affichée sur la carte de Woltar et dans la section « Villes » de la page Lieux (ex. Sétia, Begy...). Laisse désactivé pour un lieu à l’intérieur d’une ville (manoir, pub, quartier...).',
+      },
       { key: 'type', label: 'Type', type: 'text', group: 'Identité' },
       { key: 'canon', label: 'Fiabilité', type: 'select', options: CANON, group: 'Identité' },
       {

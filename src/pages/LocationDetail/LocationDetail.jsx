@@ -54,12 +54,13 @@ export default function LocationDetail() {
               <Link to="/lieux">Lieux</Link>
               {parent && <><span aria-hidden="true">/</span><Link to={`/lieux/${parent.id}`}>{parent.name}</Link></>}
             </nav>
-            <span className="eyebrow">Lieu</span>
+            <span className="eyebrow">{location.isCity ? 'Destination' : 'Carnet de lieux'}</span>
             <h1>{location.name}</h1>
             {location.shortDescription && <p className="location-hero__lead">{location.shortDescription}</p>}
             {badges.length > 0 && <ul className="location-hero__badges" aria-label="Informations principales">
               {badges.map((badge) => <li key={badge}>{badge}</li>)}
             </ul>}
+            {children.length > 0 && <a className="location-hero__explore" href="#lieux-a-explorer">Explorer les {children.length} lieux de {location.name} ↓</a>}
           </div>
         </header>
 
@@ -115,8 +116,9 @@ export default function LocationDetail() {
         </div>
         <div className="container location-detail__collections">
           {children.length > 0 && (
-            <Reveal as="section" className="location-detail__section">
-              <h2>Sous-lieux</h2>
+            <Reveal as="section" id="lieux-a-explorer" className="location-detail__section">
+              <span className="eyebrow">Dans {location.name}</span>
+              <h2>De porte en porte</h2>
               <div className="location-detail__children">
                 {children.map((child, i) => (
                   <LocationCard key={child.id} location={child} index={i} />

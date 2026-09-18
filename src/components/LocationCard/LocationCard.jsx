@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import SafeImage from '../SafeImage/SafeImage.jsx'
+import { ArrowUpRight, MapPin } from 'lucide-react'
 import './LocationCard.css'
 
 const MotionLink = motion(Link)
@@ -33,7 +34,7 @@ export default function LocationCard({ location, index = 0 }) {
             style={{ objectPosition: imgFocus(location.image) }}
           />
         ) : (
-          <span className="location-card__glyph" aria-hidden="true" />
+          <span className="location-card__glyph" aria-hidden="true"><MapPin size={32} /></span>
         )}
       </div>
       <div className="location-card__body">
@@ -41,6 +42,7 @@ export default function LocationCard({ location, index = 0 }) {
         <h3>{location.name}</h3>
         {meta && <span className="location-card__meta">{meta}</span>}
         <p>{location.shortDescription || <span className="dash">—</span>}</p>
+        <span className="location-card__explore">Explorer ce lieu <ArrowUpRight size={17} /></span>
       </div>
     </MotionLink>
   )
