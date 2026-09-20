@@ -28,6 +28,31 @@ const API_HANDLERS = {
   __public: handlePublic,
 }
 
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "script-src 'self' https://challenges.cloudflare.com 'sha256-kMXki7b/R1Zkcao1yRUNbViBAOoZFlmVxr76sad751Q='",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' data: blob: https:",
+  "connect-src 'self' https://challenges.cloudflare.com",
+  "frame-src https://challenges.cloudflare.com",
+  "form-action 'self'",
+].join('; ')
+
+function withSecurityHeaders(response) {
+  const headers = new Headers(response.headers)
+  headers.set('X-Content-Type-Options', 'nosniff')
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  headers.set('X-Frame-Options', 'DENY')
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  if (!headers.has('Content-Security-Policy')) headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY)
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers })
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
@@ -36,14 +61,14 @@ export default {
     // /__auth/api/..., /__account/api/..., /__admin/api/..., /__aether/api/..., /__public/api/...
     const handler = segments.length >= 2 && segments[1] === 'api' ? API_HANDLERS[segments[0]] : null
     if (handler) {
-      return handler(request, env, segments.slice(2))
+      return withSecurityHeaders(await handler(request, env, segments.slice(2)))
     }
 
     // /uploads/<clé> — fichiers médias uploadés à l'exécution, servis depuis
     // R2 (voir worker/lib/mediaStore.js). Distinct de /media/... (statique,
     // empaqueté au build) : ne passe donc jamais par env.ASSETS.
     if (segments[0] === 'uploads' && segments.length >= 2) {
-      return handleMediaGet(request, env, segments.slice(1).join('/'))
+      return withSecurityHeaders(await handleMediaGet(request, env, segments.slice(1).join('/')))
     }
 
     const response = await env.ASSETS.fetch(request)
@@ -52,8 +77,8 @@ export default {
       const headers = new Headers(response.headers)
       headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
       headers.set('CDN-Cache-Control', 'no-store')
-      return new Response(response.body, { status: response.status, statusText: response.statusText, headers })
+      return withSecurityHeaders(new Response(response.body, { status: response.status, statusText: response.statusText, headers }))
     }
-    return response
+    return withSecurityHeaders(response)
   },
 }

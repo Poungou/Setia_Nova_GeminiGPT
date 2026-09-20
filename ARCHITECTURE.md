@@ -74,6 +74,18 @@ Kazuko Nakamura sert de modèle de référence : sa fiche utilise exactement la 
 
 ## Statuts et fiabilité de l'information
 
+## Sécurité HTTP
+
+Le Worker applique à toutes les réponses (HTML, assets, API et fichiers `/uploads/*`) :
+
+- `X-Content-Type-Options: nosniff` ;
+- `Referrer-Policy: strict-origin-when-cross-origin` ;
+- `X-Frame-Options: DENY` ;
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()` ;
+- une CSP avec scripts locaux, le hash du script de thème inline de `index.html`, Google Fonts et les domaines nécessaires à Cloudflare Turnstile.
+
+La CSP autorise les images et médias HTTPS externes car les contenus de Culture et certaines fiches acceptent des URLs distantes. Elle interdit les objets, les formulaires externes et l’intégration en frame. Les fichiers uploadés reçoivent en plus `Content-Security-Policy: sandbox; default-src 'none'`.
+
 Chaque personnage et chaque lieu porte un champ `canon` :
 
 - `"confirmed"` — information confirmée par la propriétaire.
