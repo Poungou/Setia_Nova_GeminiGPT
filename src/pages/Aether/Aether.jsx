@@ -1,6 +1,8 @@
 import AetherAbout from '../../components/AetherAbout/AetherAbout.jsx'
 import { motion, useReducedMotion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import aetherData from '../../data/aether.json'
+import { getSession } from '../../lib/authApi.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
 import { sendAetherMessage } from '../../lib/aetherApi.js'
 import ChatWidget from '../../components/ChatWidget/ChatWidget.jsx'
@@ -21,12 +23,25 @@ const item = {
 const config = aetherData[0] || null
 
 export default function Aether() {
+  const [session, setSession] = useState({ checking: true, user: null })
   const reduce = useReducedMotion()
   const motionProps = reduce ? {} : { variants: container, initial: 'hidden', animate: 'show' }
   const itemMotion = reduce ? {} : { variants: item }
 
   const enabled = config?.enabled === 'true'
   const avatarSrc = imgSrc(config?.avatar)
+
+  useEffect(() => {
+    let alive = true
+    getSession()
+      .then((body) => {
+        if (alive) setSession({ checking: false, user: body.user || null })
+      })
+      .catch(() => {
+        if (alive) setSession({ checking: false, user: null })
+      })
+    return () => { alive = false }
+  }, [])
 
   return (
     <PageTransition>
@@ -52,7 +67,7 @@ export default function Aether() {
       </section>
 
       <div className="container aether-chat-wrap">
-        {enabled ? (
+        {enabled && !session.checking && session.user ? (
           <ChatWidget
             title={config?.name || 'Aether'}
             avatarSrc={avatarSrc}
@@ -61,6 +76,10 @@ export default function Aether() {
             sendMessage={(messages) => sendAetherMessage(messages)}
             variant="page"
           />
+        ) : !session.checking && !session.user ? (
+          <div className="aether-disabled">
+            <p>Connecte-toi pour parler à Aether.</p>
+          </div>
         ) : (
           <div className="aether-disabled">
             <p>Aether n&rsquo;est pas encore activé sur ce site.</p>

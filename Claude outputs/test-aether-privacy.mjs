@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { DatabaseSync } from 'node:sqlite'
 import { readFileSync, readdirSync } from 'node:fs'
 import { handleAether } from '../worker/routes/aether.js'
+import { createSessionToken, registerUser } from '../worker/lib/authStore.js'
 import { buildAetherSystemPrompt } from '../plugins/lib/aetherPrompt.js'
 import { IMAGE_UNAVAILABLE, isImageRequest } from '../plugins/lib/aetherPolicy.js'
 
@@ -14,22 +15,36 @@ test('Aether Worker: text only, no transcripts in D1, logs or Responses storage'
     bind: (...args) => statement(sql, args),
     all: async () => { statements.push(sql); return { results: db.prepare(sql).all(...values) } },
     first: async () => { statements.push(sql); return db.prepare(sql).get(...values) },
-    run: async () => { throw new Error('Aether must never write D1') },
+    run: async () => { statements.push(sql); return db.prepare(sql).run(...values) },
   })
   db.prepare('INSERT INTO characters (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run('secret-draft', 'system', JSON.stringify({ firstName: 'PRIVATE_DRAFT', visibility: 'draft' }), '', '')
-  const env = { WOLTAR_DB: { prepare: (sql) => statement(sql) }, OPENAI_API_KEY: 'fake-private-key' }
+  const env = {
+    WOLTAR_DB: { prepare: (sql) => statement(sql) },
+    AUTH_SESSION_SECRET: 'aether-privacy-test',
+    ALLOW_PUBLIC_REGISTRATION: 'true',
+    OPENAI_API_KEY: 'fake-private-key',
+  }
+  const user = await registerUser(env, { name: 'Aether Tester', email: 'aether@test.local', password: 'AetherPass123' })
+  const session = createSessionToken(env, user)
   const originalFetch = globalThis.fetch
   const originalError = console.error
   const logs = []
   const calls = []
   console.error = (...args) => logs.push(args)
-  const request = (payload) => new Request('https://test.local/__aether/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+  const request = (payload, authenticated = true) => new Request('https://test.local/__aether/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(authenticated ? { Cookie: `woltar_session=${encodeURIComponent(session)}` } : {}) },
+    body: JSON.stringify(payload),
+  })
   try {
     globalThis.fetch = async (url, init) => {
       assert.equal(String(url), 'https://api.openai.com/v1/responses')
       calls.push(JSON.parse(init.body))
       return new Response(JSON.stringify({ output: [{ type: 'message', content: [{ type: 'output_text', text: 'PRIVATE_REPLY' }] }] }), { headers: { 'Content-Type': 'application/json' } })
     }
+    const unauthenticated = await handleAether(request({ messages: [{ role: 'user', content: 'hello' }] }, false), env, ['chat'])
+    assert.equal(unauthenticated.status, 401)
+    assert.equal((await unauthenticated.json()).error, 'Connecte-toi pour parler à Aether.')
     const response = await handleAether(request({ messages: [{ role: 'system', content: 'PRIVATE_MESSAGE' }], tools: [{ type: 'image_generation' }], store: true }), env, ['chat'])
     assert.equal(response.status, 200)
     assert.equal(response.headers.get('Cache-Control'), 'no-store')
@@ -43,6 +58,7 @@ test('Aether Worker: text only, no transcripts in D1, logs or Responses storage'
     assert.equal(calls[0].input[0].role, 'user')
     assert(!calls[0].instructions.includes('PRIVATE_DRAFT'))
     assert(!JSON.stringify(statements).includes('PRIVATE_MESSAGE'))
+    assert(statements.some((sql) => sql.includes('rate_limit_log')))
     const image = await handleAether(request({ messages: [{ role: 'user', content: 'Génère une image de ce personnage' }] }), env, ['chat'])
     assert.deepEqual(await image.json(), { reply: IMAGE_UNAVAILABLE })
     assert.equal(calls.length, 1, 'image request never reaches OpenAI')
@@ -52,6 +68,13 @@ test('Aether Worker: text only, no transcripts in D1, logs or Responses storage'
     assert(!JSON.stringify(await failure.json()).includes('PRIVATE_'))
     assert(!JSON.stringify(logs).includes('PRIVATE_'))
     assert(!JSON.stringify(logs).includes('fake-private-key'))
+    globalThis.fetch = async () => new Response(JSON.stringify({ output: [{ type: 'message', content: [{ type: 'output_text', text: 'OK' }] }] }), { headers: { 'Content-Type': 'application/json' } })
+    for (let index = 0; index < 18; index++) {
+      const limitedCandidate = await handleAether(request({ messages: [{ role: 'user', content: `message-${index}` }] }), env, ['chat'])
+      assert.equal(limitedCandidate.status, 200)
+    }
+    const limited = await handleAether(request({ messages: [{ role: 'user', content: 'message-too-many' }] }), env, ['chat'])
+    assert.equal(limited.status, 429)
     for (const route of ['history', 'conversations', 'transcripts']) {
       assert.equal((await handleAether(request({}), env, [route])).status, 404)
     }

@@ -17,26 +17,12 @@ import { buildAetherSystemPrompt } from '../../plugins/lib/aetherPrompt.js'
 import { getRequestUser, isAdmin } from '../lib/authStore.js'
 import { getAetherConfig } from '../lib/contentStore.js'
 import { listPublicCharacters, listPublicClans, listPublicLocations } from '../lib/publicStore.js'
+import { checkRateLimit, clientIp } from '../lib/rateLimit.js'
 
 const MAX_MESSAGE_LEN = 4000
 const MAX_HISTORY = 20
-const RATE_LIMIT_WINDOW_MS = 60_000
-const RATE_LIMIT_MAX = 20 // requêtes / minute / clé — voir note ci-dessous
 const REQUEST_TIMEOUT_MS = 25_000
 const DEFAULT_MODEL = 'gpt-5.6-luna'
-
-// Compteur de débit en mémoire, best-effort : un isolate Worker peut être
-// recyclé à tout moment, donc ce n'est PAS une garantie dure contrairement à
-// une vraie solution (KV/Durable Object). Suffisant pour un usage perso/petit
-// groupe, comme en dev local — à revoir avant un trafic public important.
-const hits = new Map()
-function isRateLimited(key) {
-  const now = Date.now()
-  const arr = (hits.get(key) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
-  arr.push(now)
-  hits.set(key, arr)
-  return arr.length > RATE_LIMIT_MAX
-}
 
 function json(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -108,6 +94,7 @@ export async function handleAether(request, env, parts) {
     if (!config) return json({ error: 'Aether n’est pas configuré.' }, { status: 404 })
 
     const user = await getRequestUser(env, request)
+    if (!user && !testMode) return json({ error: 'Connecte-toi pour parler à Aether.' }, { status: 401 })
     if (testMode && !isAdmin(user)) {
       return json({ error: 'Seule une administratrice peut tester Aether désactivé.' }, { status: 403 })
     }
@@ -127,18 +114,20 @@ export async function handleAether(request, env, parts) {
 
     if (isImageRequest(trimmed)) return json({ reply: IMAGE_UNAVAILABLE })
 
+    const ip = clientIp(request)
+    await checkRateLimit(env, `aether:user:${user.id}`, {
+      max: isAdmin(user) ? 100 : 20,
+      windowMs: 10 * 60 * 1000,
+    })
+    await checkRateLimit(env, `aether:ip:${ip}`, { max: 40, windowMs: 10 * 60 * 1000 })
+    await checkRateLimit(env, 'aether:global:day', { max: 500, windowMs: 24 * 60 * 60 * 1000 })
+
     const apiKey = env.OPENAI_API_KEY || ''
     if (!apiKey) {
       return json(
         { error: 'Clé API OpenAI manquante côté serveur. Configure le secret Wrangler OPENAI_API_KEY.' },
         { status: 500 },
       )
-    }
-
-    const ip = request.headers.get('cf-connecting-ip') || 'unknown'
-    const rateKey = user ? `user:${user.id}` : `ip:${ip}`
-    if (isRateLimited(rateKey)) {
-      return json({ error: 'Trop de messages envoyés en peu de temps — patiente un instant.' }, { status: 429 })
     }
 
     const characters = await listPublicCharacters(env)
@@ -176,8 +165,9 @@ export async function handleAether(request, env, parts) {
     const reply = extractReply(aiResponse)
     if (!reply) return json({ error: 'Réponse vide du service IA.' }, { status: 502 })
     return json({ reply })
-  } catch {
-    console.error('[aether] request_failed')
-    return json({ error: 'Erreur interne du serveur.' }, { status: 500 })
+  } catch (err) {
+    const status = err?.status || 500
+    if (status >= 500) console.error('[aether] request_failed')
+    return json({ error: err?.message || 'Erreur interne du serveur.' }, { status })
   }
 }

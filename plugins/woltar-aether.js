@@ -23,12 +23,11 @@ import path from 'node:path'
 import { loadEnv } from 'vite'
 import { getRequestUser, isAdmin } from './lib/authStore.js'
 import { buildAetherSystemPrompt } from './lib/aetherPrompt.js'
+import { checkRateLimit, clientIp } from './lib/rateLimit.js'
 
 const MAX_MESSAGE_LEN = 4000
 const MAX_HISTORY = 20
 const MAX_BODY_BYTES = 200 * 1024
-const RATE_LIMIT_WINDOW_MS = 60_000
-const RATE_LIMIT_MAX = 20
 const REQUEST_TIMEOUT_MS = 25_000
 const DEFAULT_MODEL = 'gpt-5.6-luna'
 
@@ -106,15 +105,6 @@ export default function woltarAether() {
       const model = DEFAULT_MODEL
       const openai = apiKey ? new OpenAI({ apiKey, logLevel: 'off' }) : null
 
-      const hits = new Map()
-      function isRateLimited(key) {
-        const now = Date.now()
-        const arr = (hits.get(key) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
-        arr.push(now)
-        hits.set(key, arr)
-        return arr.length > RATE_LIMIT_MAX
-      }
-
       server.middlewares.use('/__aether/api', async (req, res) => {
         const send = (code, obj) => {
           res.statusCode = code
@@ -147,6 +137,7 @@ export default function woltarAether() {
           if (!config) return send(404, { error: 'Aether n’est pas configuré.' })
 
           const user = await getRequestUser(root, req)
+          if (!user && !testMode) return send(401, { error: 'Connecte-toi pour parler à Aether.' })
           if (testMode && !isAdmin(user)) {
             return send(403, { error: 'Seule une administratrice peut tester Aether désactivé.' })
           }
@@ -166,17 +157,16 @@ export default function woltarAether() {
 
           if (isImageRequest(trimmed)) return send(200, { reply: IMAGE_UNAVAILABLE })
 
+          const ip = clientIp(req)
+          checkRateLimit(`aether:user:${user.id}`, { max: isAdmin(user) ? 100 : 20, windowMs: 10 * 60 * 1000 })
+          checkRateLimit(`aether:ip:${ip}`, { max: 40, windowMs: 10 * 60 * 1000 })
+          checkRateLimit('aether:global:day', { max: 500, windowMs: 24 * 60 * 60 * 1000 })
+
           if (!apiKey || !openai) {
             return send(500, {
               error:
                 "Clé API OpenAI manquante côté serveur. Ajoute OPENAI_API_KEY dans .env.local puis relance npm run dev.",
             })
-          }
-
-          const ip = req.socket?.remoteAddress || 'local'
-          const rateKey = user ? `user:${user.id}` : `ip:${ip}`
-          if (isRateLimited(rateKey)) {
-            return send(429, { error: 'Trop de messages envoyés en peu de temps — patiente un instant.' })
           }
 
           const characters = JSON.parse(await readFile(path.join(dataDir, 'characters.json'), 'utf8'))
