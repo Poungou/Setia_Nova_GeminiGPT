@@ -10,7 +10,7 @@ const { handleAuth } = await import('../worker/routes/auth.js')
 const { handlePublic } = await import('../worker/routes/public.js')
 const { handleAccount } = await import('../worker/routes/account.js')
 const { loginUser, createSessionToken } = await import('../worker/lib/authStore.js')
-function request(path, method = 'GET', body, cookie = '') { const headers = { 'Content-Type': 'application/json' }; if (cookie) headers.Cookie = `woltar_session=${encodeURIComponent(cookie)}`; return new Request(`https://test.local${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined }) }
+function request(path, method = 'GET', body, cookie = '', ip = '198.51.100.40') { const headers = { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip }; if (cookie) headers.Cookie = `woltar_session=${encodeURIComponent(cookie)}`; return new Request(`https://test.local${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined }) }
 async function register(email, name) { const response = await handleAuth(request('/__auth/api/register', 'POST', { email, name, password: 'ProfilePass123' }), env, ['register']); return (await response.json()).user }
 const poungou = await register('poungou-profile@test.local', 'Poungou'); db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(poungou.id); const admin = await loginUser(env, { identifier: 'Poungou', password: 'ProfilePass123' }); const adminSession = createSessionToken(env, admin)
 const adminUsers = await handleAuth(request('/__auth/api/users', 'GET', undefined, adminSession), env, ['users'])
@@ -90,10 +90,10 @@ await updateLinks({ linked_character_ids: [] })
 const detachedPublic = (await (await handlePublic(request('/__public/api/players'), env, ['players'])).json()).data.find((entry) => entry.userId === poungou.id)
 assert(detachedPublic.characters.length === 1 && detachedPublic.characters[0].id === 'poungou-character', 'détachement retire les liens complémentaires et conserve la propriété automatique')
 assert(JSON.stringify(beforeCharacters) === JSON.stringify(db.prepare('SELECT * FROM characters ORDER BY id').all()), 'aucune suppression ou modification des personnages ni de owner_user_id')
-for (const email of ['', 'incorrect', 'a@b']) {
+for (const [index, email] of ['', 'incorrect', 'a@b'].entries()) {
   const invalidEmail = await handleAuth(request('/__auth/api/users', 'POST', { name: 'InvalidEmail', email, password: 'ValidPass123', passwordConfirmation: 'ValidPass123' }, adminSession), env, ['users'])
   assert(invalidEmail.status === 400, 'création admin exige une adresse email valide')
-  const registration = await handleAuth(request('/__auth/api/register', 'POST', { name: 'InvalidEmail', email, password: 'ValidPass123' }), env, ['register'])
+  const registration = await handleAuth(request('/__auth/api/register', 'POST', { name: 'InvalidEmail', email, password: 'ValidPass123' }, '', `198.51.100.${50 + index}`), env, ['register'])
   assert(registration.status === 400, 'inscription publique exige une adresse email valide')
 }
 console.log(`\n${passed} OK, ${failed} FAIL`); if (failed) process.exitCode = 1
