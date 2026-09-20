@@ -17,6 +17,13 @@ const BASE = '/__aether/api'
 
 export const aetherChatAvailable = true
 
+export async function getAetherQuota() {
+  const res = await fetch(`${BASE}/quota`, { credentials: 'same-origin', cache: 'no-store' })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(body.error || `Erreur ${res.status}`)
+  return body
+}
+
 export async function sendAetherMessage(messages, { context, testMode = false } = {}) {
   const res = await fetch(`${BASE}/chat`, {
     method: 'POST',
@@ -30,5 +37,5 @@ export async function sendAetherMessage(messages, { context, testMode = false } 
   })
   const body = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(body.error || `Erreur ${res.status}`)
-  return body.reply
+  return body
 }

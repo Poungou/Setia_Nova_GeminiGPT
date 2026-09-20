@@ -17,7 +17,11 @@
     }
   ],
   "vars": {
-    "ALLOW_PUBLIC_REGISTRATION": "true"
+    "ALLOW_PUBLIC_REGISTRATION": "true",
+    // Limites Aether journalières : modifiables ici avant un déploiement.
+    "AETHER_DAILY_GLOBAL": "30",
+    "AETHER_DAILY_USER": "5",
+    "AETHER_DAILY_IP": "10"
   },
   "observability": {
     "enabled": false

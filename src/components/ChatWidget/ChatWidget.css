@@ -162,6 +162,14 @@
   border-top: 1px solid var(--line);
 }
 
+.chat-widget__quota {
+  margin: -0.65rem var(--space-2) var(--space-2);
+  color: var(--ivory-faint);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .chat-widget__input {
   flex: 1;
   resize: none;

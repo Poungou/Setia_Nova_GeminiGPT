@@ -11,16 +11,22 @@ import { httpError } from './authStore.js'
 const hits = new Map() // bucket -> timestamps[]
 
 export function checkRateLimit(bucket, { max, windowMs }) {
-  const now = Date.now()
-  const windowStart = now - windowMs
+  const list = getRateLimitCount(bucket, { windowMs })
+
+  if (list.length >= max) throw httpError(429, 'Trop de tentatives. Réessaie dans quelques minutes.')
+  recordRateLimit(bucket)
+}
+
+export function getRateLimitCount(bucket, { windowMs }) {
+  const windowStart = Date.now() - windowMs
   const list = (hits.get(bucket) || []).filter((ts) => ts >= windowStart)
+  hits.set(bucket, list)
+  return list
+}
 
-  if (list.length >= max) {
-    hits.set(bucket, list)
-    throw httpError(429, 'Trop de tentatives. Réessaie dans quelques minutes.')
-  }
-
-  list.push(now)
+export function recordRateLimit(bucket) {
+  const list = hits.get(bucket) || []
+  list.push(Date.now())
   hits.set(bucket, list)
 }
 

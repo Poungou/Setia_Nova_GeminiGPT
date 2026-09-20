@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import aetherData from '../../data/aether.json'
 import { getSession } from '../../lib/authApi.js'
 import { imgSrc, imgFocus } from '../../lib/image.js'
-import { sendAetherMessage } from '../../lib/aetherApi.js'
+import { getAetherQuota, sendAetherMessage } from '../../lib/aetherApi.js'
 import ChatWidget from '../../components/ChatWidget/ChatWidget.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import './Aether.css'
@@ -24,6 +24,7 @@ const config = aetherData[0] || null
 
 export default function Aether() {
   const [session, setSession] = useState({ checking: true, user: null })
+  const [quota, setQuota] = useState(null)
   const reduce = useReducedMotion()
   const motionProps = reduce ? {} : { variants: container, initial: 'hidden', animate: 'show' }
   const itemMotion = reduce ? {} : { variants: item }
@@ -35,7 +36,11 @@ export default function Aether() {
     let alive = true
     getSession()
       .then((body) => {
-        if (alive) setSession({ checking: false, user: body.user || null })
+        if (alive) {
+          const user = body.user || null
+          setSession({ checking: false, user })
+          if (user) getAetherQuota().then((nextQuota) => alive && setQuota(nextQuota)).catch(() => {})
+        }
       })
       .catch(() => {
         if (alive) setSession({ checking: false, user: null })
@@ -74,6 +79,8 @@ export default function Aether() {
             avatarFocus={imgFocus(config?.avatar)}
             greeting={config?.greeting}
             sendMessage={(messages) => sendAetherMessage(messages)}
+            quota={quota}
+            onQuotaUpdate={setQuota}
             variant="page"
           />
         ) : !session.checking && !session.user ? (

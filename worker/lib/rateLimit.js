@@ -15,6 +15,14 @@
 import { httpError } from './authStore.js'
 
 export async function checkRateLimit(env, bucket, { max, windowMs }) {
+  const count = await getRateLimitCount(env, bucket, { windowMs })
+  if (count >= max) {
+    throw httpError(429, 'Trop de tentatives. Réessaie dans quelques minutes.')
+  }
+  await recordRateLimit(env, bucket)
+}
+
+export async function getRateLimitCount(env, bucket, { windowMs }) {
   const db = env.WOLTAR_DB
   const now = Date.now()
   const windowStart = now - windowMs
@@ -25,12 +33,11 @@ export async function checkRateLimit(env, bucket, { max, windowMs }) {
     .prepare('SELECT COUNT(*) as count FROM rate_limit_log WHERE bucket = ? AND created_at >= ?')
     .bind(bucket, windowStart)
     .first()
+  return row?.count || 0
+}
 
-  if ((row?.count || 0) >= max) {
-    throw httpError(429, 'Trop de tentatives. Réessaie dans quelques minutes.')
-  }
-
-  await db.prepare('INSERT INTO rate_limit_log (bucket, created_at) VALUES (?, ?)').bind(bucket, now).run()
+export async function recordRateLimit(env, bucket) {
+  await env.WOLTAR_DB.prepare('INSERT INTO rate_limit_log (bucket, created_at) VALUES (?, ?)').bind(bucket, Date.now()).run()
 }
 
 // Cloudflare pose toujours CF-Connecting-IP sur les requêtes qui atteignent

@@ -17,6 +17,8 @@ export default function ChatWidget({
   badge,
   greeting,
   sendMessage,
+  quota,
+  onQuotaUpdate,
   variant = 'floating',
   onClose,
 }) {
@@ -25,6 +27,14 @@ export default function ChatWidget({
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const logRef = useRef(null)
+  const quotaBlocked = Boolean(quota && (quota.siteAvailable === false || quota.remaining <= 0))
+
+  function quotaLabel() {
+    if (!quota) return ''
+    if (quota.siteAvailable === false) return "Aether se repose pour aujourd'hui. Reviens demain à minuit (heure de Paris)."
+    if (quota.remaining <= 0) return `Tu as utilisé tes ${quota.limit} messages du jour. Reviens demain à minuit (heure de Paris).`
+    return `${quota.remaining} message${quota.remaining === 1 ? '' : 's'} restant${quota.remaining === 1 ? '' : 's'} aujourd'hui. Remise à zéro ${quota.resetLabel || 'à minuit (heure de Paris)'}.`
+  }
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' })
@@ -32,14 +42,16 @@ export default function ChatWidget({
 
   const send = async () => {
     const text = draft.trim()
-    if (!text || sending) return
+    if (!text || sending || quotaBlocked) return
     setError('')
     const next = [...messages, { role: 'user', content: text }].slice(-MAX_LOCAL_HISTORY)
     setMessages(next)
     setDraft('')
     setSending(true)
     try {
-      const reply = await sendMessage(next)
+      const result = await sendMessage(next)
+      const reply = typeof result === 'string' ? result : result.reply
+      if (result && typeof result === 'object' && result.remaining !== undefined && onQuotaUpdate) onQuotaUpdate(result)
       setMessages((m) => [...m, { role: 'assistant', content: reply }].slice(-MAX_LOCAL_HISTORY))
     } catch (e) {
       setError(String(e.message || e))
@@ -96,6 +108,7 @@ export default function ChatWidget({
           placeholder="Écrire un message…"
           value={draft}
           maxLength={4000}
+          disabled={quotaBlocked}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -104,10 +117,11 @@ export default function ChatWidget({
             }
           }}
         />
-        <button type="submit" className="chat-widget__send" disabled={sending || !draft.trim()} aria-label="Envoyer">
+        <button type="submit" className="chat-widget__send" disabled={sending || quotaBlocked || !draft.trim()} aria-label="Envoyer">
           <Send size={15} />
         </button>
       </form>
+      <p className="chat-widget__quota" aria-live="polite">{quotaLabel()}</p>
     </div>
   )
 }

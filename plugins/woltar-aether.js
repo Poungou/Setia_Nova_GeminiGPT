@@ -23,13 +23,101 @@ import path from 'node:path'
 import { loadEnv } from 'vite'
 import { getRequestUser, isAdmin } from './lib/authStore.js'
 import { buildAetherSystemPrompt } from './lib/aetherPrompt.js'
-import { checkRateLimit, clientIp } from './lib/rateLimit.js'
+import { clientIp, getRateLimitCount, recordRateLimit } from './lib/rateLimit.js'
 
 const MAX_MESSAGE_LEN = 4000
 const MAX_HISTORY = 20
 const MAX_BODY_BYTES = 200 * 1024
 const REQUEST_TIMEOUT_MS = 25_000
 const DEFAULT_MODEL = 'gpt-5.6-luna'
+
+// Valeurs journalières centralisées, surchargeables par les variables Vite.
+const AETHER_LIMITS = Object.freeze({
+  shortWindowMs: 10 * 60 * 1000,
+  shortUser: 20,
+  shortAdmin: 100,
+  shortIp: 40,
+  dailyWindowMs: 24 * 60 * 60 * 1000,
+  dailyGlobal: { env: 'AETHER_DAILY_GLOBAL', default: 30 },
+  dailyUser: { env: 'AETHER_DAILY_USER', default: 5 },
+  dailyAdmin: 30,
+  dailyIp: { env: 'AETHER_DAILY_IP', default: 10 },
+})
+
+function limitValue(env, setting) {
+  const value = Number.parseInt(env?.[setting.env], 10)
+  return Number.isInteger(value) && value > 0 ? value : setting.default
+}
+
+function getAetherLimits(env) {
+  return {
+    ...AETHER_LIMITS,
+    dailyGlobal: limitValue(env, AETHER_LIMITS.dailyGlobal),
+    dailyUser: limitValue(env, AETHER_LIMITS.dailyUser),
+    dailyIp: limitValue(env, AETHER_LIMITS.dailyIp),
+  }
+}
+
+function parisDate() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Paris',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+function getQuota(user, ip, env) {
+  const limits = getAetherLimits(env)
+  const date = parisDate()
+  const globalBucket = `aether:global:day:${date}`
+  const userBucket = `aether:user:${user.id}:${date}`
+  const ipBucket = `aether:ip:${ip}:${date}`
+  const globalUsed = getRateLimitCount(globalBucket, { windowMs: limits.dailyWindowMs }).length
+  const userUsed = getRateLimitCount(userBucket, { windowMs: limits.dailyWindowMs }).length
+  const ipUsed = getRateLimitCount(ipBucket, { windowMs: limits.dailyWindowMs }).length
+  const limit = isAdmin(user) ? limits.dailyAdmin : limits.dailyUser
+  return {
+    used: userUsed,
+    limit,
+    remaining: Math.max(0, limit - userUsed),
+    siteAvailable: globalUsed < limits.dailyGlobal,
+    resetLabel: 'à minuit (heure de Paris)',
+    buckets: { globalBucket, userBucket, ipBucket, globalUsed, ipUsed },
+    limits,
+  }
+}
+
+function assertQuotaAvailable(user, ip, env) {
+  const quota = getQuota(user, ip, env)
+  if (!quota.siteAvailable) throw Object.assign(new Error("Aether se repose pour aujourd'hui. Reviens demain."), { status: 429 })
+  if (quota.remaining <= 0) throw Object.assign(new Error(`Tu as utilisé tes ${quota.limit} messages du jour. Reviens demain.`), { status: 429 })
+  if (quota.buckets.ipUsed >= quota.limits.dailyIp) throw Object.assign(new Error("La limite quotidienne de cette connexion est atteinte. Reviens demain."), { status: 429 })
+  if (getRateLimitCount(`aether:user:${user.id}`, { windowMs: quota.limits.shortWindowMs }).length >= (isAdmin(user) ? quota.limits.shortAdmin : quota.limits.shortUser)) {
+    throw Object.assign(new Error('Trop de messages envoyés en peu de temps — patiente un instant.'), { status: 429 })
+  }
+  if (getRateLimitCount(`aether:ip:${ip}`, { windowMs: quota.limits.shortWindowMs }).length >= quota.limits.shortIp) {
+    throw Object.assign(new Error('Trop de messages envoyés depuis cette connexion — patiente un instant.'), { status: 429 })
+  }
+  return quota
+}
+
+function recordSuccessfulMessage(quota, user, ip) {
+  recordRateLimit(quota.buckets.globalBucket)
+  recordRateLimit(quota.buckets.userBucket)
+  recordRateLimit(quota.buckets.ipBucket)
+  recordRateLimit(`aether:user:${user.id}`)
+  recordRateLimit(`aether:ip:${ip}`)
+  return {
+    used: quota.used + 1,
+    limit: quota.limit,
+    remaining: Math.max(0, quota.remaining - 1),
+    siteAvailable: quota.buckets.globalUsed + 1 < quota.limits.dailyGlobal,
+    resetLabel: quota.resetLabel,
+  }
+}
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -117,6 +205,14 @@ export default function woltarAether() {
           const url = new URL(req.url, 'http://localhost')
           const parts = url.pathname.split('/').filter(Boolean)
 
+          if (parts[0] === 'quota') {
+            if (req.method !== 'GET') return send(405, { error: 'Méthode non autorisée' })
+            const user = await getRequestUser(root, req)
+            if (!user) return send(401, { error: 'Connexion requise.' })
+            const quota = getQuota(user, clientIp(req), env)
+            return send(200, { used: quota.used, limit: quota.limit, remaining: quota.remaining, siteAvailable: quota.siteAvailable, resetLabel: quota.resetLabel })
+          }
+
           if (parts[0] !== 'chat') return send(404, { error: 'Route inconnue' })
           if (req.method !== 'POST') return send(405, { error: 'Méthode non autorisée' })
 
@@ -157,17 +253,15 @@ export default function woltarAether() {
 
           if (isImageRequest(trimmed)) return send(200, { reply: IMAGE_UNAVAILABLE })
 
-          const ip = clientIp(req)
-          checkRateLimit(`aether:user:${user.id}`, { max: isAdmin(user) ? 100 : 20, windowMs: 10 * 60 * 1000 })
-          checkRateLimit(`aether:ip:${ip}`, { max: 40, windowMs: 10 * 60 * 1000 })
-          checkRateLimit('aether:global:day', { max: 500, windowMs: 24 * 60 * 60 * 1000 })
-
           if (!apiKey || !openai) {
             return send(500, {
               error:
                 "Clé API OpenAI manquante côté serveur. Ajoute OPENAI_API_KEY dans .env.local puis relance npm run dev.",
             })
           }
+
+          const ip = clientIp(req)
+          const quota = assertQuotaAvailable(user, ip, env)
 
           const characters = JSON.parse(await readFile(path.join(dataDir, 'characters.json'), 'utf8'))
           const locations = JSON.parse(await readFile(path.join(dataDir, 'locations.json'), 'utf8'))
@@ -201,10 +295,10 @@ export default function woltarAether() {
           const reply = extractReply(aiResponse)
 
           if (!reply) return send(502, { error: 'Réponse vide du service IA.' })
-          return send(200, { reply })
-        } catch {
+          return send(200, { reply, ...recordSuccessfulMessage(quota, user, ip) })
+        } catch (err) {
           console.error('[aether] request_failed')
-          return send(500, { error: 'Erreur interne du serveur de développement.' })
+          return send(err?.status || 500, { error: err?.message || 'Erreur interne du serveur de développement.' })
         }
       })
     },
