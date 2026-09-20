@@ -27,3 +27,21 @@ test('check-release accepts the configured public key and rejects the test key',
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+test('check-release uses the CI environment before .env.local', () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), 'woltar-release-ci-'))
+  const distDir = path.join(root, 'dist')
+  const envFile = path.join(root, '.env.local')
+  const previous = process.env.VITE_TURNSTILE_SITE_KEY
+  mkdirSync(distDir)
+  writeFileSync(envFile, 'VITE_TURNSTILE_SITE_KEY=local-fallback-key\n')
+  writeFileSync(path.join(distDir, 'bundle.js'), 'const key = "ci-public-site-key"')
+  process.env.VITE_TURNSTILE_SITE_KEY = 'ci-public-site-key'
+  try {
+    assert.equal(checkRelease({ distDir, envFile }), true)
+  } finally {
+    if (previous === undefined) delete process.env.VITE_TURNSTILE_SITE_KEY
+    else process.env.VITE_TURNSTILE_SITE_KEY = previous
+    rmSync(root, { recursive: true, force: true })
+  }
+})

@@ -20,13 +20,15 @@ function listFiles(directory) {
 }
 
 export function checkRelease({ distDir = path.join(ROOT, 'dist'), envFile = path.join(ROOT, '.env.local') } = {}) {
-  let publicSiteKey
-  try {
-    publicSiteKey = readEnvValue(envFile, 'VITE_TURNSTILE_SITE_KEY')
-  } catch {
-    throw new Error('VITE_TURNSTILE_SITE_KEY est introuvable dans .env.local.')
+  let publicSiteKey = process.env.VITE_TURNSTILE_SITE_KEY || ''
+  if (!publicSiteKey) {
+    try {
+      publicSiteKey = readEnvValue(envFile, 'VITE_TURNSTILE_SITE_KEY')
+    } catch {
+      publicSiteKey = ''
+    }
   }
-  if (!publicSiteKey) throw new Error('VITE_TURNSTILE_SITE_KEY est vide dans .env.local.')
+  if (!publicSiteKey) throw new Error('VITE_TURNSTILE_SITE_KEY est absente de l’environnement et de .env.local.')
 
   let files
   try {

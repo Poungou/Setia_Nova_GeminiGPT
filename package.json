@@ -10,6 +10,7 @@
     "cloudflare:preview": "npm run build && wrangler dev",
     "check:release": "node scripts/check-release.mjs",
     "predeploy": "npm run check:release",
+    "deploy": "wrangler deploy",
     "lint": "eslint .",
     "migrate": "node scripts/migrate.mjs",
     "d1:seed:generate": "node scripts/generate-d1-seed.mjs",
