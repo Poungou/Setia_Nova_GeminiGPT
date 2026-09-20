@@ -67,6 +67,7 @@ import {
   updateTimeline,
 } from '../lib/contentStore.js'
 import { saveMedia } from '../lib/mediaStore.js'
+import { checkRateLimit, clientIp } from '../lib/rateLimit.js'
 import { canCreate, CREATE_PERMISSIONS } from '../lib/permissions.js'
 import { getPlayerProfile, savePlayerProfile } from '../lib/playerProfiles.js'
 import { normalizeTimelineEvents } from '../../src/lib/timelineEvents.js'
@@ -366,6 +367,8 @@ export async function handleAccount(request, env, parts) {
     // ici, quoi qu'envoie le client — jamais de fichier audio par ce biais.
     if (parts[0] === 'upload' && parts.length === 1) {
       if (method !== 'POST') return json({ error: 'Methode non autorisee' }, { status: 405 })
+      await checkRateLimit(env, `upload:user:${user.id}`, { max: 20, windowMs: 60 * 60 * 1000 })
+      await checkRateLimit(env, `upload:ip:${clientIp(request)}`, { max: 40, windowMs: 60 * 60 * 1000 })
       const body = await readJson(request)
       const result = await saveMedia(env, { filename: body?.filename, dataUrl: body?.dataUrl, kind: 'image' })
       return json(result)
@@ -374,12 +377,26 @@ export async function handleAccount(request, env, parts) {
     if (parts[0] === 'bootstrap' && method === 'GET') {
       const characters = await listCharacters(env)
       const clans = await listClans(env)
+      const locations = await listLocations(env)
       const data = {
         characters: isAdmin(user) ? characters : visibleRows(characters, user),
         clans: visibleRows(clans, user),
-        locations: visibleRows(await listLocations(env), user),
+        // "Mes lieux" (liste/édition) reste limité à ses propres lieux pour
+        // un compte joueur, et à tout pour une administratrice — comme
+        // `characters` ci-dessus.
+        locations: isAdmin(user) ? locations : visibleRows(locations, user),
         posts: visibleRows(await listPosts(env), user),
         timelines: visibleRows(await listTimelines(env), user),
+        // Catalogue complet des lieux (canon + tous comptes confondus), pour
+        // TOUTE utilisatrice (admin ou non) : "taguer" un lieu dans "Lieux
+        // associés" (personnage/clan/événement/article) est une simple
+        // référence, pas une édition du lieu — n'importe qui doit pouvoir
+        // lier son personnage au Joyeux Lutin ou au lieu créé par une autre
+        // joueuse. Voir src/admin/Fields.jsx#RefsInput (field.dataKey) :
+        // seuls les champs "Lieux associés"/"Lieux"/"Lieux liés" lisent
+        // cette clé plutôt que `data.locations` ci-dessus, qui lui reste
+        // scopé à la liste "Mes lieux".
+        locationsCatalog: locations,
       }
       for (const name of REFERENCE_COLLECTIONS) data[name] = STATIC_COLLECTIONS[name] || []
       return json({ user, data })

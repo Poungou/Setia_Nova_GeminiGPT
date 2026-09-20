@@ -21,10 +21,9 @@ export function fileToDataUrl(file) {
 
 // Redimensionne et compresse les images en WebP avant l'envoi (les PNG bruts
 // font facilement plusieurs Mo — inutile pour un affichage web, et ça
-// alourdit le stockage). SVG et GIF passent tels quels (pas de
-// rasterisation / on garde l'animation).
+// alourdit le stockage). GIF passe tel quel pour conserver l'animation.
 const MAX_EDGE = 1800
-const PASSTHROUGH = ['image/svg+xml', 'image/gif']
+const PASSTHROUGH = ['image/gif']
 
 async function prepareImage(file) {
   if (PASSTHROUGH.includes(file.type)) {

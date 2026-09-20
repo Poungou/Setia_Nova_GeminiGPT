@@ -39,6 +39,7 @@ import {
 import { addClanMember, listClanMembers, removeClan, removeClanMember } from './lib/clanMembers.js'
 import { canCreate, CREATE_PERMISSIONS } from '../worker/lib/permissions.js'
 import { saveMediaLocal } from './lib/mediaStore.js'
+import { checkRateLimit, clientIp } from './lib/rateLimit.js'
 import { getPlayerProfile, savePlayerProfile } from './lib/playerProfiles.js'
 import { normalizeTimelineEvents } from '../src/lib/timelineEvents.js'
 
@@ -294,6 +295,8 @@ export default function woltarAccount() {
           // pour le détail. `kind` toujours forcé à 'image'.
           if (parts[0] === 'upload' && parts.length === 1) {
             if (req.method !== 'POST') return send(405, { error: 'Méthode non autorisée' })
+            checkRateLimit(`upload:user:${user.id}`, { max: 20, windowMs: 60 * 60 * 1000 })
+            checkRateLimit(`upload:ip:${clientIp(req)}`, { max: 40, windowMs: 60 * 60 * 1000 })
             const { filename, dataUrl } = await readJson(req)
             const result = await saveMediaLocal(root, { filename, dataUrl, kind: 'image' })
             return send(200, result)
@@ -306,9 +309,22 @@ export default function woltarAccount() {
             const data = {
               characters: isAdmin(user) ? characters : visibleRows(characters, user),
               clans: visibleRows(clans, user),
-              locations: visibleRows(locations, user),
+              // "Mes lieux" (liste/édition) reste limité à ses propres lieux
+              // pour un compte joueur, et à tout pour une administratrice —
+              // comme `characters` ci-dessus.
+              locations: isAdmin(user) ? locations : visibleRows(locations, user),
               posts: visibleRows(await readCollection(dataDir, 'posts'), user),
               timelines: visibleRows(await readCollection(dataDir, 'timelines'), user),
+              // Catalogue complet des lieux (canon + tous comptes confondus),
+              // pour TOUTE utilisatrice (admin ou non) : "taguer" un lieu dans
+              // "Lieux associés" (personnage/clan/événement/article) est une
+              // simple référence, pas une édition du lieu — n'importe qui doit
+              // pouvoir lier son personnage au Joyeux Lutin ou au lieu créé
+              // par une autre joueuse. Voir src/admin/Fields.jsx#RefsInput
+              // (field.dataKey) : seuls les champs "Lieux associés"/"Lieux"/
+              // "Lieux liés" lisent cette clé plutôt que `data.locations`
+              // ci-dessus, qui lui reste scopé à la liste "Mes lieux".
+              locationsCatalog: locations,
             }
             for (const name of REFERENCE_COLLECTIONS) data[name] = await readCollection(dataDir, name)
             return send(200, { user, data })

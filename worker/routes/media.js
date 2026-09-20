@@ -22,6 +22,8 @@ export async function handleMediaGet(request, env, key) {
   object.writeHttpMetadata(headers)
   headers.set('etag', object.httpEtag)
   headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+  headers.set('X-Content-Type-Options', 'nosniff')
+  headers.set('Content-Security-Policy', "sandbox; default-src 'none'")
 
   if (request.method === 'HEAD') return new Response(null, { headers })
   return new Response(object.body, { headers })

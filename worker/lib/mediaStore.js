@@ -24,6 +24,21 @@ function base64ToBytes(base64) {
   return bytes
 }
 
+function startsWith(bytes, signature, offset = 0) {
+  return signature.every((value, index) => bytes[offset + index] === value)
+}
+
+function hasValidMagic(mime, bytes) {
+  if (mime === 'image/png') return startsWith(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+  if (mime === 'image/jpeg') return startsWith(bytes, [0xff, 0xd8, 0xff])
+  if (mime === 'image/webp') return startsWith(bytes, [0x52, 0x49, 0x46, 0x46]) && startsWith(bytes, [0x57, 0x45, 0x42, 0x50], 8)
+  if (mime === 'image/gif') return startsWith(bytes, [0x47, 0x49, 0x46, 0x38]) && (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61
+  if (mime === 'audio/mpeg' || mime === 'audio/mp3') return startsWith(bytes, [0x49, 0x44, 0x33]) || (bytes[0] === 0xff && [0xf2, 0xf3, 0xfb].includes(bytes[1]))
+  if (mime === 'audio/ogg') return startsWith(bytes, [0x4f, 0x67, 0x67, 0x53])
+  if (['audio/wav', 'audio/x-wav', 'audio/wave', 'audio/vnd.wave'].includes(mime)) return startsWith(bytes, [0x52, 0x49, 0x46, 0x46]) && startsWith(bytes, [0x57, 0x41, 0x56, 0x45], 8)
+  return false
+}
+
 // { filename, dataUrl, kind } -> { path }. kind vaut 'image' ou 'audio' ;
 // toute autre valeur retombe sur 'image' (voir validateMedia).
 export async function saveMedia(env, { filename, dataUrl, kind }) {
@@ -52,6 +67,7 @@ export async function saveMedia(env, { filename, dataUrl, kind }) {
   // qu'une estimation rapide côté client/pré-check).
   const finalCheck = validateMedia({ kind: check.kind, mime: parsed.mime, byteLength: bytes.byteLength })
   if (!finalCheck.ok) throw httpError(finalCheck.status, finalCheck.message)
+  if (!hasValidMagic(parsed.mime, bytes)) throw httpError(415, 'Le contenu du fichier ne correspond pas à son type annoncé.')
 
   const base = slugifyMediaName(String(filename || check.kind).replace(/\.[^.]+$/, ''))
   const key = `${MEDIA_KIND_FOLDER[check.kind]}/${base}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}${finalCheck.ext}`

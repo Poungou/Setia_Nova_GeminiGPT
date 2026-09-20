@@ -16,7 +16,6 @@ export const IMAGE_MIME_EXT = {
   'image/jpeg': '.jpg',
   'image/webp': '.webp',
   'image/gif': '.gif',
-  'image/svg+xml': '.svg',
 }
 
 export const AUDIO_MIME_EXT = {

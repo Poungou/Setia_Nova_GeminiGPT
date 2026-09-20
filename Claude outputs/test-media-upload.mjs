@@ -137,6 +137,7 @@ async function register(email, name) {
 const PNG_1PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
 function fakeAudioDataUrl(sizeBytes) {
   const bytes = Buffer.alloc(sizeBytes, 65) // rempli de 'A'
+  bytes.write('ID3', 0, 'ascii')
   return `data:audio/mpeg;base64,${bytes.toString('base64')}`
 }
 
@@ -175,6 +176,11 @@ const membreSession = createSessionToken(env, await loginUser(env, { identifier:
   assert(badType.status === 415, 'fichier invalide (type non supporté) rejeté avec un message clair')
   assert((await badType.json()).error?.includes('non supporté'), 'message d\'erreur explicite pour un type refusé')
 
+  const svg = await handleAdmin(request('/__admin/api/upload', 'POST', { filename: 'x.svg', dataUrl: 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=', kind: 'image' }, adminSession), env, ['upload'])
+  assert(svg.status === 415, 'SVG refusé')
+  const fakePng = await handleAdmin(request('/__admin/api/upload', 'POST', { filename: 'x.jpg', dataUrl: `data:image/jpeg;base64,${Buffer.from('PNG').toString('base64')}`, kind: 'image' }, adminSession), env, ['upload'])
+  assert(fakePng.status === 415, 'PNG avec faux type MIME refusé')
+
   // dataUrl mal formée
   const malformed = await handleAdmin(request('/__admin/api/upload', 'POST', { filename: 'x.png', dataUrl: 'ceci-nest-pas-une-dataurl' }, adminSession), env, ['upload'])
   assert(malformed.status === 400, 'dataUrl invalide rejetée (400)')
@@ -189,6 +195,8 @@ const membreSession = createSessionToken(env, await loginUser(env, { identifier:
   const served = await handleMediaGet(request(`/uploads/${key}`), env, key)
   assert(served.status === 200, 'GET /uploads/<clé> sert le fichier audio uploadé (reload)')
   assert(served.headers.get('content-type') === 'audio/mpeg', 'le fichier servi garde son content-type')
+  assert(served.headers.get('X-Content-Type-Options') === 'nosniff', 'GET /uploads pose nosniff')
+  assert(served.headers.get('Content-Security-Policy') === "sandbox; default-src 'none'", 'GET /uploads isole le contenu par CSP')
   const servedBytes = await served.arrayBuffer()
   assert(servedBytes.byteLength === 2048, 'le contenu servi correspond exactement à ce qui a été uploadé (2048 octets)')
 
@@ -218,6 +226,13 @@ const membreSession = createSessionToken(env, await loginUser(env, { identifier:
   const membreUploadRes = await handleAccount(request('/__account/api/upload', 'POST', { filename: 'portrait-perso.png', dataUrl: PNG_1PX }, membreSession), env, ['upload'])
   const membreUploadBody = await membreUploadRes.json()
   assert(membreUploadRes.status === 200 && /^\/uploads\/images\/portrait-perso-.*\.png$/.test(membreUploadBody.path), `upload compte (ni admin ni RPiste) -> chemin propre (${membreUploadBody.path})`)
+
+  for (let index = 0; index < 19; index++) {
+    const quotaCandidate = await handleAccount(request('/__account/api/upload', 'POST', { filename: `quota-${index}.png`, dataUrl: PNG_1PX }, membreSession), env, ['upload'])
+    assert(quotaCandidate.status === 200, `upload compte ${index + 2}/20 accepté`)
+  }
+  const quotaExceeded = await handleAccount(request('/__account/api/upload', 'POST', { filename: 'quota-21.png', dataUrl: PNG_1PX }, membreSession), env, ['upload'])
+  assert(quotaExceeded.status === 429, '21e upload compte dans l’heure refusé')
 
   // ... mais le vrai garde-fou reste ailleurs : un compte ni admin ni
   // RPiste ne peut toujours pas enregistrer de profil joueur (avatar y
