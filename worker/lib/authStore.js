@@ -237,7 +237,7 @@ export async function registerUser(env, payload) {
     email,
     name,
     role: 'user',
-    status: 'Membre',
+    status: 'Invité',
     permissions: {},
     disabled: false,
     passwordHash: await hashPassword(password),

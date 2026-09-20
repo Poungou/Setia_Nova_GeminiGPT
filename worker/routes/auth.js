@@ -47,6 +47,22 @@ function json(body, init = {}) {
   })
 }
 
+async function verifyTurnstile(env, request, token) {
+  if (!env.TURNSTILE_SECRET) return
+  if (!token) throw httpError(400, 'Vérification anti-robot requise.')
+  const body = new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: token })
+  const ip = clientIp(request)
+  if (ip !== 'unknown') body.set('remoteip', ip)
+  let result
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body })
+    result = await response.json()
+  } catch {
+    throw httpError(403, 'Vérification anti-robot indisponible.')
+  }
+  if (!result?.success) throw httpError(403, 'Vérification anti-robot invalide.')
+}
+
 async function readJson(request) {
   const raw = await request.text()
   return raw ? JSON.parse(raw) : {}
@@ -63,7 +79,11 @@ export async function handleAuth(request, env, parts) {
     }
 
     if (parts[0] === 'register' && method === 'POST') {
-      const user = await registerUser(env, await readJson(request))
+      const body = await readJson(request)
+      await checkRateLimit(env, `register:ip:${clientIp(request)}`, { max: 5, windowMs: 60 * 60 * 1000 })
+      await checkRateLimit(env, 'register:global:day', { max: 100, windowMs: 24 * 60 * 60 * 1000 })
+      await verifyTurnstile(env, request, body?.turnstileToken || body?.['cf-turnstile-response'])
+      const user = await registerUser(env, body)
       const token = createSessionToken(env, user)
       return json({ user }, { headers: { 'Set-Cookie': sessionCookieHeader(token) } })
     }

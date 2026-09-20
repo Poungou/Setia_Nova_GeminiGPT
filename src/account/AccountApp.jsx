@@ -82,6 +82,17 @@ function AuthGate({ onSession }) {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  useEffect(() => {
+    if (mode !== 'register' || document.querySelector('script[data-turnstile]')) return undefined
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    script.async = true
+    script.defer = true
+    script.dataset.turnstile = 'true'
+    document.head.appendChild(script)
+    return () => {}
+  }, [mode])
+
   // Format volontairement permissif — même règle que côté serveur (voir
   // worker/lib/authStore.js#assertRequiredEmail) : on écarte les fautes de
   // frappe évidentes sans être trop strict. La vérification serveur reste la
@@ -106,7 +117,7 @@ function AuthGate({ onSession }) {
     try {
       const body =
         mode === 'register'
-          ? await registerAccount({ name, email, password })
+          ? await registerAccount({ name, email, password, turnstileToken: document.querySelector('[name="cf-turnstile-response"]')?.value || '' })
           : await loginAccount({ identifier, password })
       onSession(body.user)
     } catch (e) {
@@ -186,6 +197,9 @@ function AuthGate({ onSession }) {
         />
         {mode === 'register' && (
           <p className="adm-hint">Les nouveaux comptes sont créés avec le rôle user. Une adresse email valide est obligatoire.</p>
+        )}
+        {mode === 'register' && (
+          <div className="cf-turnstile" data-sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''} />
         )}
         {mode === 'login' && (
           <>

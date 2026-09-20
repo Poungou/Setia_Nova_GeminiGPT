@@ -191,7 +191,7 @@ export async function registerUser(root, payload) {
     email,
     name,
     role: users.length === 0 ? 'admin' : 'user',
-    status: 'Membre',
+    status: 'Invité',
     permissions: {},
     disabled: false,
     passwordHash: await hashPassword(password),
