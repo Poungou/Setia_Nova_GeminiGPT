@@ -10,6 +10,7 @@ import AdminCommunityPage from './AdminCommunityPage.jsx'
 import AdminMusicPage from './AdminMusicPage.jsx'
 import AdminCulturePage from './AdminCulturePage.jsx'
 import AdminOverviewPage from './AdminOverviewPage.jsx'
+import AdminModerationPage from './AdminModerationPage.jsx'
 import { getSession, loginAccount, loginLocalAdmin, logoutAccount } from '../lib/authApi.js'
 import './admin.css'
 
@@ -149,6 +150,7 @@ export default function AdminApp() {
         >
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<AdminOverviewPage />} />
+          <Route path="moderation" element={<AdminModerationPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="players" element={<AdminCommunityPage />} />
           <Route path="music" element={<AdminMusicPage />} />

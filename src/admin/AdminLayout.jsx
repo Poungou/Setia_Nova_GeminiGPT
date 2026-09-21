@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import { SCHEMA, COLLECTION_NAMES } from './schema.js'
 import { useAdmin } from './useAdmin.js'
+import { useModerationCounts } from './useModerationCounts.js'
 
 // Tracés SVG repris tels quels de design-ref/3-dashboard-admin-bureau.html.
 const PATHS = {
@@ -35,20 +36,12 @@ function Icon({ name, size = 18, className }) {
 // CollectionEditPage.jsx).
 const GALLERY_HASH = '#home-group-accueil-de-la-galerie'
 
-const PAGE_LABELS = { overview: 'Vue d’ensemble', users: 'Utilisateurs', players: 'Joueurs', music: 'Musique du site', culture: 'Culture & hashtags', home: 'Accueil du site' }
-
-// Entrées de la maquette sans route existante : affichées désactivées.
-function SoonItem({ icon, label }) {
-  return (
-    <span className="adm-nav__link is-disabled" aria-disabled="true">
-      <Icon name={icon} />{label}<span className="adm-nav__soon adm-mono">Bientôt</span>
-    </span>
-  )
-}
+const PAGE_LABELS = { overview: 'Vue d’ensemble', moderation: 'Modération', users: 'Utilisateurs', players: 'Joueurs', music: 'Musique du site', culture: 'Culture & hashtags', home: 'Accueil du site' }
 
 export default function AdminLayout({ onLock, currentUser }) {
   const { readOnly, error, reload } = useAdmin()
   const { pathname, hash } = useLocation()
+  const moderation = useModerationCounts(pathname)
   const [menuOpen, setMenuOpen] = useState(false)
   const [universOpen, setUniversOpen] = useState(true)
   const menuButton = useRef(null)
@@ -105,7 +98,10 @@ export default function AdminLayout({ onLock, currentUser }) {
         <nav className="adm-nav" aria-label="Navigation administration">
           <span className="adm-nav__label adm-mono">Pilotage</span>
           <NavLink to="/admin/overview" className="adm-nav__link"><Icon name="grid" />Vue d’ensemble</NavLink>
-          <SoonItem icon="inbox" label="Modération" />
+          <NavLink to="/admin/moderation" className="adm-nav__link">
+            <Icon name="inbox" />Modération
+            {moderation && moderation.pending > 0 && <span className="adm-nav__badge">{moderation.pending}<span className="visually-hidden"> à valider</span></span>}
+          </NavLink>
           <NavLink to="/admin/users" className="adm-nav__link"><Icon name="users" />Utilisateurs</NavLink>
           <NavLink to="/admin/players" className="adm-nav__link"><Icon name="sparkle" />Joueurs</NavLink>
 

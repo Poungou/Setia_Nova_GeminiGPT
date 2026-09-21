@@ -1,12 +1,16 @@
 // src/admin/AdminOverviewPage.jsx — « Vue d'ensemble » (design-ref/3).
-// Uniquement des compteurs réels. Tout ce qui n'existe pas encore (validation,
-// signalements, stockage, activité, fiches les plus vues) reste « Bientôt ».
+// Uniquement des compteurs réels (dont la file de modération : à valider et
+// signalements). Ce qui n'existe pas encore (stockage, activité, fiches les plus
+// vues) reste « Bientôt ».
 // Le rôle admin est contrôlé côté serveur (session + routes /__admin/api) ;
 // cette page ne fait aucun contrôle de rôle de son côté.
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { listUsers } from '../lib/authApi.js'
 import { useAdmin } from './useAdmin.js'
+import { useModerationCounts } from './useModerationCounts.js'
+import { moderationApi } from '../lib/moderationApi.js'
+import { SCHEMA } from './schema.js'
 
 const PATHS = {
   users: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1M17 4a3.5 3.5 0 0 1 0 7M22 20v-1a5 5 0 0 0-3-4.5',
@@ -65,6 +69,8 @@ function SoonPanel({ label, text, ariaLabel }) {
 export default function AdminOverviewPage() {
   const { data, readOnly } = useAdmin()
   const [users, setUsers] = useState(null)
+  const moderation = useModerationCounts()
+  const [queue, setQueue] = useState(null)
 
   useEffect(() => {
     if (readOnly) return undefined
@@ -74,6 +80,13 @@ export default function AdminOverviewPage() {
       .catch(() => {})
     return () => { alive = false }
   }, [readOnly])
+
+  useEffect(() => {
+    if (readOnly || !moderation) return undefined
+    let alive = true
+    moderationApi.pending().then((list) => { if (alive) setQueue(list) }).catch(() => {})
+    return () => { alive = false }
+  }, [readOnly, moderation])
 
   const count = (key) => (data ? (data[key]?.length ?? 0) : null)
   const rows = data ? DRAFT_COLLECTIONS.flatMap((key) => data[key] || []) : null
@@ -92,7 +105,10 @@ export default function AdminOverviewPage() {
         </div>
         <div className="ov-hero__actions">
           <Link to="/" className="ov-btn ov-btn--ghost">Voir la vitrine<Icon name="arrow" stroke={1.8} /></Link>
-          <span className="ov-btn ov-btn--primary is-disabled" aria-disabled="true">Ouvrir la modération<SoonPill /></span>
+          <Link to="/admin/moderation" className="ov-btn ov-btn--primary">
+            Ouvrir la modération
+            {moderation && moderation.pending > 0 && <span className="ov-bubble adm-mono">{moderation.pending}<span className="visually-hidden"> à valider</span></span>}
+          </Link>
         </div>
       </section>
 
@@ -128,10 +144,26 @@ export default function AdminOverviewPage() {
         <div className="ov-left">
           <section aria-label="File de modération">
             <div className="ov-section-head"><div className="adm-mono ov-eyebrow">File de modération</div></div>
-            <div className="ov-panel ov-panel--soon ov-queue">
-              <SoonPill />
-              <p>La file de modération apparaîtra ici, quand elle existera.</p>
-            </div>
+            {moderation === null ? (
+              <div className="ov-panel ov-panel--soon ov-queue">
+                <p>La file de modération n’est pas disponible sur ce build (mode local, sans base de données).</p>
+              </div>
+            ) : (
+              <div className="ov-panel ov-modq">
+                <div className="ov-modq__counts">
+                  <Link to="/admin/moderation" className="ov-modq__count"><span className="ov-num">{moderation.pending}</span><span className="adm-mono">À valider</span></Link>
+                  <Link to="/admin/moderation?tab=reports" className="ov-modq__count"><span className="ov-num">{moderation.reports}</span><span className="adm-mono">Signalements</span></Link>
+                </div>
+                {moderation.pending === 0 && moderation.reports === 0 && <p>Rien à traiter.</p>}
+                {(queue || []).slice(0, 3).map((item) => (
+                  <Link key={`${item.collection}:${item.id}`} to="/admin/moderation" className="ov-modq__row">
+                    <span className="adm-mono mo-tag">{{ characters: 'Personnage', clans: 'Clan', locations: 'Lieu', posts: 'Article', timelines: 'Chronologie' }[item.collection]}</span>
+                    <span className="ov-modq__title">{SCHEMA[item.collection]?.title(item.record) || item.id}</span>
+                    <span className="ov-modq__by">Proposé par {item.ownerName || 'un compte'}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
 
           <section aria-label="Contenus">
