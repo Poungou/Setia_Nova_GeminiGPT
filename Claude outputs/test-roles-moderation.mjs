@@ -264,6 +264,8 @@ const canonCharacter = canonCharacters[0]?.id
 assert((await decide(canonLocation, 'approve', undefined, poungou, 'locations')).status === 404, 'un lieu canon ne passe pas par le circuit')
 assert((await decide(canonCharacter, 'reject', 'Non', poungou, 'characters')).status === 404, 'un personnage canon ne passe pas par le circuit')
 assert((await pub('locations/' + canonLocation)).status === 200, 'le canon reste public')
+const canonClan = JSON.parse(readFileSync('src/data/clans.json', 'utf8')).find((clan) => clan.id === 'nakamura')
+assert((await (await pub('clans/nakamura')).json()).data.members.length === canonClan.members.length && canonClan.members.length > 0, 'le clan canon garde ses membres embarqués, même avec un ownerUserId dans le JSON')
 assert((await (await pub('locations/' + canonLocation)).json()).data.reportable !== true, 'le canon n’est jamais marqué signalable')
 assert((await account('collections/locations', 'POST', body(canonLocation), at(creator))).status === 409, 'un id canon reste réservé')
 

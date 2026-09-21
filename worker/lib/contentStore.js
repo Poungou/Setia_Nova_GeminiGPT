@@ -351,7 +351,10 @@ async function safeListClanMembers(env, clanId) {
 // de la table clan_members.
 async function resolveClanMembers(env, clan) {
   if (!clan) return []
-  if (!clan.ownerUserId || clan.ownerUserId === 'system') return clan.members || []
+  // Un clan canon (present dans clans.json) garde ses membres embarques quel que
+  // soit son ownerUserId : un pseudo y a deja ete ecrit par l'admin de dev local.
+  const isCanon = clansJson.some((canon) => canon.id === clan.id)
+  if (isCanon || !clan.ownerUserId || clan.ownerUserId === 'system') return clan.members || []
   const rows = await safeListClanMembers(env, clan.id)
   return rows.map((r) => r.characterId)
 }
