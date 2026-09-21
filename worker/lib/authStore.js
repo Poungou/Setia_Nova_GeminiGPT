@@ -43,7 +43,15 @@
 import { createHash, createHmac, randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto'
 import { promisify } from 'node:util'
 import { emailChangeEmail, passwordResetEmail, sendMail } from './mailer.js'
-import { normalizePermissions } from './permissions.js'
+import {
+  ASSIGNABLE_ROLES,
+  RIGHTS,
+  baseRightsOf,
+  getEffectiveRights,
+  normalizePermissions,
+  normalizeRole,
+  rightState,
+} from './permissions.js'
 
 const scrypt = promisify(scryptCallback)
 
@@ -125,15 +133,16 @@ function generateRawToken() {
   return randomBytes(32).toString('base64url')
 }
 
-function normalizeAdminStatus(status) {
-  const value = String(status || 'Membre').trim()
-  if (!['Membre', 'RPiste', 'Invité'].includes(value)) throw httpError(400, 'Statut utilisateur invalide.')
-  return value
-}
+// L'ancien `status` (Membre / RPiste / Invité) n'est plus lu : la colonne
+// reste en base pour un retour arrière, on y écrit une valeur fixe.
+const LEGACY_STATUS = 'Membre'
 
-function normalizeAdminRole(role) {
-  if (role !== 'admin' && role !== 'user') throw httpError(400, 'Rôle utilisateur invalide.')
-  return role
+// Rôle attribuable via l'API : jamais `admin`. L'ancien rôle `user` (clients
+// pas encore à jour) vaut `guest`.
+function normalizeAssignableRole(role) {
+  const value = role === 'user' ? 'guest' : role
+  if (!ASSIGNABLE_ROLES.includes(value)) throw httpError(400, 'Rôle utilisateur invalide.')
+  return value
 }
 
 function rowToUser(row) {
@@ -142,9 +151,9 @@ function rowToUser(row) {
     id: row.id,
     email: row.email,
     name: row.name,
-    role: row.role,
-    status: row.status || 'Membre',
+    role: normalizeRole(row.role),
     permissions: normalizePermissions(row.permissions),
+    revokedRights: [],
     disabled: Boolean(row.disabled),
     passwordHash: row.password_hash,
     sessionVersion: row.session_version || 0,
@@ -162,7 +171,24 @@ async function hydrateUser(db, row) {
     .bind(user.id)
     .all()
   user.permissions = Object.fromEntries((results || []).map((item) => [item.permission, Boolean(item.granted)]))
+  // Migration 0014 pas encore appliquée : on ne bloque JAMAIS une connexion (en
+  // particulier celle de l'admin) pour un droit retiré qu'on ne peut pas lire.
+  try {
+    const revoked = await db
+      .prepare('SELECT right_key FROM user_revoked_rights WHERE user_id = ?')
+      .bind(user.id)
+      .all()
+    user.revokedRights = (revoked.results || []).map((item) => item.right_key)
+  } catch (err) {
+    console.error('[authStore] droits retirés illisibles (migration 0014 appliquée ?)', err)
+    user.revokedRights = []
+  }
   return user
+}
+
+// État de chaque droit pour l'écran admin « Droits précis ».
+function rightStates(user) {
+  return Object.fromEntries(RIGHTS.map((right) => [right, rightState(user, right)]))
 }
 
 // Ne renvoie jamais passwordHash au front — même à une administratrice (voir
@@ -171,6 +197,12 @@ export function publicUser(user) {
   if (!user) return null
   const safe = { ...user }
   delete safe.passwordHash
+  // Informations calculées côté serveur (jamais recalculées « pour de vrai »
+  // côté navigateur : le Worker revérifie chaque action avec can()).
+  safe.role = normalizeRole(safe.role)
+  safe.rights = getEffectiveRights(safe)
+  safe.rightStates = rightStates(safe)
+  delete safe.status
   return safe
 }
 
@@ -236,8 +268,8 @@ export async function registerUser(env, payload) {
     id: `user_${randomUUID()}`,
     email,
     name,
-    role: 'user',
-    status: 'Invité',
+    role: 'guest',
+    status: LEGACY_STATUS,
     permissions: {},
     disabled: false,
     passwordHash: await hashPassword(password),
@@ -309,8 +341,8 @@ export async function createUser(env, payload, actor) {
     id: `user_${randomUUID()}`,
     email,
     name,
-    role: normalizeAdminRole(payload?.role || 'user'),
-    status: normalizeAdminStatus(payload?.status),
+    role: normalizeAssignableRole(payload?.role || 'guest'),
+    status: LEGACY_STATUS,
     permissions,
     disabled: payload?.active === false,
     passwordHash: await hashPassword(password),
@@ -329,6 +361,74 @@ export async function createUser(env, payload, actor) {
   if (typeof db.batch !== 'function') throw httpError(500, 'Le stockage transactionnel n’est pas disponible.')
   await db.batch(statements)
   return publicUser(user)
+}
+
+// Règles de hiérarchie (côté serveur uniquement) :
+//   - seul un admin change un rôle (les routes appelantes l'exigent déjà) ;
+//   - on ne peut JAMAIS attribuer `admin` via l'API ;
+//   - le rôle d'un compte admin ne se modifie pas via l'API (un admin ne peut
+//     donc ni se retirer lui-même son rôle, ni en retirer un autre) ;
+//   - un rôle inchangé est toujours accepté (ex. un formulaire complet).
+function resolveRoleChange(actor, existing, requestedRole) {
+  if (!isAdmin(actor)) throw httpError(403, 'Réservé admin.')
+  if (requestedRole === 'admin') {
+    if (existing.role === 'admin') return 'admin'
+    throw httpError(403, 'Le rôle Admin ne peut pas être attribué.')
+  }
+  if (existing.role === 'admin') {
+    if (actor.id === existing.id) throw httpError(400, 'Tu ne peux pas retirer ton propre rôle admin.')
+    throw httpError(403, 'Le rôle d’un compte admin ne se modifie pas ici.')
+  }
+  return normalizeAssignableRole(requestedRole)
+}
+
+export async function setUserRole(env, actor, id, requestedRole) {
+  if (!isAdmin(actor)) throw httpError(403, 'Réservé admin.')
+  const db = env.WOLTAR_DB
+  const existing = await findUserById(db, id)
+  if (!existing) throw httpError(404, 'Utilisateur introuvable.')
+  const role = resolveRoleChange(actor, existing, requestedRole)
+  const now = new Date().toISOString()
+  await db.prepare('UPDATE users SET role = ?, updated_at = ? WHERE id = ?').bind(role, now, id).run()
+  return publicUser(await findUserById(db, id))
+}
+
+// Retire (enabled = false) ou rétablit / ajoute (enabled = true) UN droit
+// précis pour un compte.
+//   - désactiver un droit du rôle          -> ligne dans user_revoked_rights
+//   - désactiver un droit ajouté hors rôle -> l'ajout est supprimé
+//   - activer un droit                     -> lève le retrait ; s'il n'est pas
+//     dans le rôle, il est ajouté (user_permissions, granted = 1)
+// Un admin garde tous ses droits : rien ne lui est retirable.
+export async function setUserRight(env, actor, id, right, enabled) {
+  if (!isAdmin(actor)) throw httpError(403, 'Réservé admin.')
+  if (!RIGHTS.includes(right)) throw httpError(400, 'Droit inconnu.')
+  if (typeof enabled !== 'boolean') throw httpError(400, 'Valeur invalide.')
+  const db = env.WOLTAR_DB
+  const existing = await findUserById(db, id)
+  if (!existing) throw httpError(404, 'Utilisateur introuvable.')
+  if (existing.role === 'admin') throw httpError(400, 'Les droits d’un compte admin ne se modifient pas.')
+  const now = new Date().toISOString()
+  const inRole = baseRightsOf(existing.role).includes(right)
+
+  const grant = (granted) => db.prepare(
+    'INSERT INTO user_permissions (user_id, permission, granted, updated_by, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id, permission) DO UPDATE SET granted = excluded.granted, updated_by = excluded.updated_by, updated_at = excluded.updated_at',
+  ).bind(id, right, granted ? 1 : 0, actor.id, now)
+
+  const statements = []
+  if (enabled) {
+    statements.push(db.prepare('DELETE FROM user_revoked_rights WHERE user_id = ? AND right_key = ?').bind(id, right))
+    if (!inRole) statements.push(grant(true))
+  } else if (inRole) {
+    statements.push(db.prepare(
+      'INSERT INTO user_revoked_rights (user_id, right_key, revoked_by, revoked_at) VALUES (?, ?, ?, ?) ON CONFLICT(user_id, right_key) DO UPDATE SET revoked_by = excluded.revoked_by, revoked_at = excluded.revoked_at',
+    ).bind(id, right, actor.id, now))
+    if (existing.permissions?.[right] === true) statements.push(grant(false))
+  } else {
+    statements.push(grant(false))
+  }
+  await db.batch(statements)
+  return publicUser(await findUserById(db, id))
 }
 
 export async function updateUser(env, id, patch, actor) {
@@ -351,8 +451,9 @@ export async function updateUser(env, id, patch, actor) {
     next.email = email
     if (email !== existing.email) next.sessionVersion = (existing.sessionVersion || 0) + 1
   }
-  if (typeof patch?.status === 'string' && patch.status.trim()) next.status = patch.status.trim().slice(0, 80)
-  if (patch?.role === 'admin' || patch?.role === 'user') next.role = patch.role
+  if (Object.prototype.hasOwnProperty.call(patch || {}, 'role')) {
+    next.role = resolveRoleChange(actor, existing, patch.role)
+  }
   if (typeof patch?.disabled === 'boolean') {
     if (actor.id === id && patch.disabled) {
       throw httpError(400, 'Impossible de désactiver le compte admin connecté.')
@@ -372,9 +473,9 @@ export async function updateUser(env, id, patch, actor) {
 
   await db
     .prepare(
-      'UPDATE users SET email = ?, name = ?, role = ?, status = ?, disabled = ?, password_hash = ?, session_version = ?, updated_at = ? WHERE id = ?',
+      'UPDATE users SET email = ?, name = ?, role = ?, disabled = ?, password_hash = ?, session_version = ?, updated_at = ? WHERE id = ?',
     )
-    .bind(next.email, next.name, next.role, next.status, next.disabled ? 1 : 0, next.passwordHash, next.sessionVersion, next.updatedAt, id)
+    .bind(next.email, next.name, next.role, next.disabled ? 1 : 0, next.passwordHash, next.sessionVersion, next.updatedAt, id)
     .run()
 
   if (patch?.permissions && typeof patch.permissions === 'object' && !Array.isArray(patch.permissions)) {
@@ -410,6 +511,7 @@ export async function deleteUser(env, id, actor) {
   await db.batch([
     db.prepare('DELETE FROM user_profiles WHERE user_id = ?').bind(id),
     db.prepare('DELETE FROM user_permissions WHERE user_id = ?').bind(id),
+    db.prepare('DELETE FROM user_revoked_rights WHERE user_id = ?').bind(id),
     db.prepare('DELETE FROM account_tokens WHERE user_id = ?').bind(id),
     db.prepare('DELETE FROM users WHERE id = ?').bind(id),
   ])
