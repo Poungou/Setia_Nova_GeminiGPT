@@ -14,7 +14,6 @@ const PATHS = {
   shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',
   pin: 'M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12zM12 7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
   pen: 'M4 20l4-1L19 8a2.1 2.1 0 0 0-3-3L5 16zM14 7l3 3',
-  draft: 'M4 4h12l4 4v12H4zM8 12h8M8 16h5',
   home: 'M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
   image: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9.5h.01',
   music: 'M9 18V6l10-2v12M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z',
@@ -77,7 +76,9 @@ export default function AdminOverviewPage() {
   }, [readOnly])
 
   const count = (key) => (data ? (data[key]?.length ?? 0) : null)
-  const drafts = data ? DRAFT_COLLECTIONS.reduce((sum, key) => sum + (data[key] || []).filter((row) => row.visibility === 'draft').length, 0) : null
+  const rows = data ? DRAFT_COLLECTIONS.flatMap((key) => data[key] || []) : null
+  const drafts = rows ? rows.filter((row) => row.visibility === 'draft').length : null
+  const published = rows ? rows.length - drafts : null
   const recent = users ? users.filter((u) => Date.now() - Date.parse(u.createdAt || '') < 7 * DAY).length : null
   const show = (n) => (n === null ? '—' : n)
 
@@ -87,7 +88,7 @@ export default function AdminOverviewPage() {
         <div>
           <div className="adm-mono ov-hero__eyebrow">Pilotage · Woltar Nova</div>
           <h1>Le pouls de <em>Woltar Nova.</em></h1>
-          <p>Ce qui attend ta validation, ce qui bouge, ce qui manque.</p>
+          <p>Ce qui bouge, ce qui manque, ce qui se prépare.</p>
         </div>
         <div className="ov-hero__actions">
           <Link to="/" className="ov-btn ov-btn--ghost">Voir la vitrine<Icon name="arrow" stroke={1.8} /></Link>
@@ -96,14 +97,6 @@ export default function AdminOverviewPage() {
       </section>
 
       <section className="ov-kpis" aria-label="Indicateurs">
-        <div className="ov-kpi">
-          <div className="adm-mono ov-kpi__label">À valider</div>
-          <div className="ov-kpi__value"><SoonPill /></div>
-        </div>
-        <div className="ov-kpi">
-          <div className="adm-mono ov-kpi__label">Signalements</div>
-          <div className="ov-kpi__value"><SoonPill /></div>
-        </div>
         <Link to="/admin/users" className="ov-kpi">
           <div className="adm-mono ov-kpi__label">Utilisateurs</div>
           <div className="ov-kpi__value">
@@ -111,6 +104,20 @@ export default function AdminOverviewPage() {
             <span className="ov-kpi__cap">{recent ? `dont ${recent} sur 7 jours` : 'comptes'}</span>
           </div>
         </Link>
+        <div className="ov-kpi">
+          <div className="adm-mono ov-kpi__label">Brouillons</div>
+          <div className="ov-kpi__value">
+            <span className="ov-num">{show(drafts)}</span>
+            <span className="ov-kpi__cap">{drafts ? 'à terminer' : 'rien en attente'}</span>
+          </div>
+        </div>
+        <div className="ov-kpi">
+          <div className="adm-mono ov-kpi__label">Contenus publiés</div>
+          <div className="ov-kpi__value">
+            <span className="ov-num">{show(published)}</span>
+            <span className="ov-kpi__cap">{rows ? `sur ${rows.length} fiches` : ''}</span>
+          </div>
+        </div>
         <div className="ov-kpi">
           <div className="adm-mono ov-kpi__label">Stockage images</div>
           <div className="ov-kpi__value"><SoonPill /></div>
@@ -137,11 +144,6 @@ export default function AdminOverviewPage() {
                   <span className="ov-tile__count">{show(count(key))}</span>
                 </Link>
               ))}
-              <div className="ov-tile ov-tile--static">
-                <span className="ov-tile__ic"><Icon name="draft" /></span>
-                <span className="ov-tile__text"><span className="ov-tile__title">Brouillons</span><span className="ov-tile__sub">Toutes collections confondues</span></span>
-                <span className="ov-tile__count">{show(drafts)}</span>
-              </div>
             </div>
           </section>
 
