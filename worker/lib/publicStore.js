@@ -26,13 +26,34 @@ import {
   listTimelinesWithFallback,
 } from './contentStore.js'
 
+// Un contenu est public s'il n'est pas en brouillon (règle historique
+// `visibility`) ET si sa relecture est terminée : seul `published` est
+// exposé (draft, pending, needs_changes et hidden ne le sont jamais). Un
+// contenu canon n'a pas de `reviewStatus` : il reste public.
+export function isLive(record) {
+  if (!record || record.visibility === 'draft') return false
+  return record.reviewStatus === undefined || record.reviewStatus === 'published'
+}
+
+// Le message de l'équipe et l'identité du relecteur ne sortent jamais côté public.
+function withoutReview(record) {
+  if (!record) return null
+  const clean = { ...record }
+  delete clean.reviewNote
+  delete clean.reviewedBy
+  delete clean.submittedAt
+  delete clean.reviewedAt
+  delete clean.reviewStatus
+  return clean
+}
+
 function isPublished(character) {
-  return Boolean(character) && character.visibility !== 'draft'
+  return isLive(character)
 }
 
 function publicCharacter(character) {
   if (!character) return null
-  const clean = { ...character }
+  const clean = withoutReview(character)
   delete clean.__managedByAdmin
   return clean
 }
@@ -71,43 +92,43 @@ export async function listPublicCharacterOwners(env) {
 // (Nakamura) n'a pas ce champ dans clans.json : il reste donc public par
 // defaut (visibility !== 'draft' est vrai pour undefined).
 function isPublishedClan(clan) {
-  return Boolean(clan) && clan.visibility !== 'draft'
+  return isLive(clan)
 }
 
 export async function listPublicClans(env) {
   const all = await listClansWithFallback(env)
-  return all.filter(isPublishedClan)
+  return all.filter(isPublishedClan).map(withoutReview)
 }
 
 export async function getPublicClan(env, id) {
   const clan = await getClanWithFallback(env, id)
-  return isPublishedClan(clan) ? clan : null
+  return isPublishedClan(clan) ? withoutReview(clan) : null
 }
 
 function isPublishedLocation(location) {
-  return Boolean(location) && location.visibility !== 'draft'
+  return isLive(location)
 }
 
 export async function listPublicLocations(env) {
-  return (await listLocationsWithFallback(env)).filter(isPublishedLocation)
+  return (await listLocationsWithFallback(env)).filter(isPublishedLocation).map(withoutReview)
 }
 
 export async function getPublicLocation(env, id) {
   const location = await getLocationWithFallback(env, id)
-  return isPublishedLocation(location) ? location : null
+  return isPublishedLocation(location) ? withoutReview(location) : null
 }
 
 function isPublishedPost(post) {
-  return Boolean(post) && post.visibility !== 'draft'
+  return isLive(post)
 }
 
 export async function listPublicPosts(env) {
-  return (await listPostsWithFallback(env)).filter(isPublishedPost)
+  return (await listPostsWithFallback(env)).filter(isPublishedPost).map(withoutReview)
 }
 
 export async function getPublicPost(env, id) {
   const post = await getPostWithFallback(env, id)
-  return isPublishedPost(post) ? post : null
+  return isPublishedPost(post) ? withoutReview(post) : null
 }
 
 // Une chronologie de compte peut rester "draft" tant que sa proprietaire ne
@@ -115,14 +136,14 @@ export async function getPublicPost(env, id) {
 // La chronologie canon (Nakamura) n'a pas ce champ : elle reste donc
 // publique par defaut (visibility !== 'draft' est vrai pour undefined).
 function isPublishedTimeline(timeline) {
-  return Boolean(timeline) && timeline.visibility !== 'draft'
+  return isLive(timeline)
 }
 
 export async function listPublicTimelines(env) {
-  return (await listTimelinesWithFallback(env)).filter(isPublishedTimeline)
+  return (await listTimelinesWithFallback(env)).filter(isPublishedTimeline).map(withoutReview)
 }
 
 export async function getPublicTimeline(env, id) {
   const timeline = await getTimelineWithFallback(env, id)
-  return isPublishedTimeline(timeline) ? timeline : null
+  return isPublishedTimeline(timeline) ? withoutReview(timeline) : null
 }

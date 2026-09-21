@@ -1,4 +1,5 @@
 import { listCharactersWithFallback } from './contentStore.js'
+import { isLive } from './publicStore.js'
 import { isCharacterLinked, validateCharacterLinks } from '../../src/lib/characterLinks.js'
 
 const PROFILE_FIELDS = ['avatar', 'image_source', 'player_intro', 'writing_style', 'univers', 'tw', 'rhythm', 'ig_username']
@@ -95,17 +96,16 @@ export async function deletePlayerProfile(env, userId) {
 
 export async function listPublicPlayerProfiles(env) {
   const { results } = await env.WOLTAR_DB.prepare(
-    `SELECT u.id, u.name, u.status, p.* FROM users u JOIN user_profiles p ON p.user_id = u.id
+    `SELECT u.id, u.name, p.* FROM users u JOIN user_profiles p ON p.user_id = u.id
      WHERE p.profile_public = 1 AND u.disabled = 0 ORDER BY lower(u.name) ASC`,
   ).all()
   const characters = await listCharactersWithFallback(env)
   return (results || []).map((row) => {
     const linkedIds = parseIds(row.linked_character_ids)
-    const visible = characters.filter((character) => character.visibility !== 'draft' && isCharacterLinked(character, row.id, linkedIds))
+    const visible = characters.filter((character) => isLive(character) && isCharacterLinked(character, row.id, linkedIds))
     return {
       userId: row.id,
       name: row.name,
-      status: row.status,
       profile: { ...rowToProfile(row), linked_character_ids: linkedIds.filter((id) => visible.some((character) => character.id === id)) },
       characters: visible.map((character) => ({ id: character.id, name: [character.firstName, character.lastName].filter(Boolean).join(' ') || character.name || character.id })),
     }

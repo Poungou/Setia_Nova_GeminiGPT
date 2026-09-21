@@ -44,8 +44,37 @@ function parseObjectJson(value, fallback = {}) {
   }
 }
 
+// --- Modération (migration 0014) -----------------------------------------------
+// L'état de relecture vit dans des COLONNES (jamais dans le JSON `data`) : un
+// client ne peut donc pas le forger en l'envoyant dans le corps d'une requête.
+// Un contenu sans ces champs (canon) est considéré publié.
+export const REVIEW_STATUSES = ['draft', 'pending', 'published', 'needs_changes', 'hidden']
+const REVIEW_KEYS = ['reviewStatus', 'reviewNote', 'submittedAt', 'reviewedAt', 'reviewedBy']
+
+function stripReview(data) {
+  for (const key of REVIEW_KEYS) delete data[key]
+  return data
+}
+
+function reviewFromRow(row) {
+  return {
+    reviewStatus: row.review_status || 'published',
+    reviewNote: row.review_note || '',
+    submittedAt: row.submitted_at || null,
+    reviewedAt: row.reviewed_at || null,
+    reviewedBy: row.reviewed_by || null,
+  }
+}
+
+function reviewColumns(review) {
+  const r = review || {}
+  return [r.status || 'published', r.note || '', r.submittedAt || null, r.reviewedAt || null, r.reviewedBy || null]
+}
+
+const REVIEW_INSERT_COLUMNS = ', review_status, review_note, submitted_at, reviewed_at, reviewed_by'
+
 function dataForStorage(row, id) {
-  const data = { ...row, id }
+  const data = stripReview({ ...row, id })
   delete data.ownerUserId
   delete data.__managedByAdmin
   return data
@@ -57,6 +86,7 @@ function rowToRecord(row) {
   const gallerySources = parseObjectJson(row.gallery_sources, data.gallery_sources || {})
   return {
     ...data,
+    ...reviewFromRow(row),
     id: row.id,
     ownerUserId: row.owner_user_id,
     is_featured: row.is_featured === undefined ? bool(data.is_featured) : bool(row.is_featured),
@@ -100,7 +130,7 @@ export async function insertRow(env, collection, row, options = {}) {
   const columns = characterColumns(row, options)
 
   await env.WOLTAR_DB.prepare(
-    'INSERT INTO characters (id, owner_user_id, data, is_featured, image_source, gallery_sources, managed_by_admin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO characters (id, owner_user_id, data, is_featured, image_source, gallery_sources, managed_by_admin, created_at, updated_at' + REVIEW_INSERT_COLUMNS + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   )
     .bind(
       id,
@@ -112,6 +142,7 @@ export async function insertRow(env, collection, row, options = {}) {
       columns.managedByAdmin,
       now,
       now,
+      ...reviewColumns(options.review),
     )
     .run()
 }
@@ -208,7 +239,7 @@ export async function listCharactersWithFallback(env) {
 // de la logique personnages existante. Voir migrations/0004_clans_and_members.sql.
 
 function clanDataForStorage(row, id) {
-  const data = { ...row, id }
+  const data = stripReview({ ...row, id })
   delete data.ownerUserId
   return data
 }
@@ -216,7 +247,7 @@ function clanDataForStorage(row, id) {
 function clanRowToRecord(row) {
   if (!row) return null
   const data = JSON.parse(row.data)
-  return { ...data, id: row.id, ownerUserId: row.owner_user_id }
+  return { ...data, ...reviewFromRow(row), id: row.id, ownerUserId: row.owner_user_id }
 }
 
 export async function listClans(env) {
@@ -230,14 +261,14 @@ export async function getClan(env, id) {
   return clanRowToRecord(row)
 }
 
-export async function insertClan(env, row) {
+export async function insertClan(env, row, review = null) {
   const now = new Date().toISOString()
   const { id, ownerUserId } = row
   const data = JSON.stringify(clanDataForStorage(row, id))
   await env.WOLTAR_DB.prepare(
-    'INSERT INTO clans (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO clans (id, owner_user_id, data, created_at, updated_at' + REVIEW_INSERT_COLUMNS + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   )
-    .bind(id, ownerUserId || 'system', data, now, now)
+    .bind(id, ownerUserId || 'system', data, now, now, ...reviewColumns(review))
     .run()
 }
 
@@ -354,14 +385,14 @@ export async function listClansWithFallback(env) {
 // --- Lieux de comptes -----------------------------------------------------
 
 function locationDataForStorage(row, id) {
-  const data = { ...row, id }
+  const data = stripReview({ ...row, id })
   delete data.ownerUserId
   return data
 }
 
 function locationRowToRecord(row) {
   if (!row) return null
-  return { ...JSON.parse(row.data), id: row.id, ownerUserId: row.owner_user_id }
+  return { ...JSON.parse(row.data), ...reviewFromRow(row), id: row.id, ownerUserId: row.owner_user_id }
 }
 
 export async function listLocations(env) {
@@ -375,13 +406,13 @@ export async function getLocation(env, id) {
   return locationRowToRecord(row)
 }
 
-export async function insertLocation(env, row) {
+export async function insertLocation(env, row, review = null) {
   const now = new Date().toISOString()
   const data = JSON.stringify(locationDataForStorage(row, row.id))
   await env.WOLTAR_DB.prepare(
-    'INSERT INTO locations (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO locations (id, owner_user_id, data, created_at, updated_at' + REVIEW_INSERT_COLUMNS + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   )
-    .bind(row.id, row.ownerUserId || 'system', data, now, now)
+    .bind(row.id, row.ownerUserId || 'system', data, now, now, ...reviewColumns(review))
     .run()
 }
 
@@ -414,14 +445,14 @@ export async function listLocationsWithFallback(env) {
 // --- Articles de journal de comptes ---------------------------------------
 
 function postDataForStorage(row, id) {
-  const data = { ...row, id }
+  const data = stripReview({ ...row, id })
   delete data.ownerUserId
   return data
 }
 
 function postRowToRecord(row) {
   if (!row) return null
-  return { ...JSON.parse(row.data), id: row.id, ownerUserId: row.owner_user_id }
+  return { ...JSON.parse(row.data), ...reviewFromRow(row), id: row.id, ownerUserId: row.owner_user_id }
 }
 
 export async function listPosts(env) {
@@ -435,10 +466,10 @@ export async function getPost(env, id) {
   return postRowToRecord(row)
 }
 
-export async function insertPost(env, row) {
+export async function insertPost(env, row, review = null) {
   const now = new Date().toISOString()
-  await env.WOLTAR_DB.prepare('INSERT INTO posts (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
-    .bind(row.id, row.ownerUserId, JSON.stringify(postDataForStorage(row, row.id)), now, now)
+  await env.WOLTAR_DB.prepare('INSERT INTO posts (id, owner_user_id, data, created_at, updated_at' + REVIEW_INSERT_COLUMNS + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(row.id, row.ownerUserId, JSON.stringify(postDataForStorage(row, row.id)), now, now, ...reviewColumns(review))
     .run()
 }
 
@@ -472,14 +503,14 @@ export async function listPostsWithFallback(env) {
 // restent ceux de src/data/events.json, jamais dupliques ici.
 
 function timelineDataForStorage(row, id) {
-  const data = { ...row, id }
+  const data = stripReview({ ...row, id })
   delete data.ownerUserId
   return data
 }
 
 function timelineRowToRecord(row) {
   if (!row) return null
-  return { ...JSON.parse(row.data), id: row.id, ownerUserId: row.owner_user_id }
+  return { ...JSON.parse(row.data), ...reviewFromRow(row), id: row.id, ownerUserId: row.owner_user_id }
 }
 
 export async function listTimelines(env) {
@@ -493,13 +524,13 @@ export async function getTimeline(env, id) {
   return timelineRowToRecord(row)
 }
 
-export async function insertTimeline(env, row) {
+export async function insertTimeline(env, row, review = null) {
   const now = new Date().toISOString()
   const data = JSON.stringify(timelineDataForStorage(row, row.id))
   await env.WOLTAR_DB.prepare(
-    'INSERT INTO timelines (id, owner_user_id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    'INSERT INTO timelines (id, owner_user_id, data, created_at, updated_at' + REVIEW_INSERT_COLUMNS + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   )
-    .bind(row.id, row.ownerUserId || 'system', data, now, now)
+    .bind(row.id, row.ownerUserId || 'system', data, now, now, ...reviewColumns(review))
     .run()
 }
 
