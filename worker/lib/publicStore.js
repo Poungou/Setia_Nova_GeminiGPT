@@ -39,6 +39,9 @@ export function isLive(record) {
 function withoutReview(record) {
   if (!record) return null
   const clean = { ...record }
+  // Seul le contenu d'un compte (ligne D1 passée par la relecture) est signalable :
+  // le canon n'a pas de reviewStatus et n'entre jamais dans ce circuit.
+  if (record.reviewStatus !== undefined && record.ownerUserId && record.ownerUserId !== 'system') clean.reportable = true
   delete clean.reviewNote
   delete clean.reviewedBy
   delete clean.submittedAt

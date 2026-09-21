@@ -214,6 +214,7 @@ assert(approved.status === 200 && (await approved.json()).row.reviewStatus === '
 const live = await pub('characters/perso-a')
 const liveBody = (await live.json()).data
 assert(live.status === 200 && liveBody.title === 'Corrigée', 'published : visible côté public')
+assert(liveBody.reportable === true, 'une fiche de compte publiée est marquée signalable (reportable)')
 assert(!('reviewNote' in liveBody) && !('reviewedBy' in liveBody) && !('reviewStatus' in liveBody), 'le message de l’équipe et le relecteur ne fuitent pas côté public')
 assert((await account('collections/characters/perso-a', 'PUT', { ...body('perso-a'), title: 'Retouche' }, at(creator))).status === 200, 'published : l’auteur peut modifier')
 assert(sqlite.prepare("SELECT review_status s FROM characters WHERE id = 'perso-a'").get().s === 'published', 'modifier un contenu publié le laisse publié (publication directe)')
@@ -263,6 +264,7 @@ const canonCharacter = canonCharacters[0]?.id
 assert((await decide(canonLocation, 'approve', undefined, poungou, 'locations')).status === 404, 'un lieu canon ne passe pas par le circuit')
 assert((await decide(canonCharacter, 'reject', 'Non', poungou, 'characters')).status === 404, 'un personnage canon ne passe pas par le circuit')
 assert((await pub('locations/' + canonLocation)).status === 200, 'le canon reste public')
+assert((await (await pub('locations/' + canonLocation)).json()).data.reportable !== true, 'le canon n’est jamais marqué signalable')
 assert((await account('collections/locations', 'POST', body(canonLocation), at(creator))).status === 409, 'un id canon reste réservé')
 
 console.log('Droits précis')
