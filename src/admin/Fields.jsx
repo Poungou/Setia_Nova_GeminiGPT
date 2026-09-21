@@ -23,7 +23,7 @@ export function Field({
   // jamais { src, focus }) — voir ImageInput plus bas.
   allowFocus = true,
 }) {
-  const common = { id: `f-${field.key}`, disabled }
+  const common = { id: `f-${field.key}`, disabled, 'aria-describedby': field.hint ? `h-${field.key}` : undefined }
   switch (field.type) {
     case 'textarea':
       return (
@@ -334,6 +334,17 @@ function ImageInput({
   )
 }
 
+// Nom de fichier lisible d'une image (dernier segment du chemin ou de l'URL).
+function imageName(src) {
+  if (String(src || '').startsWith('data:')) return 'Image intégrée'
+  const last = String(src || '').split(/[?#]/)[0].split('/').filter(Boolean).pop() || ''
+  try {
+    return decodeURIComponent(last)
+  } catch {
+    return last
+  }
+}
+
 function GalleryInput({ value, onChange, disabled, uploadEnabled, uploadFn }) {
   const [draft, setDraft] = useState('')
   const addDraft = () => {
@@ -347,6 +358,7 @@ function GalleryInput({ value, onChange, disabled, uploadEnabled, uploadFn }) {
       {value.map((item, i) => (
         <div key={`${imgSrc(item)}-${i}`} className="adm-gallery__item">
           <img src={imgSrc(item)} alt="" />
+          <span className="adm-gallery__name">{imageName(imgSrc(item))}</span>
           <button
             type="button"
             onClick={() => onChange(value.filter((_, j) => j !== i))}

@@ -1,7 +1,7 @@
 // src/admin/CollectionEditPage.jsx
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
-import { Save, Trash2, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import { Field } from './Fields.jsx'
@@ -13,6 +13,20 @@ import { adminStorageLabel, localFileUploadsAvailable } from './adminApi.js'
 // AdminOverviewPage pointent vers la même ancre.
 const groupAnchor = (collection, group) => `${collection === 'home' ? 'home-group' : 'group'}-${group.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`
 const pad = (n) => String(n).padStart(2, '0')
+
+// Icônes reprises de design-ref/4 (viewBox 24×24).
+const IC = {
+  left: 'M15 6l-6 6 6 6',
+  right: 'M9 6l6 6-6 6',
+  out: 'M7 17L17 7M8 7h9v9',
+  save: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
+}
+function Ic({ name, size = 18 }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={IC[name]} /></svg>
+  )
+}
 
 // Égalité profonde, insensible à l'ordre des clés : sert à savoir si le
 // formulaire diffère réellement des données chargées.
@@ -176,35 +190,34 @@ export default function CollectionEditPage() {
 
   return (
     <div className="adm-edit ed">
-      <header className="adm-edit__head">
-        <Link to={`/admin/${collection}`} className="adm-btn adm-btn--ghost">
-          <ArrowLeft size={15} /> Retour
-        </Link>
-        <div className="adm-edit__title">
-          <h1>{isNew ? `Nouveau ${s.singular}` : s.title(form)}</h1>
-          {!s.singleton && <code>{computedId || '(identifiant à venir)'}</code>}
+      <header className="ed-head">
+        <div className="ed-head__text">
+          <Link to={`/admin/${collection}`} className="ed-back"><Ic name="left" size={16} />Retour</Link>
+          <h1>{isNew ? `Nouveau ${s.singular}` : collection === 'home' ? 'Accueil du site' : s.title(form)}</h1>
+          {!s.singleton && <code className="ed-head__id">{computedId || '(identifiant à venir)'}</code>}
           {collection === 'home' && <p className="ed-lead">Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>}
         </div>
-        <div className="adm-edit__actions">
-          {collection === 'home' && <a href="/" target="_blank" rel="noreferrer" className="adm-btn adm-btn--ghost">Voir l’accueil ↗</a>}
+        <div className="ed-head__actions">
+          <div className="ed-status" role="status" aria-live="polite">
+            {readOnly ? <span className="ed-status__pill is-readonly"><i />Lecture seule</span>
+              : saving ? <span className="ed-status__pill is-saving"><i />Enregistrement…</span>
+              : changed ? <span className="ed-status__pill is-changed"><i />Modifications non enregistrées</span>
+              : flash === 'saved' ? <span className="ed-status__pill is-saved" title={`Enregistré dans ${adminStorageLabel}`}><i />Enregistré</span>
+              : null}
+          </div>
+          {collection === 'home' && <a href="/" target="_blank" rel="noreferrer" className="ed-btn ed-btn--ghost">Voir l’accueil<Ic name="out" /></a>}
           {!isNew && !s.singleton && (
-            <button type="button" className="adm-btn adm-btn--danger" onClick={onDelete} disabled={readOnly || saving}>
-              <Trash2 size={15} /> Supprimer
+            <button type="button" className="ed-btn ed-btn--danger" onClick={onDelete} disabled={readOnly || saving}>
+              <Trash2 size={18} /> Supprimer
             </button>
           )}
-          <button type="button" className="adm-btn adm-btn--primary" onClick={onSave} disabled={readOnly || saving}>
-            <Save size={15} /> {saving ? 'Enregistrement…' : 'Enregistrer'}
+          <button type="button" className="ed-btn ed-btn--primary" onClick={onSave} disabled={readOnly || saving}>
+            <Ic name="save" />{saving ? 'Enregistrement…' : 'Enregistrer'}
           </button>
         </div>
       </header>
 
-      {flash === 'saved' && (
-        <div className="adm-banner adm-banner--ok">Enregistré dans {adminStorageLabel}</div>
-      )}
-      {flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}
-      {changed && !saving && flash !== 'saved' && (
-        <div className="adm-banner">Modifications non enregistrées.</div>
-      )}
+      {flash.startsWith('error:') && <div className="adm-banner adm-banner--error" role="alert">{flash.slice(6)}</div>}
 
       <div className="ed-body">
         {multi && (
@@ -235,7 +248,6 @@ export default function CollectionEditPage() {
             {fields.map((f) => (
               <div key={f.key} className={`adm-field adm-field--${f.type}`}>
                 <label htmlFor={`f-${f.key}`}>{f.label}</label>
-                {f.hint && <p className="adm-hint">{f.hint}</p>}
                 <Field
                   field={f}
                   value={form[f.key]}
@@ -244,6 +256,7 @@ export default function CollectionEditPage() {
                   disabled={readOnly || saving}
                   uploadEnabled={localFileUploadsAvailable}
                 />
+                {f.hint && <p className="adm-hint" id={`h-${f.key}`}>{f.hint}</p>}
               </div>
             ))}
           </div>
@@ -251,12 +264,12 @@ export default function CollectionEditPage() {
           {multi && (
             <div className="ed-card__nav">
               {prev ? (
-                <Link to={{ hash: `#${anchorOf(prev)}` }} replace className="ed-nav-btn"><ArrowLeft size={18} />Précédent</Link>
+                <Link to={{ hash: `#${anchorOf(prev)}` }} replace className="ed-nav-btn"><Ic name="left" />Précédent</Link>
               ) : (
-                <span className="ed-nav-btn is-off" aria-disabled="true"><ArrowLeft size={18} />Précédent</span>
+                <span className="ed-nav-btn is-off" aria-disabled="true"><Ic name="left" />Précédent</span>
               )}
               {next && (
-                <Link to={{ hash: `#${anchorOf(next)}` }} replace className="ed-nav-btn">Suivant : {next}<ArrowRight size={18} /></Link>
+                <Link to={{ hash: `#${anchorOf(next)}` }} replace className="ed-nav-btn">Suivant : {next}<Ic name="right" /></Link>
               )}
             </div>
           )}
