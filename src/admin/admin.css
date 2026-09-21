@@ -181,7 +181,6 @@
   max-width: 1180px;
   min-width: 0;
   padding: clamp(1.5rem, 4vw, 3.5rem);
-  overflow-x: hidden;
 }
 .adm-shell .adm-main { max-width: none; padding: 0 48px 48px; }
 .adm-shell .adm-main::before {
@@ -718,7 +717,7 @@ textarea.adm-input {
 
 .adm-user-meta {
   display: grid;
-  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   gap: 0.3rem 1.2rem;
   margin: 0;
 }
@@ -1024,7 +1023,7 @@ textarea.adm-input {
 
 @media (max-width: 780px) {
   .adm {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
   }
 
@@ -1067,7 +1066,6 @@ textarea.adm-input {
 
   .adm-main {
     padding: var(--space-2);
-    overflow-x: hidden;
   }
   .adm-topbar {
     align-items: flex-start;
@@ -1294,11 +1292,12 @@ a.ov-tile:hover { border-color: rgba(169, 193, 255, .55); background: rgba(255, 
 .ed-card h2:focus { outline: none; }
 
 .ed-fields { display: flex; flex-direction: column; gap: 22px; margin-top: 28px; }
-.ed-card__nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(200, 210, 255, .14); }
+.ed-card__nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(200, 210, 255, .14); }
 .ed-nav-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  height: 48px; padding: 0 22px; border: 1px solid rgba(200, 210, 255, .32); border-radius: 4px;
-  font-size: 16px; font-weight: 600; white-space: nowrap; color: #d6dcf5;
+  min-height: 48px; padding: 10px 22px; border: 1px solid rgba(200, 210, 255, .32); border-radius: 4px;
+  font-size: 16px; font-weight: 600; line-height: 1.25; text-align: center; color: #d6dcf5;
+  min-width: 0; max-width: 100%;
 }
 .ed-nav-btn:hover { border-color: var(--adm-accent); }
 .ed-nav-btn.is-off { opacity: .45; cursor: default; }
@@ -1450,17 +1449,12 @@ a.ov-tile:hover { border-color: rgba(169, 193, 255, .55); background: rgba(255, 
   .ed-head__actions .ed-btn, .ed-status__pill { width: 100%; }
   .ed-status__pill { height: auto; min-height: 48px; padding: 10px 16px; line-height: 1.3; }
 
-  .ed-body { flex-direction: column; align-items: stretch; gap: 16px; }
-  .ed-rail, .ed-preview, .ed-badge, .ed-card__step { display: none; }
-  .ed-picker { display: flex; flex-direction: column; gap: 8px; }
-  .ed-picker__label { font-size: 12px; color: var(--adm-accent); }
-  .ed-picker select { font-size: 16px; }
 
   .ed-card { padding: 20px 16px; }
   .ed-card h2 { font-size: 30px; }
   .ed-fields { gap: 24px; margin-top: 20px; }
   .ed-card__nav { flex-direction: column; align-items: stretch; margin-top: 24px; padding-top: 20px; }
-  .ed-nav-btn { height: auto; min-height: 48px; padding: 10px 16px; white-space: normal; text-align: center; }
+  .ed-nav-btn { padding: 10px 16px; }
   .ed-nav-btn:last-child:not(:first-child) { margin-left: 0; }
 
   .ed .adm-input, .ed textarea.adm-input, .ed select.adm-input { font-size: 16px; }
@@ -1479,3 +1473,29 @@ a.ov-tile:hover { border-color: rgba(169, 193, 255, .55); background: rgba(255, 
 }
 /* Les zones de texte grandissent avec leur contenu (rien n'est caché). */
 .ed textarea.adm-input { field-sizing: content; }
+
+/* --- Rien ne doit dépasser de l'écran ----------------------------------------
+   Racine des débordements observés : (1) un <fieldset> garde par défaut
+   min-width: min-content, donc un long contenu l'élargit ; (2) les textes
+   venus des données (e-mails, messages d'erreur, noms) n'avaient aucune règle
+   de coupure ; (3) des enfants flex/grid sans min-width: 0. On les traite un
+   par un, sans masquer le défaut avec overflow: hidden sur la page. */
+.adm-main { overflow-wrap: break-word; }
+.adm-fieldset { min-width: 0; }
+.adm-banner, .adm-card, .adm-user-card, .adm-user-meta dd, .adm-hint, .adm-muted, .adm-error,
+.adm-edit__title, .adm-list__head h1 { overflow-wrap: anywhere; }
+.adm-user-meta > div, .adm-user-card__identity, .adm-card__body { min-width: 0; }
+.ov > *, .ov-hero > *, .ov-panel, .ov-tile, .ov-kpi, .ov-kpi__value { min-width: 0; }
+.ov-btn { max-width: 100%; }
+.ed-body > *, .ed-head > *, .ed-head__actions > * { min-width: 0; }
+.ed-btn { max-width: 100%; }
+
+/* Sous 1000 px, la liste des rubriques (208 px) et la fiche ne tiennent plus
+   côte à côte : la liste devient le sélecteur « Rubrique 3/10 ». */
+@media (max-width: 999px) {
+  .ed-body { flex-direction: column; align-items: stretch; gap: 16px; }
+  .ed-rail, .ed-preview, .ed-badge, .ed-card__step { display: none; }
+  .ed-picker { display: flex; flex-direction: column; gap: 8px; max-width: 520px; }
+  .ed-picker__label { font-size: 12px; color: var(--adm-accent); }
+  .ed-picker select { font-size: 16px; }
+}

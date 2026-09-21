@@ -235,7 +235,7 @@ a.acc-tile--hero:hover { background: rgba(139, 30, 63, .28); }
 .acc-tile h3 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 400; letter-spacing: 0; }
 .acc-tile--hero:has(.acc-mosaic) h3 { font-size: 30px; }
 .acc-tile p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--acc-ink-2); }
-.acc-tile__foot { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--acc-line-2); }
+.acc-tile__foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid var(--acc-line-2); }
 .acc-tile__count { font-size: 40px; line-height: 1; }
 .acc-tile.is-empty .acc-tile__count { color: var(--acc-ink-4); }
 .acc-lnk { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--acc-accent); }
@@ -434,3 +434,11 @@ a.acc-tile--hero:hover { background: rgba(139, 30, 63, .28); }
 @media (prefers-reduced-motion: reduce) {
   .acc-side, .acc-side.is-open { transition: none; }
 }
+
+/* Rien ne doit dépasser de l'écran (voir admin.css) : un <fieldset> garde
+   min-width: min-content par défaut. */
+.account-workspace .adm-fieldset { min-width: 0; }
+.account-workspace .adm-main { overflow-wrap: break-word; }
+.account-workspace .adm-banner, .account-workspace .adm-card, .account-workspace .adm-hint, .account-workspace .adm-muted { overflow-wrap: anywhere; }
+.acc-tile__body, .acc-tile__main { min-width: 0; }
+.acc-tile h3 { overflow-wrap: anywhere; }
