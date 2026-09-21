@@ -254,6 +254,19 @@ export default function CollectionEditPage() {
 
       <div className="ed-body">
         {multi && (
+          <div className="ed-picker">
+            <label htmlFor="ed-picker-select" className="ed-picker__label adm-mono">Rubrique {current + 1}/{groupNames.length}</label>
+            <select
+              id="ed-picker-select"
+              className="adm-input"
+              value={current}
+              onChange={(e) => navigate({ hash: `#${anchorOf(groupNames[Number(e.target.value)])}` }, { replace: true })}
+            >
+              {groupNames.map((name, index) => <option key={name} value={index}>{pad(index + 1)} · {name}</option>)}
+            </select>
+          </div>
+        )}
+        {multi && (
           <nav className="ed-rail" aria-label={`Rubriques : ${s.title(form)}`}>
             <div className="ed-rail__count adm-mono">{groupNames.length} rubriques</div>
             {groupNames.map((name, index) => (
