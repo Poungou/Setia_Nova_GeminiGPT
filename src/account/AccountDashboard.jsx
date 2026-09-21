@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SCHEMA } from '../admin/schema.js'
+import { reviewStateOf } from '../lib/reviewState.js'
+import { roleLabel } from '../lib/roles.js'
 
 // Tracés SVG repris tels quels des maquettes design-ref/ (viewBox 24×24).
 const PATHS = {
@@ -102,12 +104,15 @@ function Tile({ to, icon, index, title, short, desc, count, cta, empty, hero, ch
   )
 }
 
-export default function AccountDashboard({ data, user, canCreate, profileAllowed, cultureCount }) {
+export default function AccountDashboard({ data, user, canCreate, profileAllowed, cultureCount, showCulture = true }) {
   const [query, setQuery] = useState('')
   const list = (key) => data[key] || []
   const rows = SECTIONS.flatMap(({ key }) => list(key))
-  const drafts = rows.filter((row) => row.visibility === 'draft').length
-  const published = rows.length - drafts
+  // « Brouillons » = ce qui reste à finir (brouillon ou à corriger) ; une fiche en
+  // attente de relecture n'est plus à finir, elle n'est pas comptée non plus comme publiée.
+  const stateOf = (row) => reviewStateOf(row)
+  const drafts = rows.filter((row) => ['draft', 'needs'].includes(stateOf(row))).length
+  const published = rows.filter((row) => stateOf(row) === 'published').length
   const sections = SECTIONS.filter(({ key }) => canCreate(user, key) || list(key).length)
 
   // « Reprendre » et « Fiches à enrichir » ne concernent que les fiches de la
@@ -126,7 +131,7 @@ export default function AccountDashboard({ data, user, canCreate, profileAllowed
 
   const emptyNames = [
     ...sections.filter(({ key }) => !list(key).length).map(({ short }) => short),
-    ...(cultureCount === 0 ? [CULTURE.short] : []),
+    ...(showCulture && cultureCount === 0 ? [CULTURE.short] : []),
   ]
 
   const creatable = SECTIONS.filter(({ key, chip }) => chip && canCreate(user, key))
@@ -163,6 +168,29 @@ export default function AccountDashboard({ data, user, canCreate, profileAllowed
           </div>
         )}
       </Tile>
+    )
+  }
+
+  // Un compte sans aucun droit de création (Invité) ne voit que les paramètres de son compte.
+  const noCreations = SECTIONS.every(({ key }) => !canCreate(user, key)) && rows.length === 0
+  if (noCreations) {
+    return (
+      <div className="acc">
+        <div className="acc-topbar"><div className="acc-mono acc-crumb">Woltar Nova <span>/</span> <b>Mon espace</b></div></div>
+        <section className="acc-hero">
+          <div>
+            <div className="acc-mono acc-hero__eyebrow">Mon espace · Woltar Nova</div>
+            <h1>Bienvenue, <em>{user.name || 'à toi'}.</em></h1>
+            <p>Ton rôle : {roleLabel(user.role)}. Tu peux gérer les paramètres de ton compte.</p>
+          </div>
+        </section>
+        <section aria-label="Paramètres du compte" className="acc-creations">
+          <div className="acc-creations__head"><div className="acc-mono acc-eyebrow">Mon compte</div></div>
+          <div className="acc-grid">
+            <Tile to="/compte/securite" icon="lock" index="01" title="Sécurité du compte" short="Sécurité" desc="Change ton mot de passe ou ton adresse e-mail." count={null} cta="Ouvrir" empty={false} />
+          </div>
+        </section>
+      </div>
     )
   }
 
@@ -252,8 +280,10 @@ export default function AccountDashboard({ data, user, canCreate, profileAllowed
             <div className="acc-creations__head"><div className="acc-mono acc-eyebrow">Mes créations</div><div className="acc-creations__note">À chaque histoire, son espace</div></div>
             <div className="acc-grid">
               {sections.map((section, i) => tileFor(section, i))}
-              <Tile to="/culture?mes=1" icon={CULTURE.icon} index={pad(sections.length + 1)} title={CULTURE.title} short={CULTURE.short} desc={CULTURE.desc}
-                count={cultureCount === null ? '—' : cultureCount} cta={cultureCount === 0 ? 'Commencer' : 'Ouvrir'} empty={cultureCount === 0} />
+              {showCulture && (
+                <Tile to="/culture?mes=1" icon={CULTURE.icon} index={pad(sections.length + 1)} title={CULTURE.title} short={CULTURE.short} desc={CULTURE.desc}
+                  count={cultureCount === null ? '—' : cultureCount} cta={cultureCount === 0 ? 'Commencer' : 'Ouvrir'} empty={cultureCount === 0} />
+              )}
               {profileAllowed && (
                 <Link to="/compte/profil" className="acc-tile acc-tile--profile">
                   <Icon name="sparkle" size={22} className="acc-tile__pico" />
@@ -267,6 +297,7 @@ export default function AccountDashboard({ data, user, canCreate, profileAllowed
         </div>
 
         <aside className="acc-right">
+          {(canCreate(user, 'characters') || myCharacters.length > 0) && (
           <section className="acc-panel" aria-label="Fiches à enrichir">
             <div className="acc-panel__head"><div className="acc-mono acc-eyebrow">Fiches à enrichir</div><div className="acc-mono acc-panel__count">{toEnrich.length}</div></div>
             <div className="acc-enrich">
@@ -284,6 +315,7 @@ export default function AccountDashboard({ data, user, canCreate, profileAllowed
             </div>
             <div className="acc-panel__legend">{COMPLETENESS_LABELS}</div>
           </section>
+          )}
 
           <section className="acc-panel acc-panel--soon acc-visits" aria-label="Visites">
             <div className="acc-panel__head"><div className="acc-mono acc-eyebrow">Visites de tes fiches</div><div className="acc-mono acc-soon">Bientôt</div></div>

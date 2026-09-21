@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, ChevronUp, LogOut, Plus, Save, Trash2, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronUp, LogOut, Plus, Save, Send, Trash2, X } from 'lucide-react'
 import {
   accountBackendAvailable,
   confirmEmail,
@@ -28,6 +28,8 @@ import ClanComposer from '../components/ClanComposer/ClanComposer.jsx'
 import '../admin/admin.css'
 import { cultureApi } from '../lib/cultureApi.js'
 import { canManagePlayerProfile, roleLabel, userHasRight } from '../lib/roles.js'
+import { submitForReview } from '../lib/moderationApi.js'
+import { REVIEW_STATE_LABEL, REVIEW_STATE_TONE, reviewStateOf } from '../lib/reviewState.js'
 import AccountDashboard, { Icon } from './AccountDashboard.jsx'
 import './Account.css'
 
@@ -51,6 +53,41 @@ const CREATE_PERMISSION_BY_COLLECTION = {
 
 function canCreate(user, collection) {
   return userHasRight(user, CREATE_PERMISSION_BY_COLLECTION[collection])
+}
+
+// Pastille d'état d'une création (Brouillon, En attente, Publiée, À corriger).
+function StateChip({ row }) {
+  const state = reviewStateOf(row)
+  return <span className={`acc-state acc-mono is-${REVIEW_STATE_TONE[state]}`}>{REVIEW_STATE_LABEL[state]}</span>
+}
+
+// Message de relecture affiché au-dessus d'une fiche (jamais pour un admin ni
+// pour une fiche déjà publiée). Les droits réels restent contrôlés par le serveur.
+function ReviewNotice({ state, note }) {
+  if (state === 'published') return null
+  const team = note ? (
+    <div className="acc-team"><span className="acc-mono acc-team__label">Message de l’équipe</span>{note}</div>
+  ) : null
+  if (state === 'pending') {
+    return <div className="acc-review is-wait" role="status"><p>Ta fiche est en cours de relecture. Tu peux encore la consulter, mais pas la modifier.</p></div>
+  }
+  if (state === 'needs') {
+    return (
+      <div className="acc-review is-warn" role="status">
+        {team}
+        <p>Corrige la fiche, puis renvoie-la avec « Corriger et renvoyer ».</p>
+      </div>
+    )
+  }
+  if (state === 'hidden') {
+    return (
+      <div className="acc-review is-warn" role="status">
+        <p>Cette fiche a été refusée par l’équipe : elle est gardée en archive et ne peut plus être modifiée.</p>
+        {team}
+      </div>
+    )
+  }
+  return <div className="acc-review" role="status"><p>Cette fiche est un brouillon : elle reste privée tant que l’équipe ne l’a pas validée. Envoie-la pour validation quand elle est prête.</p></div>
 }
 
 function AccountBackendUnavailable() {
@@ -645,6 +682,7 @@ function AccountList({ data, user, reload }) {
             <Link to={`/compte/${section}/${encodeURIComponent(row.id)}`} className="adm-card">
               <div className="adm-card__body">
                 <strong>{schema.title(row)}</strong>
+                <StateChip row={row} />
                 <span className="adm-muted">{schema.subtitle(row) || '—'}</span>
                 {user?.role === 'admin' && row.ownerUserId && row.ownerUserId !== user.id && (
                   <span className="adm-muted">Propriétaire : {row.ownerUserId}</span>
@@ -840,6 +878,14 @@ function AccountEdit({ data, reload, user }) {
     ...(collection === 'posts' && isNew ? { visibility: 'draft', author: user.name || '' } : {}),
     ...(collection === 'timelines' && isNew ? { visibility: 'draft' } : {}),
   })
+  // Modération : un compte non admin crée en brouillon, envoie pour validation,
+  // et ne peut plus modifier une fiche en attente ou refusée. Le Worker impose
+  // ces règles ; l'écran ne fait que les refléter (`rights` absent = serveur de dev).
+  const moderated = Array.isArray(user.rights)
+  const isAdminUser = user.role === 'admin'
+  const reviewState = existing ? reviewStateOf(existing) : 'draft'
+  const locked = moderated && !isAdminUser && !isNew && (reviewState === 'pending' || reviewState === 'hidden')
+  const gated = moderated && !isAdminUser && (isNew || reviewState !== 'published')
   const [form, setForm] = useState(() => ({ ...(schema?.defaults || {}), ...newRowDefaults(), ...(existing || {}) }))
   const [saving, setSaving] = useState(false)
   const [flash, setFlash] = useState('')
@@ -861,6 +907,8 @@ function AccountEdit({ data, reload, user }) {
     for (const field of schema.fields) {
       if (field.key === 'ownerUserId') continue
       if (field.accountHidden) continue
+      // La publication ne se décide pas ici tant que la fiche n'est pas validée.
+      if (field.key === 'visibility' && gated) continue
       // Pour un clan, le personnage central se choisit dans l'aperçu du
       // sociogramme (ClanComposer, Bloc D) plutôt que via un <select> perdu
       // au milieu du formulaire d'identité — voir rendu conditionnel plus
@@ -869,7 +917,7 @@ function AccountEdit({ data, reload, user }) {
       ;(groups[field.group || 'Autres'] ||= []).push(field)
     }
     return groups
-  }, [schema, collection])
+  }, [schema, collection, gated])
 
   if (!config || !schema) return <Navigate to="/compte" replace />
   if (!isNew && !existing) {
@@ -885,7 +933,7 @@ function AccountEdit({ data, reload, user }) {
   const setField = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
   const onSave = async (visibility) => {
-    if (saving) return
+    if (saving || locked) return
     if (isNew && !computedId) {
       setFlash('error:Renseigne les champs nécessaires pour créer un identifiant.')
       return
@@ -911,6 +959,28 @@ function AccountEdit({ data, reload, user }) {
     }
   }
 
+  const onSubmitReview = async () => {
+    if (saving || locked || isNew || !existing) return
+    setSaving(true)
+    setFlash('')
+    try {
+      await submitForReview(collection, existing.id)
+      await reload()
+      setFlash('submitted')
+    } catch (e) {
+      setFlash(`error:${e.message || e}`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // « Envoyer pour validation » / « Corriger et renvoyer » : on enregistre d'abord.
+  const sendForReview = async () => {
+    const saved = await onSave()
+    if (saved) await onSubmitReview()
+  }
+  const submitLabel = reviewState === 'needs' ? 'Corriger et renvoyer' : 'Envoyer pour validation'
+
   const onDelete = async () => {
     if (isNew || saving) return
     if (!window.confirm(`Supprimer « ${schema.title(form)} » ?`)) return
@@ -926,11 +996,18 @@ function AccountEdit({ data, reload, user }) {
   }
 
   if (collection === 'posts' && ((isNew && form.id) || (!isNew && form.id !== existing.id))) return <p className="adm-muted">Ouverture de l’article…</p>
-  if (collection === 'posts') return <Suspense fallback={<p className="adm-muted">Ouverture de l’atelier…</p>}><ArticleComposer
-    key={`account-${user.id}-${id}`} form={form} onChange={setForm} onSave={onSave} onDelete={onDelete}
-    saving={saving} flash={flash} isNew={isNew} backTo="/compte/articles" data={data}
-    uploadEnabled={false} draftScope={`account:${user.id}:${id}`}
-  /></Suspense>
+  if (collection === 'posts') return (
+    <>
+      {moderated && !isNew && <ReviewNotice state={reviewState} note={existing?.reviewNote} />}
+      {flash === 'submitted' && <div className="adm-banner adm-banner--ok" role="status">Envoyé pour validation : l’équipe va relire ta fiche.</div>}
+      <Suspense fallback={<p className="adm-muted">Ouverture de l’atelier…</p>}><ArticleComposer
+        key={`account-${user.id}-${id}`} form={form} onChange={setForm} onSave={onSave} onDelete={locked ? undefined : onDelete}
+        saving={saving} flash={flash} isNew={isNew} backTo="/compte/articles" data={data} readOnly={locked}
+        review={gated ? { gated: true, stateLabel: REVIEW_STATE_LABEL[reviewState], submitLabel, onSubmit: onSubmitReview } : null}
+        uploadEnabled={false} draftScope={`account:${user.id}:${id}`}
+      /></Suspense>
+    </>
+  )
 
   return (
     <div className="adm-edit">
@@ -941,19 +1018,30 @@ function AccountEdit({ data, reload, user }) {
         <div className="adm-edit__title">
           <h1>{isNew ? `Nouveau ${config.singular}` : schema.title(form)}</h1>
           <code>{computedId || '(identifiant à venir)'}</code>
+          {moderated && !isNew && <StateChip row={existing} />}
         </div>
         <div className="adm-edit__actions">
-          {!isNew && (
+          {!isNew && !locked && (
             <button type="button" className="adm-btn adm-btn--danger" onClick={onDelete} disabled={saving}>
               <Trash2 size={15} /> Supprimer
             </button>
           )}
-          <button type="button" className="adm-btn adm-btn--primary" onClick={onSave} disabled={saving}>
-            <Save size={15} /> {saving ? 'Enregistrement...' : 'Enregistrer'}
-          </button>
+          {!locked && (
+            <button type="button" className={`adm-btn ${gated && !isNew ? 'adm-btn--ghost' : 'adm-btn--primary'}`} onClick={() => onSave()} disabled={saving}>
+              <Save size={15} /> {saving ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          )}
+          {gated && !isNew && !locked && (
+            <button type="button" className="adm-btn adm-btn--primary" onClick={sendForReview} disabled={saving}>
+              <Send size={15} /> {submitLabel}
+            </button>
+          )}
         </div>
       </header>
 
+      {moderated && !isNew && <ReviewNotice state={reviewState} note={existing?.reviewNote} />}
+      {moderated && isNew && gated && <ReviewNotice state="draft" />}
+      {flash === 'submitted' && <div className="adm-banner adm-banner--ok" role="status">Envoyé pour validation : l’équipe va relire ta fiche.</div>}
       {flash === 'saved' && <div className="adm-banner adm-banner--ok">Enregistré.</div>}
       {flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}
 
@@ -974,7 +1062,7 @@ function AccountEdit({ data, reload, user }) {
             reload={reload}
             isNew={isNew}
             clanId={existing?.id}
-            disabled={saving}
+            disabled={saving || locked}
           />
         ) : (
           Object.entries(fields).map(([group, groupFields]) => (
@@ -989,12 +1077,12 @@ function AccountEdit({ data, reload, user }) {
                     value={form[field.key]}
                     onChange={(value) => setField(field.key, value)}
                     allData={data}
-                    disabled={saving}
+                    disabled={saving || locked}
                     // Portraits de personnages/clans/lieux édités depuis
                     // /compte : upload réel via /__account/api/upload (pas
                     // le endpoint admin, réservé aux administratrices), et
                     // plus limité au dev — voir uploadAccountImage.
-                    uploadEnabled={!saving}
+                    uploadEnabled={!saving && !locked}
                     uploadFn={uploadAccountImage}
                   />
                 </div>
@@ -1009,7 +1097,7 @@ function AccountEdit({ data, reload, user }) {
           events={form.events || []}
           onChange={(events) => setField('events', events)}
           data={data}
-          disabled={saving}
+          disabled={saving || locked}
         />
       )}
     </div>
@@ -1071,9 +1159,14 @@ function Workspace({ user, onLogout }) {
   }, [menuOpen])
 
   const count = (key) => (data ? String(data[key]?.length ?? 0) : null)
+  const showCharacters = canCreate(user, 'characters') || data?.characters?.length > 0
+  const showClans = canCreate(user, 'clans') || data?.clans?.length > 0
   const showLocations = canCreate(user, 'locations') || data?.locations?.length > 0
   const showPosts = canCreate(user, 'posts') || data?.posts?.length > 0
   const showTimelines = canCreate(user, 'timelines') || data?.timelines?.length > 0
+  // Cultures : réservé aux créateurs (et à l'admin) ; sans `rights` (serveur de dev), on garde l'ancien comportement.
+  const showCulture = !Array.isArray(user.rights) || user.role === 'admin' || user.role === 'creator'
+  const showCreations = showCharacters || showClans || showLocations || showPosts || showTimelines || showCulture
   const initial = (user.name || user.email || '?').trim().charAt(0).toUpperCase()
   const roleName = roleLabel(user.role)
   const logout = async () => {
@@ -1104,13 +1197,13 @@ function Workspace({ user, onLogout }) {
         </Link>
         <nav className="acc-nav" aria-label="Navigation du compte">
           <NavLink to="/compte" end className="acc-nav__link"><Icon name="home" />Mon espace</NavLink>
-          <div className="acc-mono acc-nav__group">Créations</div>
-          {link('/compte/personnages', 'user', 'Personnages', count('characters'))}
-          {link('/compte/clans', 'shield', 'Clans', count('clans'))}
+          {showCreations && <div className="acc-mono acc-nav__group">Créations</div>}
+          {showCharacters && link('/compte/personnages', 'user', 'Personnages', count('characters'))}
+          {showClans && link('/compte/clans', 'shield', 'Clans', count('clans'))}
           {showLocations && link('/compte/lieux', 'pin', 'Lieux', count('locations'))}
           {showPosts && link('/compte/articles', 'pen', 'Articles', count('posts'))}
           {showTimelines && link('/compte/chronologies', 'clock', 'Chronologies', count('timelines'))}
-          {link('/culture?mes=1', 'leaf', 'Cultures', cultureCount === null ? null : String(cultureCount))}
+          {showCulture && link('/culture?mes=1', 'leaf', 'Cultures', cultureCount === null ? null : String(cultureCount))}
           {user.role === 'admin' && link('/galerie', 'image', 'Galerie')}
           <div className="acc-mono acc-nav__group">Compte</div>
           {canManagePlayerProfile(user) && link('/compte/profil', 'sparkle', 'Profil joueur')}
@@ -1134,7 +1227,7 @@ function Workspace({ user, onLogout }) {
         {error && <div className="adm-banner adm-banner--error">{error}</div>}
         {data && (
           <Routes>
-            <Route index element={<AccountDashboard data={data} user={user} canCreate={canCreate} profileAllowed={canManagePlayerProfile(user)} cultureCount={cultureCount} />} />
+            <Route index element={<AccountDashboard data={data} user={user} canCreate={canCreate} profileAllowed={canManagePlayerProfile(user)} cultureCount={showCulture ? cultureCount : undefined} showCulture={showCulture} />} />
             <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
             {canManagePlayerProfile(user) && <Route path="profil" element={<PlayerProfileSection />} />}
             <Route path=":section" element={<AccountList data={data} user={user} reload={load} />} />

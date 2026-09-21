@@ -442,3 +442,25 @@ a.acc-tile--hero:hover { background: rgba(139, 30, 63, .28); }
 .account-workspace .adm-banner, .account-workspace .adm-card, .account-workspace .adm-hint, .account-workspace .adm-muted { overflow-wrap: anywhere; }
 .acc-tile__body, .acc-tile__main { min-width: 0; }
 .acc-tile h3 { overflow-wrap: anywhere; }
+
+/* --- Relecture : pastilles d'état et messages (design-ref/7, côté auteure) --------
+   Le libellé est toujours écrit : la couleur ne porte jamais seule l'information. */
+.acc-state {
+  display: inline-flex; align-items: center; align-self: flex-start; width: fit-content; min-height: 24px; padding: 0 9px; border-radius: 3px;
+  border: 1px solid rgba(200, 210, 255, .25); font-size: 10px; color: #c9d2f5;
+}
+.acc-state.is-wait { border-color: rgba(169, 193, 255, .6); background: rgba(70, 105, 225, .18); color: #dfe7ff; }
+.acc-state.is-ok { border-color: rgba(127, 214, 160, .5); color: #9be3b9; }
+.acc-state.is-warn { border-color: rgba(240, 138, 165, .55); color: #f7b6c8; }
+.adm-edit__title .acc-state { margin: 6px 0 0 8px; }
+
+.acc-review {
+  margin: 0 0 16px; padding: 14px 18px; border: 1px solid var(--acc-line); border-radius: 4px; background: var(--acc-surface);
+  font-size: 14.5px; line-height: 1.55; color: var(--acc-ink-5);
+}
+.acc-review p { margin: 0; }
+.acc-review p + .acc-team, .acc-team + p { margin-top: 12px; }
+.acc-review.is-wait { border-color: rgba(169, 193, 255, .45); background: rgba(70, 105, 225, .12); }
+.acc-review.is-warn { border-color: rgba(240, 138, 165, .4); }
+.acc-team { padding: 6px 0 6px 14px; border-left: 2px solid #f08aa5; color: #f2dde4; overflow-wrap: anywhere; white-space: pre-line; }
+.acc-team__label { display: block; margin-bottom: 4px; font-size: 10px; color: #f7b6c8; }

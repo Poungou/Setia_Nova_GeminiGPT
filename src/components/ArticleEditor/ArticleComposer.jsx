@@ -15,7 +15,7 @@ function readRecovery(key) {
   } catch { return null }
 }
 
-export default function ArticleComposer({ form, onChange, onSave, onDelete, saving, readOnly = false, flash, isNew, backTo, data, uploadEnabled, draftScope }) {
+export default function ArticleComposer({ form, onChange, onSave, onDelete, saving, readOnly = false, flash, isNew, backTo, data, uploadEnabled, draftScope, review = null }) {
   const [preview, setPreview] = useState(false)
   const draftKey = `woltar:journal-draft:${draftScope}`
   const [recovery, setRecovery] = useState(() => readRecovery(draftKey))
@@ -63,20 +63,30 @@ export default function ArticleComposer({ form, onChange, onSave, onDelete, savi
       setRecovery(null)
       setLocalStatus('')
     }
+    return Boolean(success)
+  }
+  // Compte soumis à relecture : on enregistre le brouillon, puis on l'envoie.
+  const sendForReview = async () => {
+    if (await save('draft')) await review.onSubmit()
   }
   const field = (key, label) => {
     const definition = SCHEMA.posts.fields.find((entry) => entry.key === key)
     return <div className="adm-field" key={key}><label htmlFor={`f-${key}`}>{label || definition.label}</label><Field field={definition} value={form[key]} onChange={(value) => set(key, value)} allData={data} disabled={disabled} uploadEnabled={uploadEnabled} /></div>
   }
-  const published = form.visibility === 'published'
+  const gated = Boolean(review?.gated)
+  const published = !gated && form.visibility === 'published'
 
   return (
     <div className="article-composer">
       <header className="article-composer__head">
-        <div><Link to={backTo} className="article-composer__back"><ArrowLeft size={15} />Journal</Link><div className="article-composer__name"><h1>Atelier du Journal</h1><span className={`article-composer__status${published ? ' is-published' : ''}`}>{published ? 'Publié' : 'Brouillon'}</span></div><p>Une page pour les histoires, les images et les idées de Woltar.</p></div>
+        <div><Link to={backTo} className="article-composer__back"><ArrowLeft size={15} />Journal</Link><div className="article-composer__name"><h1>Atelier du Journal</h1><span className={`article-composer__status${published ? ' is-published' : ''}`}>{gated ? review.stateLabel : published ? 'Publié' : 'Brouillon'}</span></div><p>Une page pour les histoires, les images et les idées de Woltar.</p></div>
         <div className="article-composer__actions">
           <button type="button" className="adm-btn" onClick={() => save('draft')} disabled={disabled}><Save size={15} />{published ? 'Repasser en brouillon' : 'Enregistrer le brouillon'}</button>
-          <button type="button" className="adm-btn adm-btn--primary" onClick={() => save('published')} disabled={disabled}><Send size={15} />{saving ? 'Enregistrement…' : published ? 'Mettre à jour' : 'Publier'}</button>
+          {gated ? (!isNew && (
+            <button type="button" className="adm-btn adm-btn--primary" onClick={sendForReview} disabled={disabled}><Send size={15} />{saving ? 'Enregistrement…' : review.submitLabel}</button>
+          )) : (
+            <button type="button" className="adm-btn adm-btn--primary" onClick={() => save('published')} disabled={disabled}><Send size={15} />{saving ? 'Enregistrement…' : published ? 'Mettre à jour' : 'Publier'}</button>
+          )}
         </div>
       </header>
       {recovery && !readOnly && <div className="article-composer__recovery"><div><strong>Une copie de travail vous attend.</strong><p>Enregistrée sur cet appareil le {new Date(recovery.savedAt).toLocaleString('fr-FR')}. La restaurer ne publie rien.</p></div><button className="adm-btn" type="button" disabled={disabled} onClick={() => { onChange({ ...form, ...recovery.form }); setRecovery(null) }}>Restaurer</button><button className="adm-btn adm-btn--ghost" type="button" disabled={disabled} onClick={() => { try { localStorage.removeItem(draftKey) } catch { /* optional cache */ } setRecovery(null) }}>Ignorer</button></div>}
@@ -97,7 +107,7 @@ export default function ArticleComposer({ form, onChange, onSave, onDelete, savi
         </section>
         <aside className="article-composer__sidebar" aria-label="Paramètres de l’article">
           <section className="article-composer__card"><span className="eyebrow">La signature du récit</span>{field('author')}{field('date')}{field('category')}</section>
-          <section className="article-composer__card"><span className="eyebrow">Publication</span><strong>{published ? 'Dans le Journal public' : 'Votre espace de brouillon'}</strong><p>{published ? 'Enregistrez avec « Mettre à jour » pour publier vos changements.' : 'Prenez le temps d’écrire. Le brouillon reste privé jusqu’à sa publication.'}</p><p className="article-composer__local" aria-live="polite">{localStatus || (dirty ? 'Modifications à enregistrer' : 'À jour')}</p>{!isNew && published && <Link to={`/journal/${encodeURIComponent(form.id)}`} target="_blank" rel="noopener noreferrer">Voir l’article ↗</Link>}</section>
+          <section className="article-composer__card"><span className="eyebrow">Publication</span><strong>{published ? 'Dans le Journal public' : 'Votre espace de brouillon'}</strong><p>{published ? 'Enregistrez avec « Mettre à jour » pour publier vos changements.' : gated ? 'Prenez le temps d’écrire. Le brouillon reste privé jusqu’à sa validation par l’équipe.' : 'Prenez le temps d’écrire. Le brouillon reste privé jusqu’à sa publication.'}</p><p className="article-composer__local" aria-live="polite">{localStatus || (dirty ? 'Modifications à enregistrer' : 'À jour')}</p>{!isNew && published && <Link to={`/journal/${encodeURIComponent(form.id)}`} target="_blank" rel="noopener noreferrer">Voir l’article ↗</Link>}</section>
           <details className="article-composer__card"><summary>Galerie complémentaire</summary>{field('gallery')}</details>
           <details className="article-composer__card"><summary>Liens avec l’univers</summary>{['characters', 'locations', 'tags'].map((key) => field(key))}</details>
           {!isNew && onDelete && <button type="button" className="adm-btn adm-btn--ghost article-composer__delete" onClick={onDelete} disabled={disabled}><Trash2 size={14} />Supprimer l’article</button>}
