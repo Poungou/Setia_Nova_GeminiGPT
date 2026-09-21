@@ -344,6 +344,46 @@ Suite à liste de mise à jour donnée par l'utilisatrice (10 points). État :
   n'ont pas été branchées sur l'API publique dans cette passe — restent
   sur les données statiques du bundle, comme avant. À faire si besoin.
 
+## Phase 12 — Rôles, droits précis et modération (branche `feat/roles-moderation`)
+
+Fait (étape A, côté Worker + D1) :
+- [x] Rôles `admin` / `creator` / `journalist` / `guest` (`users.role`), module central
+  `worker/lib/permissions.js` (`can`, `getEffectiveRights`) ; l'ancien `status`
+  (Membre/RPiste/Invité) n'est plus lu nulle part.
+- [x] Droits précis : droits du rôle + droits ajoutés (`user_permissions`) − droits
+  retirés (`user_revoked_rights`).
+- [x] Modération : `review_status` (draft / pending / published / needs_changes /
+  hidden) + note, dates, relecteur sur personnages, clans, lieux, articles,
+  chronologies de comptes. Le canon (JSON compilé) n'y passe jamais.
+- [x] Signalements publics (`content_reports`, `POST /__public/api/reports`).
+- [x] Routes admin `/__admin/api/moderation/*` et `/__admin/api/users/:id/(role|rights)`.
+- [x] Migration `migrations/0014_roles_moderation.sql` (À APPLIQUER À LA MAIN sur la D1
+  distante, après export de sauvegarde — jamais appliquée automatiquement).
+
+À faire / hors périmètre de cette étape :
+- [ ] Étape B : écrans (Utilisateurs et rôles, File de modération, espace utilisateur,
+  bouton « Signaler » côté public). L'écran Utilisateurs actuel est une version
+  transitoire (rôle + interrupteurs de droits), refaite en B1.
+- [ ] **Validation des images ajoutées à une fiche déjà publiée** : hors périmètre. Les
+  images suivent la fiche (une image ajoutée à une fiche publiée est en ligne sans
+  relecture).
+- [ ] **Publication directe par compte** : aujourd'hui une fiche déjà publiée reste
+  publiée quand son auteur la modifie. Prévoir un réglage par compte (« toujours
+  relire ») si besoin.
+- [ ] **E-mail de notification** (fiche à valider, correction demandée, fiche validée)
+  via Resend (`worker/lib/mailer.js`) — non branché.
+- [ ] Articles du Journal : le stockage D1 (`posts`) existe et passe par le même
+  circuit que les fiches ; rien à brancher côté serveur. La rubrique Articles de
+  l'espace Journaliste (B3) reste à construire.
+- [ ] `npm run dev` (plugins Vite, sans D1) ne connaît pas les nouvelles routes de rôles
+  et de modération : les écrans de l'étape B se testent avec `npm run cloudflare:preview`
+  (`wrangler dev`). Le portage des plugins de dev n'est pas prévu.
+- [ ] Tests obsolètes hors `npm test` (chemins d'import périmés, déjà cassés avant
+  cette branche) : `test-http-routes`, `test-extra-checklist`, `test-prod-security`,
+  `test-delete-user`.
+- [ ] Les routes d'écriture existantes (avant cette branche) n'ont pas de contrôle
+  `Origin` ; seules les nouvelles routes en ont un (`worker/lib/originGuard.js`).
+
 ## Contenu à intégrer dès que disponible
 - [ ] Portraits des 7 personnages (actuellement : initiales KN, HN, FN, CA, SN, IS, MN)
 - [ ] Images des 3 lieux majeurs
