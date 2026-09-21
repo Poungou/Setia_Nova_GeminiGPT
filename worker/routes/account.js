@@ -68,7 +68,9 @@ import {
 } from '../lib/contentStore.js'
 import { saveMedia } from '../lib/mediaStore.js'
 import { checkRateLimit, clientIp } from '../lib/rateLimit.js'
-import { canCreate, CREATE_PERMISSIONS } from '../lib/permissions.js'
+import { can, canManagePlayerProfile, CREATE_PERMISSIONS } from '../lib/permissions.js'
+import { submitForReview } from '../lib/moderation.js'
+import { assertSameOrigin } from '../lib/originGuard.js'
 import { getPlayerProfile, savePlayerProfile } from '../lib/playerProfiles.js'
 import { normalizeTimelineEvents } from '../../src/lib/timelineEvents.js'
 import staticCharactersJson from '../../src/data/characters.json' with { type: 'json' }
@@ -136,8 +138,33 @@ function assertCanEdit(user, row) {
 }
 
 function assertCanManagePlayerProfile(user) {
-  if (!isAdmin(user) && user.status !== 'RPiste') {
-    throw httpError(403, 'Un statut RPiste est requis pour créer ou modifier un profil joueur.')
+  if (!canManagePlayerProfile(user)) {
+    throw httpError(403, 'Ton rôle ne permet pas de créer ou modifier un profil joueur.')
+  }
+}
+
+// --- Modération -----------------------------------------------------------------
+// L'état de relecture (reviewStatus...) est posé UNIQUEMENT par le serveur : tout
+// ce que le client en envoie est ignoré. Un admin publie directement ; les autres
+// comptes créent en brouillon, envoient pour validation (route /submit), et
+// l'admin valide depuis /__admin/api/moderation.
+const REVIEW_INPUT_KEYS = ['reviewStatus', 'reviewNote', 'submittedAt', 'reviewedAt', 'reviewedBy']
+
+function withoutReviewInput(body) {
+  const clean = { ...(body && typeof body === 'object' && !Array.isArray(body) ? body : {}) }
+  for (const key of REVIEW_INPUT_KEYS) delete clean[key]
+  return clean
+}
+
+// Un contenu en cours de relecture (pending) ou refusé (hidden) n'est pas
+// modifiable par son auteur. L'admin, lui, garde la main.
+function assertNotLocked(user, row) {
+  if (isAdmin(user)) return
+  if (row.reviewStatus === 'pending') {
+    throw httpError(403, 'Ta fiche est en cours de relecture : tu peux la consulter, mais pas la modifier.')
+  }
+  if (row.reviewStatus === 'hidden') {
+    throw httpError(403, 'Ce contenu a été refusé par l’équipe : il ne peut plus être modifié.')
   }
 }
 
@@ -208,7 +235,7 @@ const COLLECTION_OPS = {
   characters: {
     list: (env) => listCharacters(env),
     get: (env, id) => getCharacter(env, id),
-    insert: (env, row) => insertRow(env, 'characters', row),
+    insert: (env, row, review) => insertRow(env, 'characters', row, { review }),
     update: (env, id, row) => updateRow(env, 'characters', id, row),
     remove: (env, id) => deleteRow(env, 'characters', id),
     sanitize: sanitizeOwnedRow,
@@ -218,7 +245,7 @@ const COLLECTION_OPS = {
   clans: {
     list: (env) => listClans(env),
     get: (env, id) => getClan(env, id),
-    insert: (env, row) => insertClan(env, row),
+    insert: (env, row, review) => insertClan(env, row, review),
     update: (env, id, row) => updateClan(env, id, row),
     remove: (env, id) => deleteClan(env, id),
     sanitize: sanitizeOwnedClanRow,
@@ -228,7 +255,7 @@ const COLLECTION_OPS = {
   locations: {
     list: (env) => listLocations(env),
     get: (env, id) => getLocation(env, id),
-    insert: (env, row) => insertLocation(env, row),
+    insert: (env, row, review) => insertLocation(env, row, review),
     update: (env, id, row) => updateLocation(env, id, row),
     remove: (env, id) => deleteLocation(env, id),
     sanitize: sanitizeOwnedRow,
@@ -238,7 +265,7 @@ const COLLECTION_OPS = {
   posts: {
     list: (env) => listPosts(env),
     get: (env, id) => getPost(env, id),
-    insert: (env, row) => insertPost(env, row),
+    insert: (env, row, review) => insertPost(env, row, review),
     update: (env, id, row) => updatePost(env, id, row),
     remove: (env, id) => deletePost(env, id),
     sanitize: sanitizeOwnedRow,
@@ -248,7 +275,7 @@ const COLLECTION_OPS = {
   timelines: {
     list: (env) => listTimelines(env),
     get: (env, id) => getTimeline(env, id),
-    insert: (env, row) => insertTimeline(env, row),
+    insert: (env, row, review) => insertTimeline(env, row, review),
     update: (env, id, row) => updateTimeline(env, id, row),
     remove: (env, id) => deleteTimeline(env, id),
     sanitize: sanitizeOwnedTimelineRow,
@@ -276,6 +303,7 @@ async function handleClanMembers(request, env, user, clanId, characterIdPart, me
   const clan = await getClan(env, clanId)
   if (!clan || isSystemOwned(clan)) throw httpError(404, 'Clan introuvable.')
   assertCanEdit(user, clan)
+  if (method !== 'GET') assertNotLocked(user, clan)
 
   if (method === 'GET' && !characterIdPart) {
     return json({ data: await listClanMembers(env, clanId) })
@@ -423,17 +451,30 @@ export async function handleAccount(request, env, parts) {
 
       if (method === 'POST' && parts.length === 2) {
         const permission = CREATE_PERMISSIONS[name]
-        if (!permission || !canCreate(user, permission)) {
+        if (!permission || !can(user, permission)) {
           throw httpError(403, 'Cette possibilité n’est pas activée pour ton compte.')
         }
-        const clean = ops.sanitize(await readJson(request), user)
+        const clean = ops.sanitize(withoutReviewInput(await readJson(request)), user)
         if (ops.canonIds.has(clean.id)) {
           throw httpError(409, ops.canonMessage)
         }
         const existing = await ops.get(env, clean.id)
         if (existing) throw httpError(409, 'Cet identifiant existe déjà.')
-        await ops.insert(env, clean)
-        return json({ row: clean })
+        // Admin : publication directe. Autres : brouillon, jamais visible avant validation.
+        const review = { status: isAdmin(user) ? 'published' : 'draft' }
+        if (review.status === 'draft') clean.visibility = 'draft'
+        await ops.insert(env, clean, review)
+        return json({ row: { ...clean, reviewStatus: review.status, reviewNote: '', submittedAt: null, reviewedAt: null, reviewedBy: null } })
+      }
+
+      // Envoi pour validation : draft | needs_changes -> pending.
+      if (method === 'POST' && parts[2] && parts[3] === 'submit' && parts.length === 4) {
+        assertSameOrigin(request)
+        const permission = CREATE_PERMISSIONS[name]
+        if (!permission || !can(user, permission)) {
+          throw httpError(403, 'Cette possibilité n’est pas activée pour ton compte.')
+        }
+        return json({ ok: true, row: await submitForReview(env, user, name, decodeURIComponent(parts[2])) })
       }
 
       if ((method === 'PUT' || method === 'DELETE') && parts[2] && !parts[3]) {
@@ -441,11 +482,24 @@ export async function handleAccount(request, env, parts) {
         const existing = await ops.get(env, id)
         if (!existing || isSystemOwned(existing)) throw httpError(404, 'Fiche introuvable.')
         assertCanEdit(user, existing)
+        assertNotLocked(user, existing)
 
         if (method === 'PUT') {
-          const clean = ops.sanitize(await readJson(request), user, existing)
+          const clean = ops.sanitize(withoutReviewInput(await readJson(request)), user, existing)
+          // Tant que le contenu n'a pas été validé, il reste un brouillon côté
+          // données : un auteur ne peut pas le publier en changeant `visibility`.
+          if (!isAdmin(user) && existing.reviewStatus !== 'published') clean.visibility = 'draft'
           await ops.update(env, id, clean)
-          return json({ row: clean })
+          return json({
+            row: {
+              ...clean,
+              reviewStatus: existing.reviewStatus,
+              reviewNote: existing.reviewNote,
+              submittedAt: existing.submittedAt,
+              reviewedAt: existing.reviewedAt,
+              reviewedBy: existing.reviewedBy,
+            },
+          })
         }
 
         await ops.remove(env, id)

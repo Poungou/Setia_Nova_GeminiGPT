@@ -5,7 +5,16 @@
 // personnages. Les autres collections restent servies en lecture depuis le
 // bundle statique tant qu'elles ne sont pas migrees.
 
-import { getRequestUser, httpError, isAdmin } from '../lib/authStore.js'
+import { getRequestUser, httpError, isAdmin, setUserRight, setUserRole } from '../lib/authStore.js'
+import {
+  decideContent,
+  getModerationCounts,
+  handleReport,
+  listHistory,
+  listPending,
+  listReports,
+} from '../lib/moderation.js'
+import { assertSameOrigin } from '../lib/originGuard.js'
 import { getCharacter, insertRow, listCharactersWithFallback, updateRow } from '../lib/contentStore.js'
 import { saveMedia } from '../lib/mediaStore.js'
 import { getSiteSetting, setSiteSetting } from '../lib/siteSettings.js'
@@ -100,6 +109,52 @@ export async function handleAdmin(request, env, parts) {
     const user = await getRequestUser(env, request)
     if (!user) throw httpError(401, 'Connexion requise.')
     if (!isAdmin(user)) throw httpError(403, 'Reserve admin.')
+
+    // --- Modération (admin uniquement, revérifié ci-dessus) ---------------------
+    if (parts[0] === 'moderation') {
+      const method = request.method
+      if (method === 'GET' && parts[1] === 'counts' && parts.length === 2) {
+        return json({ data: await getModerationCounts(env) })
+      }
+      if (method === 'GET' && parts[1] === 'pending' && parts.length === 2) {
+        return json({ data: await listPending(env) })
+      }
+      if (method === 'GET' && parts[1] === 'reports' && parts.length === 2) {
+        return json({ data: await listReports(env) })
+      }
+      if (method === 'GET' && parts[1] === 'history' && parts.length === 2) {
+        return json({ data: await listHistory(env) })
+      }
+      // POST /moderation/content/:collection/:id/(approve|request-changes|reject)
+      if (method === 'POST' && parts[1] === 'content' && parts.length === 5) {
+        assertSameOrigin(request)
+        const decision = { approve: 'approve', 'request-changes': 'request_changes', reject: 'reject' }[parts[4]]
+        if (!decision) return json({ error: 'Route inconnue' }, { status: 404 })
+        const body = await readJson(request)
+        const row = await decideContent(env, user, parts[2], decodeURIComponent(parts[3]), decision, body?.note)
+        return json({ ok: true, row })
+      }
+      // POST /moderation/reports/:id/(keep|hide)
+      if (method === 'POST' && parts[1] === 'reports' && parts.length === 4) {
+        assertSameOrigin(request)
+        const decision = { keep: 'keep', hide: 'hide' }[parts[3]]
+        if (!decision) return json({ error: 'Route inconnue' }, { status: 404 })
+        const body = await readJson(request)
+        return json(await handleReport(env, user, decodeURIComponent(parts[2]), decision, body?.note))
+      }
+      return json({ error: 'Route inconnue' }, { status: 404 })
+    }
+
+    // --- Rôles et droits précis -----------------------------------------------
+    // PUT /users/:id/role    { role }
+    // PUT /users/:id/rights  { right, enabled }
+    if (parts[0] === 'users' && parts[1] && request.method === 'PUT' && parts.length === 3) {
+      assertSameOrigin(request)
+      const body = await readJson(request)
+      if (parts[2] === 'role') return json({ user: await setUserRole(env, user, decodeURIComponent(parts[1]), body?.role) })
+      if (parts[2] === 'rights') return json({ user: await setUserRight(env, user, decodeURIComponent(parts[1]), body?.right, body?.enabled) })
+      return json({ error: 'Route inconnue' }, { status: 404 })
+    }
 
     if (parts[0] === 'collections') {
       const name = parts[1]

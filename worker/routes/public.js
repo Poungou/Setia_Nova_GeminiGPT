@@ -23,6 +23,7 @@ import {
   listPublicTimelines,
 } from '../lib/publicStore.js'
 import { listPublicPlayerProfiles } from '../lib/playerProfiles.js'
+import { createReport } from '../lib/moderation.js'
 import { safeGetSiteSetting } from '../lib/siteSettings.js'
 import { normalizeHomeSettings } from '../../src/lib/homeSettings.js'
 import { normalizeMusicSettings, activeTracksFor } from '../../src/lib/musicSettings.js'
@@ -41,6 +42,15 @@ function json(body, init = {}) {
 // `parts` = segments du chemin après /__public/api/ (ex: ['characters', 'fudo-nakamura']).
 export async function handlePublic(request, env, parts) {
   try {
+    // Seule écriture publique : le signalement d'une fiche (Origin contrôlé,
+    // limité par IP, contenu vérifié — voir worker/lib/moderation.js).
+    if (request.method === 'POST' && parts[0] === 'reports' && parts.length === 1) {
+      const raw = await request.text()
+      let body = {}
+      try { body = raw ? JSON.parse(raw) : {} } catch { return json({ error: 'Requête invalide.' }, { status: 400 }) }
+      return json(await createReport(env, request, body), { status: 201 })
+    }
+
     if (request.method !== 'GET') return json({ error: 'Méthode non autorisée' }, { status: 405 })
 
     if (parts[0] === 'home' && parts.length === 1) return json({ data: normalizeHomeSettings(await safeGetSiteSetting(env, 'home')) })
@@ -110,6 +120,8 @@ export async function handlePublic(request, env, parts) {
 
     return json({ error: 'Route inconnue' }, { status: 404 })
   } catch (err) {
+    // Erreurs contrôlées (400 / 403 / 404 / 429 des signalements) : renvoyées telles quelles.
+    if (err?.status && err.status < 500) return json({ error: err.message }, { status: err.status })
     console.error('[worker/public]', err)
     return json({ error: 'Erreur interne du serveur.' }, { status: 500 })
   }
