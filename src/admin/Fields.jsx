@@ -390,7 +390,16 @@ function GalleryInput({ value, onChange, disabled, uploadEnabled, uploadFn }) {
 }
 
 function RefsInput({ field, value, onChange, allData, disabled }) {
-  const rows = allData?.[field.ref] || []
+  // `field.dataKey`, quand présent, pointe vers une liste plus large que la
+  // collection possédée habituelle (ex. "locationsCatalog" : TOUS les lieux,
+  // canon + tous comptes confondus, pour que n'importe quelle joueuse puisse
+  // taguer n'importe quel lieu existant dans "Lieux associés" — pas
+  // seulement les siens). `SCHEMA[field.ref]` reste la source du
+  // titre/sous-titre affiché (même collection, juste une liste différente).
+  // Repli sur `allData[field.ref]` si `dataKey` est absent de `allData`
+  // (ex. côté /admin, où le bootstrap ne fournit pas ce catalogue séparé —
+  // `allData.locations` y est déjà la liste complète, non filtrée).
+  const rows = (field.dataKey && allData?.[field.dataKey]) || allData?.[field.ref] || []
   const s = SCHEMA[field.ref]
   const selected = new Set(value)
   return (
