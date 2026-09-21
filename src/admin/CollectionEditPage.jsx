@@ -40,6 +40,38 @@ function sameValue(a, b) {
   return ka.every((k) => k in b && sameValue(a[k], b[k]))
 }
 
+// Numéros des champs de la rubrique « Bienvenue » de l'accueil : ils
+// renvoient aux mêmes numéros de l'aperçu schématique.
+const WELCOME_NUMBERS = { eyebrow: 1, title: 2, subtitle: 3, communityNote: 4, primaryCtaLabel: 5, primaryCtaUrl: 6, secondaryCtaLabel: 7, secondaryCtaUrl: 8 }
+
+// Schéma (pas la vraie page) alimenté par les valeurs du formulaire. Comme sur
+// le vrai accueil, le dernier mot du titre est mis en valeur.
+function WelcomePreview({ form }) {
+  const words = String(form.title || '').trim().split(/\s+/).filter(Boolean)
+  const lead = words.slice(0, -1).join(' ')
+  const accent = words.at(-1) || ''
+  const empty = (text, fallback) => (String(text || '').trim() ? text : <span className="ed-pv__empty">{fallback}</span>)
+  return (
+    <aside className="ed-preview" aria-label="Aperçu schématique">
+      <div className="ed-preview__head"><div className="ed-preview__title">Aperçu</div><div className="ed-preview__tag adm-mono">Schéma</div></div>
+      <div className="ed-pv" aria-hidden="true">
+        <div className="ed-pv__item ed-pv__item--start"><span className="ed-badge">1</span><div className="ed-pv__eyebrow adm-mono">{empty(form.eyebrow, '(vide)')}</div></div>
+        <div className="ed-pv__item"><span className="ed-badge">2</span>
+          <div className="ed-pv__title">{accent ? <>{lead}{lead ? ' ' : ''}<em>{accent}</em></> : <span className="ed-pv__empty">(titre vide)</span>}</div>
+        </div>
+        <div className="ed-pv__item"><span className="ed-badge">3</span><p className="ed-pv__text">{empty(form.subtitle, '(présentation vide)')}</p></div>
+        <div className="ed-pv__actions">
+          <div className="ed-pv__item ed-pv__item--start"><span className="ed-badge ed-badge--wide">5 · 6</span><div className="ed-pv__btn adm-mono">{empty(form.primaryCtaLabel, '(bouton vide)')} ↗</div></div>
+          <div className="ed-pv__item ed-pv__item--start"><span className="ed-badge ed-badge--wide">7 · 8</span><div className="ed-pv__link">{empty(form.secondaryCtaLabel, '(lien vide)')} ↗</div></div>
+        </div>
+        <div className="ed-pv__item ed-pv__item--note"><span className="ed-badge">4</span><p className="ed-pv__note">{empty(form.communityNote, '(aucune note)')}</p></div>
+      </div>
+      <p className="adm-hint">Les numéros de l’aperçu correspondent aux champs à gauche.</p>
+      <a href="/" target="_blank" rel="noreferrer" className="ed-btn ed-btn--ghost ed-btn--sm">Voir l’accueil en vrai<Ic name="out" /></a>
+    </aside>
+  )
+}
+
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
 
 export default function CollectionEditPage() {
@@ -184,6 +216,7 @@ export default function CollectionEditPage() {
   const rubrique = groupNames[current]
   const fields = groups[rubrique] || []
   const multi = groupNames.length > 1
+  const numbers = collection === 'home' && rubrique === 'Bienvenue' ? WELCOME_NUMBERS : null
   const anchorOf = (name) => groupAnchor(collection, name)
   const prev = current > 0 ? groupNames[current - 1] : null
   const next = current < groupNames.length - 1 ? groupNames[current + 1] : null
@@ -247,7 +280,7 @@ export default function CollectionEditPage() {
           <div className="ed-fields">
             {fields.map((f) => (
               <div key={f.key} className={`adm-field adm-field--${f.type}`}>
-                <label htmlFor={`f-${f.key}`}>{f.label}</label>
+                <label htmlFor={`f-${f.key}`}>{numbers?.[f.key] && <span className="ed-badge" aria-hidden="true">{numbers[f.key]}</span>}{f.label}</label>
                 <Field
                   field={f}
                   value={form[f.key]}
@@ -274,6 +307,8 @@ export default function CollectionEditPage() {
             </div>
           )}
         </form>
+
+        {numbers && <WelcomePreview form={form} />}
       </div>
     </div>
   )
