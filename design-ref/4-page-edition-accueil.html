@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Édition d'une page — bureau</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0a0b18;font-family:'Instrument Sans',sans-serif;color:#eceaf4}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #a9c1ff;outline-offset:2px}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+.serif{font-family:'Cormorant Garamond',serif;font-variant-numeric:lining-nums;font-feature-settings:'lnum' 1}
+.nav{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border:1px solid transparent;border-radius:4px;color:#b3b8d4;font-size:14px}
+.nav:hover{background:rgba(255,255,255,.05);color:#eceaf4}
+.nav.on{background:rgba(70,105,225,.2);border-color:rgba(169,193,255,.5);color:#f4f6ff}
+.nav svg,.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8a90b3}
+.grp{padding:20px 12px 8px;font-size:10px;color:#8a90b3}
+.sub{display:flex;flex-direction:column;margin:2px 0 4px 22px;padding-left:12px;border-left:1px solid rgba(200,210,255,.16)}
+.sub a{padding:7px 10px;font-size:13px;line-height:1.35;color:#9aa0c4;border-radius:3px}
+.sub a:hover{color:#eceaf4;background:rgba(255,255,255,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:48px;padding:0 22px;border-radius:4px;font-size:16px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.btn.p{background:#3a5bd0;color:#fff;border-color:#6d8bf0}
+.btn.p:hover{background:#4a6be0}
+.btn.g{background:transparent;color:#d6dcf5;border-color:rgba(200,210,255,.32)}
+.btn.g:hover{border-color:#a9c1ff}
+.btn.off{opacity:.45}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rail a{display:flex;align-items:center;gap:14px;min-height:48px;padding:0 14px;border:1px solid transparent;border-radius:4px;font-size:15px;color:#b3b8d4}
+.rail a:hover{background:rgba(255,255,255,.05);color:#eceaf4}
+.rail a b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:12px;color:#8a90b3;width:20px}
+.rail a.on{background:rgba(70,105,225,.2);border-color:rgba(169,193,255,.55);color:#fff;font-weight:600}
+.rail a.on b{color:#a9c1ff}
+.card{border:1px solid rgba(200,210,255,.16);border-radius:4px;background:rgba(255,255,255,.03)}
+.bd{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:none;border-radius:50%;background:#a9c1ff;color:#0a0b18;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500}
+.f{display:flex;flex-direction:column;gap:8px}
+.lb{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;line-height:1.3;color:#f4f6ff}
+.hint{margin:0;font-size:14px;line-height:1.5;color:#b3b8d4}
+.in{width:100%;height:52px;padding:0 16px;border:1px solid rgba(200,210,255,.32);border-radius:4px;background:rgba(6,7,20,.7);color:#f4f6ff;font:inherit;font-size:16px}
+.ta{width:100%;padding:14px 16px;border:1px solid rgba(200,210,255,.32);border-radius:4px;background:rgba(6,7,20,.7);color:#f4f6ff;font:inherit;font-size:16px;line-height:1.6;resize:vertical}
+.in:hover,.ta:hover{border-color:rgba(200,210,255,.55)}
+.in.focus{border:2px solid #a9c1ff;box-shadow:0 0 0 4px rgba(169,193,255,.16)}
+.chip{display:inline-flex;align-items:center;height:36px;padding:0 14px;border:1px solid rgba(200,210,255,.3);border-radius:999px;font-size:14px;color:#d6dcf5}
+.chip:hover{border-color:#a9c1ff;color:#fff}
+.gt{display:flex;align-items:baseline;gap:12px;margin:0 0 4px}
+.pv{position:relative}
+.pv .bd{position:absolute;top:-11px;left:-11px;z-index:2;box-shadow:0 0 0 3px #0a0b18}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:1700px;display:flex;background:#0a0b18;overflow:hidden;">
+
+<!-- SIDEBAR -->
+<aside style="width:264px;flex:none;display:flex;flex-direction:column;padding:20px 16px;background:#080916;border-right:1px solid rgba(200,210,255,.10);">
+<div style="display:flex;align-items:center;gap:12px;padding:4px 8px 16px;">
+<div class="serif" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(169,193,255,.6);border-radius:4px;background:rgba(70,105,225,.22);font-size:24px;color:#a9c1ff;">W</div>
+<div>
+<div class="serif" style="font-size:22px;line-height:1;">Woltar Nova</div>
+<div class="mono" style="font-size:10px;color:#a9c1ff;margin-top:5px;">Administration</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;padding:3px;border:1px solid rgba(200,210,255,.16);border-radius:4px;background:rgba(255,255,255,.03);margin-bottom:6px;">
+<a href="#" class="mono" style="display:flex;align-items:center;justify-content:center;height:32px;font-size:10px;color:#b3b8d4;border-radius:3px;">Mon espace</a>
+<a href="#" class="mono" style="display:flex;align-items:center;justify-content:center;height:32px;font-size:10px;color:#0a0b18;background:#a9c1ff;border-radius:3px;font-weight:500;">Admin</a>
+</div>
+<nav aria-label="Navigation administration" style="display:flex;flex-direction:column;gap:2px;">
+<div class="mono grp" style="padding-top:16px;">Pilotage</div>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>Vue d'ensemble</a>
+<a class="nav" href="#" style="opacity:.6;"><svg viewBox="0 0 24 24"><path d="M4 13l2-8h12l2 8v6H4zM4 13h5l1 2h4l1-2h5"/></svg>Modération<span class="n">Bientôt</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1M17 4a3.5 3.5 0 0 1 0 7M22 20v-1a5 5 0 0 0-3-4.5"/></svg>Utilisateurs</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>Joueurs</a>
+<div class="mono grp">Publication</div>
+<a class="nav on" href="#" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil du site</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></svg>Musique du site</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10 4L8 20M16 4l-2 16"/></svg>Culture &amp; hashtags</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9.5h.01"/></svg>Galerie</a>
+<div class="mono grp">Contenus</div>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/></svg>Univers<span class="n">7</span></a>
+<div class="sub">
+<a href="#">Journal</a><a href="#">Personnages</a><a href="#">Lieux</a><a href="#">Clans</a><a href="#">Chronologies</a><a href="#">Chronologie (événements Nakamura)</a><a href="#">Aether</a>
+</div>
+</nav>
+<div style="flex-grow:1;"></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 8px;border-top:1px solid rgba(200,210,255,.10);">
+<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(200,210,255,.2);border-radius:50%;background:linear-gradient(160deg,#1f2c6b,#161232);font-size:20px;" class="serif">P</div>
+<div><div style="font-size:14px;font-weight:600;">Poungou</div><div class="mono" style="font-size:10px;color:#a9c1ff;margin-top:3px;">Admin</div></div>
+</div>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"/></svg>Verrouiller</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg>Voir le site</a>
+</aside>
+
+<!-- MAIN -->
+<main style="position:relative;flex-grow:1;padding:0 40px 56px;">
+<div style="position:absolute;top:0;left:0;right:0;height:360px;background:radial-gradient(620px 260px at 24% 0,rgba(58,91,208,.24),transparent 70%);pointer-events:none;"></div>
+
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;height:64px;">
+<div class="mono" style="color:#8a90b3;">Woltar Nova <span style="color:#a9c1ff;">/</span> Administration <span style="color:#a9c1ff;">/</span> <span style="color:#d6dcf5;">Accueil du site</span></div>
+<div class="mono" style="display:flex;align-items:center;gap:8px;font-size:10.5px;color:#7fd6a0;"><span style="width:7px;height:7px;border-radius:50%;background:#7fd6a0;display:block;"></span>Espace actif</div>
+</div>
+
+<!-- HEADER + ACTIONS -->
+<header style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:8px 0 28px;">
+<div style="max-width:560px;">
+<a href="#" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#a9c1ff;margin-bottom:14px;"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M15 6l-6 6 6 6"/></svg>Retour</a>
+<h1 class="serif" style="margin:0 0 10px;font-size:52px;line-height:1;font-weight:500;">Accueil du site</h1>
+<p style="margin:0;font-size:16px;line-height:1.6;color:#b3b8d4;">Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>
+</div>
+<div style="display:flex;align-items:center;gap:12px;">
+<div style="display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border:1px solid rgba(255,196,110,.45);border-radius:4px;font-size:14px;color:#ffd699;"><span style="width:9px;height:9px;border-radius:50%;background:#ffc46e;display:block;"></span>Modifications non enregistrées</div>
+<a class="btn g" href="#">Voir l'accueil<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+<a class="btn p" href="#"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></svg>Enregistrer</a>
+</div>
+</header>
+
+<!-- 3 COLUMNS -->
+<div style="position:relative;display:flex;gap:28px;align-items:flex-start;">
+
+<!-- RAIL -->
+<nav class="rail" aria-label="Rubriques de l'accueil" style="width:208px;flex:none;display:flex;flex-direction:column;gap:4px;">
+<div class="mono" style="font-size:10.5px;color:#8a90b3;padding:0 14px 10px;">10 rubriques</div>
+<a href="#" class="on" aria-current="step"><b>01</b>Bienvenue</a>
+<a href="#"><b>02</b>Fenêtre illustrée</a>
+<a href="#"><b>03</b>Compteurs automatiques</a>
+<a href="#"><b>04</b>Carte Cultures</a>
+<a href="#"><b>05</b>Carte Journal</a>
+<a href="#"><b>06</b>Carte Aether</a>
+<a href="#"><b>07</b>Galerie de personnages</a>
+<a href="#"><b>08</b>Galerie de lieux</a>
+<a href="#"><b>09</b>Accueil de la galerie</a>
+<a href="#"><b>10</b>Fonds du site</a>
+</nav>
+
+<!-- FORM -->
+<section class="card" aria-label="Rubrique Bienvenue" style="width:520px;flex:none;padding:32px;">
+<div class="gt"><span class="mono" style="color:#a9c1ff;font-size:12px;">01 / 10</span></div>
+<h2 class="serif" style="margin:0 0 6px;font-size:38px;line-height:1.05;font-weight:500;">Bienvenue</h2>
+<p class="hint" style="font-size:15px;">Le premier écran de la vitrine : titre, texte et boutons.</p>
+
+<div style="display:flex;flex-direction:column;gap:22px;margin-top:28px;">
+
+<h3 style="margin:0;font-size:12px;font-weight:500;color:#8a90b3;letter-spacing:.12em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">Textes</h3>
+
+<div class="f"><label class="lb" for="f1"><span class="bd">1</span>Petit titre</label><input class="in" id="f1" type="text" value="Woltar Nova · vitrine RP"></div>
+<div class="f"><label class="lb" for="f2"><span class="bd">2</span>Titre principal</label><textarea class="ta in focus" id="f2" style="height:84px;padding-top:14px;">Bienvenue sur Woltar Nova.</textarea></div>
+<div class="f"><label class="lb" for="f3"><span class="bd">3</span>Présentation</label><textarea class="ta" id="f3" style="height:108px;">Explore les visages, les liens et les lieux qui donnent vie aux récits de Woltar</textarea></div>
+<div class="f"><label class="lb" for="f4"><span class="bd">4</span>Note communautaire</label><textarea class="ta" id="f4" style="height:132px;">Woltar Nova n'est pas le site officiel de Woltar : c'est une vitrine RP où chaque joueuse et joueur présente ses propres personnages, son univers et ses histoires.</textarea></div>
+
+<h3 style="margin:10px 0 0;font-size:12px;font-weight:500;color:#8a90b3;letter-spacing:.12em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">Boutons</h3>
+
+<div class="card" style="padding:20px;display:flex;flex-direction:column;gap:20px;background:rgba(255,255,255,.02);">
+<div style="font-size:15px;font-weight:600;color:#d6dcf5;">Bouton principal</div>
+<div class="f"><label class="lb" for="f5"><span class="bd">5</span>Texte du bouton</label><input class="in" id="f5" type="text" value="Découvrir les personnages"></div>
+<div class="f"><label class="lb" for="f6"><span class="bd">6</span>Lien</label>
+<input class="in" id="f6" type="text" value="/personnages" aria-describedby="h6">
+<p class="hint" id="h6">Chemin du site (par exemple /culture) ou adresse https://…</p></div>
+</div>
+
+<div class="card" style="padding:20px;display:flex;flex-direction:column;gap:20px;background:rgba(255,255,255,.02);">
+<div style="font-size:15px;font-weight:600;color:#d6dcf5;">Lien secondaire</div>
+<div class="f"><label class="lb" for="f7"><span class="bd">7</span>Texte du lien</label><input class="in" id="f7" type="text" value="Explorer l'univers"></div>
+<div class="f"><label class="lb" for="f8"><span class="bd">8</span>Lien</label>
+<input class="in" id="f8" type="text" value="/univers" aria-describedby="h8">
+<p class="hint" id="h8">Chemin du site (par exemple /culture) ou adresse https://…</p></div>
+</div>
+
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:32px;padding-top:24px;border-top:1px solid rgba(200,210,255,.14);">
+<a class="btn g off" href="#" aria-disabled="true"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Précédent</a>
+<a class="btn g" href="#">Suivant : Fenêtre illustrée<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+</div>
+</section>
+
+<!-- PREVIEW -->
+<aside aria-label="Aperçu" style="width:312px;flex:none;display:flex;flex-direction:column;gap:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div style="font-size:16px;font-weight:600;">Aperçu</div>
+<div class="mono" style="font-size:10px;color:#8a90b3;border:1px solid rgba(200,210,255,.2);border-radius:3px;padding:3px 6px;">Schéma</div>
+</div>
+
+<div style="padding:22px 18px 20px;border:1px solid rgba(200,210,255,.16);border-radius:4px;background:linear-gradient(180deg,#171238 0%,#1b1030 55%,#120d22 100%);display:flex;flex-direction:column;gap:18px;">
+
+<div class="pv" style="align-self:flex-start;"><span class="bd">1</span><div class="mono" style="font-size:9.5px;color:#c9c4e6;letter-spacing:.14em;padding-left:2px;">Woltar Nova · vitrine RP</div></div>
+
+<div class="pv"><span class="bd">2</span><div class="serif" style="font-size:36px;line-height:1;color:#f3ecdf;font-weight:500;">Bienvenue sur Woltar <em style="color:#f08aa5;">Nova.</em></div></div>
+
+<div class="pv"><span class="bd">3</span><p style="margin:0;font-size:12.5px;line-height:1.55;color:#cfc9e6;">Explore les visages, les liens et les lieux qui donnent vie aux récits de Woltar</p></div>
+
+<div style="display:flex;flex-direction:column;gap:12px;">
+<div class="pv" style="align-self:flex-start;"><span class="bd" style="width:auto;padding:0 7px;border-radius:11px;">5 · 6</span><div class="mono" style="font-size:9.5px;color:#fff;background:#9c1f43;border:1px solid #c2385e;padding:11px 14px;border-radius:3px;letter-spacing:.1em;">Découvrir les personnages ↗</div></div>
+<div class="pv" style="align-self:flex-start;"><span class="bd" style="width:auto;padding:0 7px;border-radius:11px;">7 · 8</span><div style="font-size:12.5px;color:#d5cfe8;padding:6px 2px 0 2px;">Explorer l'univers ↗</div></div>
+</div>
+
+<div class="pv" style="margin-top:4px;"><span class="bd">4</span><p style="margin:0;padding:12px;border:1px solid rgba(226,214,255,.16);border-radius:3px;background:rgba(255,255,255,.04);font-size:11.5px;line-height:1.55;color:#c9c4e6;">Woltar Nova n'est pas le site officiel de Woltar : c'est une vitrine RP où chaque joueuse et joueur présente ses propres personnages, son univers et ses histoires.</p></div>
+
+</div>
+
+<p class="hint" style="font-size:13.5px;">Les numéros de l'aperçu correspondent aux champs à gauche.</p>
+<a class="btn g" href="#" style="height:44px;font-size:14px;">Voir l'accueil en vrai<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+</aside>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

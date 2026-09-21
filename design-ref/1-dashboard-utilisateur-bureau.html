@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mon espace — bureau</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0b0a17;font-family:'Instrument Sans',sans-serif;color:#f1eadc}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #f08aa5;outline-offset:2px}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+.serif{font-family:'Cormorant Garamond',serif;font-variant-numeric:lining-nums;font-feature-settings:'lnum' 1}
+.nav{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border:1px solid transparent;border-radius:4px;color:#b7b1cf;font-size:14px}
+.nav:hover{background:rgba(255,255,255,.05);color:#f1eadc}
+.nav.on{background:rgba(163,33,63,.24);border-color:rgba(240,138,165,.5);color:#f8f2e6}
+.nav svg,.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8f89ab}
+.grp{padding:22px 12px 8px;font-size:10px;color:#8f89ab}
+.tile{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:14px;min-height:186px;padding:20px;border:1px solid rgba(226,214,255,.14);border-radius:4px;background:rgba(255,255,255,.03)}
+.tile::before{content:"";position:absolute;top:-1px;left:-1px;width:14px;height:14px;border-top:1px solid #f08aa5;border-left:1px solid #f08aa5}
+.tile:hover{border-color:rgba(240,138,165,.55);background:rgba(255,255,255,.05)}
+.tile.empty{border-style:dashed;background:transparent}
+.tile.hero{background:rgba(139,30,63,.2);border-color:rgba(240,138,165,.38)}
+.cap{font-size:13.5px;line-height:1.45;color:#b7b1cf}
+.foot{display:flex;justify-content:space-between;align-items:flex-end;padding-top:12px;border-top:1px solid rgba(226,214,255,.12)}
+.lnk{font-size:10.5px;color:#f08aa5;display:flex;align-items:center;gap:6px}
+.lnk svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.panel{border:1px solid rgba(226,214,255,.14);border-radius:4px;background:rgba(255,255,255,.03);padding:20px}
+.seg{display:flex;gap:3px;flex-grow:1}
+.seg i{display:block;height:4px;flex-grow:1;background:rgba(255,255,255,.14);border-radius:1px}
+.seg i.f{background:#f08aa5}
+.av{display:flex;align-items:center;justify-content:center;border:1px solid rgba(226,214,255,.2);border-radius:3px;background:linear-gradient(160deg,#5a1230,#1a1433);color:#f1eadc}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:44px;padding:0 20px;border-radius:4px;font-size:14px;font-weight:600;border:1px solid transparent}
+.btn.p{background:#9c1f43;color:#fff;border-color:#c2385e}
+.btn.p:hover{background:#b02550}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chip{display:inline-flex;align-items:center;height:28px;padding:0 10px;border:1px solid rgba(226,214,255,.2);border-radius:3px;font-size:10.5px;color:#d5cfe8}
+.chip:hover{border-color:#f08aa5;color:#fff}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:1400px;display:flex;background:#0b0a17;overflow:hidden;">
+
+<!-- SIDEBAR -->
+<aside style="width:264px;flex:none;display:flex;flex-direction:column;padding:20px 16px;background:#090813;border-right:1px solid rgba(226,214,255,.10);">
+<div style="display:flex;align-items:center;gap:12px;padding:4px 8px 18px;">
+<div class="serif" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(240,138,165,.6);border-radius:4px;background:rgba(139,30,63,.28);font-size:24px;color:#f08aa5;">W</div>
+<div>
+<div class="serif" style="font-size:22px;line-height:1;">Woltar Nova</div>
+<div class="mono" style="font-size:10px;color:#8f89ab;margin-top:5px;">Compte</div>
+</div>
+</div>
+<nav aria-label="Navigation du compte" style="display:flex;flex-direction:column;gap:2px;">
+<a class="nav on" href="#" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Mon espace</a>
+<div class="mono grp">Créations</div>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM5 21v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/></svg>Personnages<span class="n">11</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Clans<span class="n">1</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12zM12 7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg>Lieux<span class="n">1</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8a2.1 2.1 0 0 0-3-3L5 16zM14 7l3 3"/></svg>Articles<span class="n">1</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2"/></svg>Chronologies<span class="n">0</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M20 4c-8 0-13 4-13 11l-3 5M20 4c0 8-4 12-11 12M9 16l6-6"/></svg>Cultures<span class="n">0</span></a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9.5h.01"/></svg>Galerie</a>
+<div class="mono grp">Compte</div>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>Profil joueur</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"/></svg>Sécurité</a>
+</nav>
+<div style="flex-grow:1;"></div>
+<a class="nav" href="#" style="border-color:rgba(122,162,255,.35);color:#a9c1ff;margin-bottom:14px;"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/></svg>Administration<span class="n" style="color:#a9c1ff;">Admin</span></a>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 8px;border-top:1px solid rgba(226,214,255,.10);">
+<div class="av serif" style="width:36px;height:36px;font-size:20px;border-radius:50%;">P</div>
+<div>
+<div style="font-size:14px;font-weight:600;">Poungou</div>
+<div class="mono" style="font-size:10px;color:#8f89ab;margin-top:3px;">Woltar</div>
+</div>
+</div>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/></svg>Déconnexion</a>
+<a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg>Voir le site</a>
+</aside>
+
+<!-- MAIN -->
+<main style="position:relative;flex-grow:1;padding:0 48px 48px;">
+<div style="position:absolute;top:0;left:0;right:0;height:420px;background:radial-gradient(640px 300px at 22% 0,rgba(139,30,63,.30),transparent 70%);pointer-events:none;"></div>
+
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;height:72px;">
+<div class="mono" style="color:#8f89ab;">Woltar Nova <span style="color:#f08aa5;">/</span> <span style="color:#d5cfe8;">Mon espace</span></div>
+<div style="display:flex;align-items:center;gap:20px;">
+<label style="display:flex;align-items:center;gap:10px;width:280px;height:38px;padding:0 12px;border:1px solid rgba(226,214,255,.16);border-radius:4px;background:rgba(255,255,255,.03);color:#8f89ab;">
+<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"/></svg>
+<input type="text" placeholder="Rechercher une fiche…" aria-label="Rechercher une fiche" style="flex-grow:1;min-width:0;background:transparent;border:0;outline:0;color:#f1eadc;font:inherit;font-size:13.5px;">
+</label>
+</div>
+</div>
+
+<!-- HERO -->
+<section style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;padding:16px 0 28px;">
+<div>
+<div class="mono" style="color:#f08aa5;">Mon espace · Woltar Nova</div>
+<h1 class="serif" style="margin:14px 0 10px;font-size:64px;line-height:1;font-weight:500;">Bienvenue, <em style="color:#f08aa5;">Poungou.</em></h1>
+<p style="margin:0;font-size:16px;line-height:1.5;color:#b7b1cf;">Ton atelier d'histoires. Reprends là où tu t'étais arrêtée.</p>
+</div>
+<div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
+<a class="btn p" href="#"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Écrire une nouvelle fiche</a>
+<div style="display:flex;gap:6px;">
+<a class="chip mono" href="#">Personnage</a><a class="chip mono" href="#">Clan</a><a class="chip mono" href="#">Lieu</a><a class="chip mono" href="#">Article</a>
+</div>
+</div>
+</section>
+
+<!-- KPI STRIP -->
+<section aria-label="Indicateurs" style="position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid rgba(226,214,255,.14);border-radius:4px;background:rgba(255,255,255,.03);">
+<div style="padding:20px 24px;">
+<div class="mono" style="font-size:10.5px;color:#9d97b8;">Fiches publiées</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;"><span class="serif" style="font-size:52px;line-height:1;">14</span><span style="font-size:13px;color:#b7b1cf;">sur 14 accessibles</span></div>
+</div>
+<div style="padding:20px 24px;border-left:1px solid rgba(226,214,255,.12);">
+<div class="mono" style="font-size:10.5px;color:#9d97b8;">Brouillons</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;"><span class="serif" style="font-size:52px;line-height:1;">0</span><span style="font-size:13px;color:#b7b1cf;">rien en attente</span></div>
+</div>
+<div style="padding:20px 24px;border-left:1px solid rgba(226,214,255,.12);">
+<div class="mono" style="font-size:10.5px;color:#9d97b8;">Complétude moyenne</div>
+<div style="display:flex;align-items:baseline;gap:4px;margin-top:8px;"><span class="serif" style="font-size:52px;line-height:1;">72</span><span class="serif" style="font-size:26px;color:#f08aa5;">%</span></div>
+<div class="seg" style="margin-top:10px;"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f" style="opacity:.55"></i><i></i></div>
+</div>
+<div style="padding:20px 24px;border-left:1px solid rgba(226,214,255,.12);">
+<div class="mono" style="font-size:10.5px;color:#9d97b8;">Sections vides</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;"><span class="serif" style="font-size:52px;line-height:1;">2</span><span style="font-size:13px;color:#b7b1cf;">Chronologies, Cultures</span></div>
+</div>
+</section>
+
+<!-- TWO COLUMNS -->
+<div style="position:relative;display:flex;gap:32px;margin-top:32px;align-items:flex-start;">
+
+<!-- LEFT -->
+<div style="width:736px;flex:none;display:flex;flex-direction:column;gap:28px;">
+
+<!-- REPRENDRE -->
+<section aria-label="Reprendre">
+<div class="mono" style="color:#9d97b8;margin-bottom:12px;">Reprendre</div>
+<div class="tile hero" style="flex-direction:row;align-items:center;gap:24px;min-height:0;padding:20px;">
+<div class="av serif" style="width:112px;height:140px;flex:none;font-size:44px;">KN</div>
+<div style="flex-grow:1;min-width:0;">
+<div class="mono" style="font-size:10.5px;color:#f08aa5;">Dernière fiche ouverte · 01</div>
+<div class="serif" style="font-size:38px;line-height:1.05;margin:8px 0 4px;">Kazuko Nakamura</div>
+<div style="font-size:14px;color:#b7b1cf;">Matriarche du clan Nakamura</div>
+<div style="display:flex;align-items:center;gap:14px;margin-top:16px;">
+<div class="seg" style="max-width:220px;"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i></div>
+<span class="mono" style="font-size:10.5px;color:#d5cfe8;">4 sur 5 sections</span>
+</div>
+</div>
+<a class="btn p" href="#" style="flex:none;">Continuer<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
+</div>
+</section>
+
+<!-- CREATIONS -->
+<section aria-label="Mes créations">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;">
+<div class="mono" style="color:#9d97b8;">Mes créations</div>
+<div style="font-size:13px;color:#8f89ab;">À chaque histoire, son espace</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+
+<a class="tile hero" href="#" style="grid-column:span 2;flex-direction:row;gap:24px;">
+<div style="display:flex;flex-direction:column;justify-content:space-between;gap:14px;flex-grow:1;">
+<div style="display:flex;justify-content:space-between;align-items:center;"><svg class="ic" viewBox="0 0 24 24" style="color:#f08aa5;"><path d="M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM5 21v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/></svg><span class="mono" style="font-size:10.5px;color:#9d97b8;">01</span></div>
+<div>
+<div class="serif" style="font-size:30px;line-height:1.1;">Mes personnages</div>
+<div class="cap" style="margin-top:6px;">Des visages, des caractères et des histoires à faire grandir.</div>
+</div>
+<div class="foot"><span class="serif" style="font-size:40px;line-height:1;">11</span><span class="mono lnk">Ouvrir mes fiches<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+</div>
+<div style="width:200px;flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;align-content:center;">
+<div class="av serif" style="height:44px;font-size:16px;">KN</div>
+<div class="av serif" style="height:44px;font-size:16px;">HN</div>
+<div class="av serif" style="height:44px;font-size:16px;">FN</div>
+<div class="av serif" style="height:44px;font-size:16px;">CA</div>
+<div class="av serif" style="height:44px;font-size:16px;">SN</div>
+<div class="av serif" style="height:44px;font-size:16px;">IS</div>
+<div class="av serif" style="height:44px;font-size:16px;">MN</div>
+<div class="av mono" style="height:44px;font-size:11px;background:transparent;border-style:dashed;color:#b7b1cf;">+4</div>
+</div>
+</a>
+
+<a class="tile" href="#">
+<div style="display:flex;justify-content:space-between;align-items:center;"><svg class="ic" viewBox="0 0 24 24" style="color:#f08aa5;"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span class="mono" style="font-size:10.5px;color:#9d97b8;">02</span></div>
+<div>
+<div class="serif" style="font-size:26px;line-height:1.1;">Mes clans</div>
+<div class="cap" style="margin-top:6px;">Les liens et les familles qui donnent corps à ton univers.</div>
+</div>
+<div class="foot"><span class="serif" style="font-size:40px;line-height:1;">1</span><span class="mono lnk">Ouvrir<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+</a>
+
+<a class="tile" href="#">
+<div style="display:flex;justify-content:space-between;align-items:center;"><svg class="ic" viewBox="0 0 24 24" style="color:#f08aa5;"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12zM12 7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg><span class="mono" style="font-size:10.5px;color:#9d97b8;">03</span></div>
+<div>
+<div class="serif" style="font-size:26px;line-height:1.1;">Mes lieux</div>
+<div class="cap" style="margin-top:6px;">Des décors pour accueillir les prochaines rencontres.</div>
+</div>
+<div class="foot"><span class="serif" style="font-size:40px;line-height:1;">1</span><span class="mono lnk">Ouvrir<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+</a>
+
+<a class="tile" href="#">
+<div style="display:flex;justify-content:space-between;align-items:center;"><svg class="ic" viewBox="0 0 24 24" style="color:#f08aa5;"><path d="M4 20l4-1L19 8a2.1 2.1 0 0 0-3-3L5 16zM14 7l3 3"/></svg><span class="mono" style="font-size:10.5px;color:#9d97b8;">04</span></div>
+<div>
+<div class="serif" style="font-size:26px;line-height:1.1;">Mes articles</div>
+<div class="cap" style="margin-top:6px;">Les nouvelles et les récits que tu souhaites partager.</div>
+</div>
+<div class="foot"><span class="serif" style="font-size:40px;line-height:1;">1</span><span class="mono lnk">Ouvrir<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span></div>
+</a>
+
+<a class="tile empty" href="#">
+<div style="display:flex;justify-content:space-between;align-items:center;"><svg class="ic" viewBox="0 0 24 24" style="color:#8f89ab;"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2"/></svg><span class="mono" style="font-size:10.5px;color:#9d97b8;">05</span></div>
+<div>
+<div class="serif" style="font-size:26px;line-height:1.1;">Mes chronologies</div>
+<div class="cap" style="margin-top:6px;">Les moments clés, au fil de tes histoires.</div>
+</div>
+<div class="foot"><span class="serif" style="font-size:40px;line-height:1;color:#8f89ab;">0</span><span class="mono lnk">Commencer<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></div>
+</a>
+
+<a class="tile empty" href="#">
+<div style="display:flex;justify-content:space-between;align-items:center;"><svg class="ic" viewBox="0 0 24 24" style="color:#8f89ab;"><path d="M20 4c-8 0-13 4-13 11l-3 5M20 4c0 8-4 12-11 12M9 16l6-6"/></svg><span class="mono" style="font-size:10.5px;color:#9d97b8;">06</span></div>
+<div>
+<div class="serif" style="font-size:26px;line-height:1.1;">Mes cultures</div>
+<div class="cap" style="margin-top:6px;">Traditions, croyances et rituels de ton univers.</div>
+</div>
+<div class="foot"><span class="serif" style="font-size:40px;line-height:1;color:#8f89ab;">0</span><span class="mono lnk">Commencer<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></div>
+</a>
+
+<a class="tile" href="#" style="grid-column:span 2;min-height:0;flex-direction:row;align-items:center;gap:20px;">
+<svg class="ic" viewBox="0 0 24 24" style="color:#f08aa5;width:22px;height:22px;"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+<div style="flex-grow:1;">
+<div class="serif" style="font-size:26px;line-height:1.1;">Mon profil joueur</div>
+<div class="cap" style="margin-top:4px;">Présente ta plume, tes envies et ton rythme de jeu.</div>
+</div>
+<span class="mono lnk">Modifier<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+</a>
+
+</div>
+</section>
+</div>
+
+<!-- RIGHT -->
+<aside style="width:312px;flex:none;display:flex;flex-direction:column;gap:20px;">
+
+<section class="panel" aria-label="Fiches à enrichir">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div class="mono" style="color:#9d97b8;">Fiches à enrichir</div>
+<div class="mono" style="font-size:10.5px;color:#f08aa5;">3</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px;margin-top:20px;">
+
+<a href="#" style="display:flex;align-items:center;gap:12px;">
+<div class="av serif" style="width:40px;height:48px;flex:none;font-size:16px;">CA</div>
+<div style="flex-grow:1;min-width:0;">
+<div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14.5px;font-weight:600;">Calion</span><span class="mono" style="font-size:10.5px;color:#d5cfe8;">60%</span></div>
+<div style="font-size:12.5px;color:#9d97b8;margin:2px 0 8px;">Entourage Nakamura</div>
+<div class="seg"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></div>
+</div>
+</a>
+
+<a href="#" style="display:flex;align-items:center;gap:12px;">
+<div class="av serif" style="width:40px;height:48px;flex:none;font-size:16px;">SN</div>
+<div style="flex-grow:1;min-width:0;">
+<div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14.5px;font-weight:600;">Shizuka Nakamura</span><span class="mono" style="font-size:10.5px;color:#d5cfe8;">40%</span></div>
+<div style="font-size:12.5px;color:#9d97b8;margin:2px 0 8px;">Clan Nakamura</div>
+<div class="seg"><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div>
+</div>
+</a>
+
+<a href="#" style="display:flex;align-items:center;gap:12px;">
+<div class="av serif" style="width:40px;height:48px;flex:none;font-size:16px;">IS</div>
+<div style="flex-grow:1;min-width:0;">
+<div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14.5px;font-weight:600;">Isil</span><span class="mono" style="font-size:10.5px;color:#d5cfe8;">20%</span></div>
+<div style="font-size:12.5px;color:#9d97b8;margin:2px 0 8px;">Entourage Nakamura</div>
+<div class="seg"><i class="f"></i><i></i><i></i><i></i><i></i></div>
+</div>
+</a>
+
+</div>
+<div style="margin-top:20px;padding-top:14px;border-top:1px solid rgba(226,214,255,.12);font-size:12px;line-height:1.6;color:#9d97b8;">Identité · Caractère · Apparence · Histoire · Relations</div>
+</section>
+
+<section class="panel" aria-label="Visites" style="border-style:dashed;background:transparent;">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div class="mono" style="color:#9d97b8;">Visites de tes fiches</div>
+<div class="mono" style="font-size:10px;color:#8f89ab;border:1px solid rgba(226,214,255,.2);border-radius:3px;padding:3px 6px;">Bientôt</div>
+</div>
+<svg viewBox="0 0 272 64" style="display:block;width:100%;height:64px;margin-top:22px;" aria-hidden="true"><path d="M0 48H272" stroke="rgba(226,214,255,.22)" stroke-width="1" stroke-dasharray="3 4" fill="none"/></svg>
+<div style="margin-top:14px;font-size:13.5px;line-height:1.5;color:#b7b1cf;">Ici apparaîtront les visites sur tes personnages, tes lieux et tes articles.</div>
+</section>
+
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
