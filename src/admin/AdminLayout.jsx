@@ -31,6 +31,10 @@ function Icon({ name, size = 18, className }) {
   )
 }
 
+// Ancre stable de la rubrique « Accueil de la galerie » (voir groupAnchor dans
+// CollectionEditPage.jsx).
+const GALLERY_HASH = '#home-group-accueil-de-la-galerie'
+
 const PAGE_LABELS = { overview: 'Vue d’ensemble', users: 'Utilisateurs', players: 'Joueurs', music: 'Musique du site', culture: 'Culture & hashtags', home: 'Accueil du site' }
 
 // Entrées de la maquette sans route existante : affichées désactivées.
@@ -44,7 +48,7 @@ function SoonItem({ icon, label }) {
 
 export default function AdminLayout({ onLock, currentUser }) {
   const { readOnly, error, reload } = useAdmin()
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [universOpen, setUniversOpen] = useState(true)
   const menuButton = useRef(null)
@@ -66,6 +70,7 @@ export default function AdminLayout({ onLock, currentUser }) {
     }
   }, [menuOpen])
 
+  const galleryActive = pathname.startsWith('/admin/home') && hash === GALLERY_HASH
   const universNames = COLLECTION_NAMES.filter((name) => name !== 'home')
   const segment = pathname.split('/')[2] || ''
   const pageLabel = PAGE_LABELS[segment] || SCHEMA[segment]?.label || ''
@@ -105,10 +110,10 @@ export default function AdminLayout({ onLock, currentUser }) {
           <NavLink to="/admin/players" className="adm-nav__link"><Icon name="sparkle" />Joueurs</NavLink>
 
           <span className="adm-nav__label adm-mono">Publication</span>
-          <NavLink to="/admin/home" className="adm-nav__link"><Icon name="home" />Accueil du site</NavLink>
+          <NavLink to="/admin/home" className={({ isActive }) => `adm-nav__link${isActive && !galleryActive ? ' active' : ''}`}><Icon name="home" />Accueil du site</NavLink>
           <NavLink to="/admin/music" className="adm-nav__link"><Icon name="music" />Musique du site</NavLink>
           <NavLink to="/admin/culture" className="adm-nav__link"><Icon name="hash" />Culture &amp; hashtags</NavLink>
-          <Link to="/admin/home/home#home-group-8" className="adm-nav__link"><Icon name="image" />Galerie</Link>
+          <Link to={`/admin/home/home${GALLERY_HASH}`} className={`adm-nav__link${galleryActive ? ' active' : ''}`} aria-current={galleryActive ? 'page' : undefined}><Icon name="image" />Galerie</Link>
 
           <span className="adm-nav__label adm-mono">Contenus</span>
           <button type="button" className="adm-nav__link adm-nav__button" aria-expanded={universOpen} aria-controls="adm-univers" onClick={() => setUniversOpen((open) => !open)}>

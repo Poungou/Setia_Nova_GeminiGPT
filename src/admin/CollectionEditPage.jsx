@@ -1,16 +1,22 @@
 // src/admin/CollectionEditPage.jsx
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, Link, Navigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
 import { Save, Trash2, ArrowLeft } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import { Field } from './Fields.jsx'
 import { adminStorageLabel, localFileUploadsAvailable } from './adminApi.js'
 
+// Ancre stable d'une rubrique de l'accueil, dérivée de son nom (et non de sa
+// position) : « Accueil de la galerie » -> #home-group-accueil-de-la-galerie.
+// AdminLayout et AdminOverviewPage pointent vers la même ancre.
+const groupAnchor = (group) => `home-group-${group.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`
+
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
 
 export default function CollectionEditPage() {
   const { collection, id } = useParams()
+  const { hash } = useLocation()
   const navigate = useNavigate()
   const s = SCHEMA[collection]
   const { data, save, readOnly, currentUser } = useAdmin()
@@ -50,6 +56,13 @@ export default function CollectionEditPage() {
     for (const f of s?.fields || []) (g[f.group || 'Autres'] ||= []).push(f)
     return g
   }, [s])
+
+  // Les rubriques n'existent qu'une fois les données chargées : on n'amène la
+  // page à l'ancre demandée (#home-group-...) qu'à ce moment-là.
+  useEffect(() => {
+    if (collection !== 'home' || !data || !hash) return
+    document.getElementById(hash.slice(1))?.scrollIntoView()
+  }, [collection, data, hash])
 
   if (collection === 'posts' && !import.meta.env.DEV) return <Navigate to={`/compte/articles/${id}`} replace />
   if (!s) return <p className="adm-muted">Collection inconnue.</p>
@@ -148,7 +161,7 @@ export default function CollectionEditPage() {
       {collection === 'home' && <div className="adm-home-guide">
         <p>Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>
         <a href="/" target="_blank" rel="noreferrer" className="adm-btn">Voir l’accueil ↗</a>
-        <nav aria-label="Rubriques de l’accueil">{Object.keys(groups).map((group, index) => <a key={group} href={`#home-group-${index}`}>{group}</a>)}</nav>
+        <nav aria-label="Rubriques de l’accueil">{Object.keys(groups).map((group) => <a key={group} href={`#${groupAnchor(group)}`}>{group}</a>)}</nav>
       </div>}
 
       {flash === 'saved' && (
@@ -166,8 +179,8 @@ export default function CollectionEditPage() {
           onSave()
         }}
       >
-        {Object.entries(groups).map(([group, fields], index) => (
-          <fieldset key={group} id={collection === 'home' ? `home-group-${index}` : undefined} className="adm-fieldset">
+        {Object.entries(groups).map(([group, fields]) => (
+          <fieldset key={group} id={collection === 'home' ? groupAnchor(group) : undefined} className="adm-fieldset">
             <legend>{group}</legend>
             {fields.map((f) => (
               <div key={f.key} className={`adm-field adm-field--${f.type}`}>

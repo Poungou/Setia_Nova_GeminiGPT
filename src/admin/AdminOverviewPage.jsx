@@ -43,7 +43,7 @@ const CONTENT = [
 
 const PUBLISH = [
   { to: '/admin/home', title: 'Accueil du site', sub: 'Textes, images et repères', icon: 'home' },
-  { to: '/admin/home/home#home-group-8', title: 'Galerie', sub: 'Illustrations et médias', icon: 'image' },
+  { to: '/admin/home/home#home-group-accueil-de-la-galerie', title: 'Galerie', sub: 'Illustrations et médias', icon: 'image' },
   { to: '/admin/music', title: 'Musique du site', sub: 'Ambiance sonore', icon: 'music' },
   { to: '/admin/culture', title: 'Culture & hashtags', sub: 'Repères de la communauté', icon: 'hash' },
 ]
