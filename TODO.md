@@ -346,12 +346,12 @@ Suite à liste de mise à jour donnée par l'utilisatrice (10 points). État :
 
 ## Phase 12 — Rôles, droits précis et modération (branche `feat/roles-moderation`)
 
-Fait (étape A, côté Worker + D1) :
+Fait — étape A (Worker + D1) :
 - [x] Rôles `admin` / `creator` / `journalist` / `guest` (`users.role`), module central
   `worker/lib/permissions.js` (`can`, `getEffectiveRights`) ; l'ancien `status`
   (Membre/RPiste/Invité) n'est plus lu nulle part.
 - [x] Droits précis : droits du rôle + droits ajoutés (`user_permissions`) − droits
-  retirés (`user_revoked_rights`).
+  retirés (`user_revoked_rights`). Le rôle Admin ne s'attribue jamais par l'API.
 - [x] Modération : `review_status` (draft / pending / published / needs_changes /
   hidden) + note, dates, relecteur sur personnages, clans, lieux, articles,
   chronologies de comptes. Le canon (JSON compilé) n'y passe jamais.
@@ -360,29 +360,47 @@ Fait (étape A, côté Worker + D1) :
 - [x] Migration `migrations/0014_roles_moderation.sql` (À APPLIQUER À LA MAIN sur la D1
   distante, après export de sauvegarde — jamais appliquée automatiquement).
 
-À faire / hors périmètre de cette étape :
-- [ ] Étape B : écrans (Utilisateurs et rôles, File de modération, espace utilisateur,
-  bouton « Signaler » côté public). L'écran Utilisateurs actuel est une version
-  transitoire (rôle + interrupteurs de droits), refaite en B1.
+Fait — étape B (écrans) :
+- [x] Admin › Utilisateurs (`design-ref/5`) : bandeau des 4 rôles, liste + recherche,
+  rôle en cartes radio (sans Admin), droits précis en interrupteurs, états écrits en
+  texte (Donné par le rôle / Ajouté par toi / Retiré par toi / Pas dans ce rôle /
+  Toujours actif).
+- [x] Admin › Modération (`design-ref/6`) : `/admin/moderation`, badge dans le menu,
+  onglets À valider / Signalements / Historique, vérifications rapides, motifs rapides,
+  message obligatoire pour correction / refus / masquage, états vides. Compteurs réels
+  dans la Vue d'ensemble.
+- [x] Espace utilisateur (`design-ref/7`) : pastilles d'état, « Envoyer pour validation »,
+  « Corriger et renvoyer », « Message de l'équipe », fiche verrouillée en attente.
+  Invité = paramètres du compte seulement ; Journaliste = Articles seulement.
+- [x] Public : bouton « Signaler » (fenêtre à 3 motifs) sur les fiches de compte, jamais
+  sur le canon.
+
+À faire / hors périmètre :
 - [ ] **Validation des images ajoutées à une fiche déjà publiée** : hors périmètre. Les
   images suivent la fiche (une image ajoutée à une fiche publiée est en ligne sans
   relecture).
 - [ ] **Publication directe par compte** : aujourd'hui une fiche déjà publiée reste
-  publiée quand son auteur la modifie. Prévoir un réglage par compte (« toujours
-  relire ») si besoin.
+  publiée quand son auteur la modifie (publication directe pour tous les comptes).
+  Prévoir un droit précis par compte (« toujours relire ») pour les comptes moins sûrs.
 - [ ] **E-mail de notification** (fiche à valider, correction demandée, fiche validée)
-  via Resend (`worker/lib/mailer.js`) — non branché.
-- [ ] Articles du Journal : le stockage D1 (`posts`) existe et passe par le même
-  circuit que les fiches ; rien à brancher côté serveur. La rubrique Articles de
-  l'espace Journaliste (B3) reste à construire.
-- [ ] `npm run dev` (plugins Vite, sans D1) ne connaît pas les nouvelles routes de rôles
-  et de modération : les écrans de l'étape B se testent avec `npm run cloudflare:preview`
-  (`wrangler dev`). Le portage des plugins de dev n'est pas prévu.
+  via Resend (`worker/lib/mailer.js`) — non branché. Aujourd'hui l'auteur voit l'état de
+  sa fiche dans son espace, rien n'est envoyé par e-mail.
+- [ ] **Contrôle `Origin` sur les anciennes routes d'écriture** : seules les nouvelles
+  routes (envoi pour validation, modération, rôles et droits, signalement) le vérifient
+  (`worker/lib/originGuard.js`). Les routes existantes (`/__account/api/collections`
+  POST/PUT/DELETE, `/__auth/api/users`, `/__admin/api/collections`, upload...) ne l'ont pas.
+- [ ] **Portage de `npm run dev`** (plugins Vite, sans D1) : il ne connaît ni les rôles
+  ni la modération ni les signalements. Les écrans de l'étape B se testent avec
+  `npm run cloudflare:preview` (`wrangler dev`). Le portage des plugins n'est pas prévu.
+- [ ] **Cultures (posts de culture)** : la création reste ouverte à tout compte connecté
+  côté serveur (`worker/lib/cultureService.js`, hors du circuit de droits). L'espace
+  utilisateur masque « Cultures » aux Invités et aux Journalistes, mais ce n'est qu'un
+  masquage d'écran : à rattacher aux droits si la règle doit être stricte.
+- [ ] Le circuit de validation couvre aussi les chronologies (droit « ajouté » seulement,
+  hors droits de base du Créateur).
 - [ ] Tests obsolètes hors `npm test` (chemins d'import périmés, déjà cassés avant
   cette branche) : `test-http-routes`, `test-extra-checklist`, `test-prod-security`,
   `test-delete-user`.
-- [ ] Les routes d'écriture existantes (avant cette branche) n'ont pas de contrôle
-  `Origin` ; seules les nouvelles routes en ont un (`worker/lib/originGuard.js`).
 
 ## Contenu à intégrer dès que disponible
 - [ ] Portraits des 7 personnages (actuellement : initiales KN, HN, FN, CA, SN, IS, MN)
