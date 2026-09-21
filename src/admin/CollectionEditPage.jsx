@@ -1,16 +1,30 @@
 // src/admin/CollectionEditPage.jsx
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
-import { Save, Trash2, ArrowLeft } from 'lucide-react'
+import { Save, Trash2, ArrowLeft, ArrowRight } from 'lucide-react'
 import { SCHEMA } from './schema.js'
 import { useAdmin } from './useAdmin.js'
 import { Field } from './Fields.jsx'
 import { adminStorageLabel, localFileUploadsAvailable } from './adminApi.js'
 
-// Ancre stable d'une rubrique de l'accueil, dérivée de son nom (et non de sa
-// position) : « Accueil de la galerie » -> #home-group-accueil-de-la-galerie.
-// AdminLayout et AdminOverviewPage pointent vers la même ancre.
-const groupAnchor = (group) => `home-group-${group.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`
+// Ancre stable d'une rubrique, dérivée de son nom (et non de sa position) :
+// « Accueil de la galerie » -> #home-group-accueil-de-la-galerie. L'accueil
+// garde son préfixe historique « home-group- » ; AdminLayout et
+// AdminOverviewPage pointent vers la même ancre.
+const groupAnchor = (collection, group) => `${collection === 'home' ? 'home-group' : 'group'}-${group.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`
+const pad = (n) => String(n).padStart(2, '0')
+
+// Égalité profonde, insensible à l'ordre des clés : sert à savoir si le
+// formulaire diffère réellement des données chargées.
+function sameValue(a, b) {
+  if (a === b) return true
+  if (typeof a !== 'object' || typeof b !== 'object' || !a || !b) return false
+  if (Array.isArray(a) !== Array.isArray(b)) return false
+  const ka = Object.keys(a)
+  const kb = Object.keys(b)
+  if (ka.length !== kb.length) return false
+  return ka.every((k) => k in b && sameValue(a[k], b[k]))
+}
 
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
 
@@ -28,8 +42,9 @@ export default function CollectionEditPage() {
   const [form, setForm] = useState(() => ({ ...s?.defaults, ...(collection === 'posts' && isNew ? { visibility: 'draft' } : {}), ...(existing || {}) }))
   const [saving, setSaving] = useState(false)
   const [flash, setFlash] = useState('') // '' | 'saved' | 'error:<msg>'
-  const [dirty, setDirty] = useState(false)
   const skipReset = useRef(false)
+  const headingRef = useRef(null)
+  const firstRubrique = useRef(true)
 
   // (Ré)initialise le formulaire quand on change de fiche, ou quand les données
   // finissent de charger. On saute ce reset juste après un enregistrement
@@ -40,7 +55,6 @@ export default function CollectionEditPage() {
       return
     }
     setForm({ ...s?.defaults, ...(collection === 'posts' && isNew ? { visibility: 'draft' } : {}), ...(existing || {}) })
-    setDirty(false)
     setFlash('')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collection, id, existing])
@@ -57,12 +71,26 @@ export default function CollectionEditPage() {
     return g
   }, [s])
 
-  // Les rubriques n'existent qu'une fois les données chargées : on n'amène la
-  // page à l'ancre demandée (#home-group-...) qu'à ce moment-là.
+  // Une seule rubrique est visible à la fois. La rubrique courante vient de
+  // l'ancre (#home-group-<nom>), ce qui garde les liens directs valides ;
+  // sans ancre reconnue, c'est la première.
+  const groupNames = Object.keys(groups)
+  const found = groupNames.findIndex((name) => groupAnchor(collection, name) === hash.slice(1))
+  const current = found >= 0 ? found : 0
+  const dataReady = Boolean(data)
+
+  // À chaque changement de rubrique (ou arrivée directe sur une ancre), on
+  // ramène le titre de la rubrique à l'écran et on y place le focus, pour que
+  // le clavier et les lecteurs d'écran suivent. Rien au tout premier rendu
+  // sans ancre : la page s'ouvre normalement.
   useEffect(() => {
-    if (collection !== 'home' || !data || !hash) return
-    document.getElementById(hash.slice(1))?.scrollIntoView()
-  }, [collection, data, hash])
+    if (!dataReady) return
+    if (firstRubrique.current) {
+      firstRubrique.current = false
+      if (!hash) return
+    }
+    headingRef.current?.focus()
+  }, [dataReady, current, hash])
 
   if (collection === 'posts' && !import.meta.env.DEV) return <Navigate to={`/compte/articles/${id}`} replace />
   if (!s) return <p className="adm-muted">Collection inconnue.</p>
@@ -77,7 +105,6 @@ export default function CollectionEditPage() {
 
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }))
-    setDirty(true)
   }
 
   const computedId = isNew ? s.makeId(form) : existing.id
@@ -101,7 +128,6 @@ export default function CollectionEditPage() {
       skipReset.current = true
       const savedRows = await save(collection, next)
       setForm(savedRows?.find((r) => r.id === computedId) || row)
-      setDirty(false)
       setFlash('saved')
       setSaving(false)
       if (isNew) navigate(`/admin/${collection}/${encodeURIComponent(computedId)}`, { replace: true })
@@ -130,23 +156,37 @@ export default function CollectionEditPage() {
     if ((isNew && form.id) || (!isNew && form.id !== existing.id)) return <p className="adm-muted">Ouverture de l’article…</p>
     return <Suspense fallback={<p className="adm-muted">Ouverture de l’atelier…</p>}><ArticleComposer
       key={`admin-${id}`} form={form}
-      onChange={(next) => { setForm(next); setDirty(true) }} onSave={onSave} onDelete={onDelete}
+      onChange={setForm} onSave={onSave} onDelete={onDelete}
       saving={saving} readOnly={readOnly} flash={flash} isNew={isNew} backTo="/admin/posts"
       data={data} uploadEnabled={localFileUploadsAvailable} draftScope={`local-admin:${currentUser?.id || 'local'}:${id}`}
     /></Suspense>
   }
 
+  // « Modifications non enregistrées » : seulement si le formulaire diffère
+  // vraiment des données chargées (revenir à la valeur d'origine l'efface).
+  const baseline = { ...s.defaults, ...(collection === 'posts' && isNew ? { visibility: 'draft' } : {}), ...(existing || {}) }
+  const changed = !sameValue(form, baseline)
+
+  const rubrique = groupNames[current]
+  const fields = groups[rubrique] || []
+  const multi = groupNames.length > 1
+  const anchorOf = (name) => groupAnchor(collection, name)
+  const prev = current > 0 ? groupNames[current - 1] : null
+  const next = current < groupNames.length - 1 ? groupNames[current + 1] : null
+
   return (
-    <div className={`adm-edit${collection === 'home' ? ' adm-home-edit' : ''}`}>
+    <div className="adm-edit ed">
       <header className="adm-edit__head">
         <Link to={`/admin/${collection}`} className="adm-btn adm-btn--ghost">
-          <ArrowLeft size={15} /> {s.label}
+          <ArrowLeft size={15} /> Retour
         </Link>
         <div className="adm-edit__title">
           <h1>{isNew ? `Nouveau ${s.singular}` : s.title(form)}</h1>
-          <code>{computedId || '(identifiant à venir)'}</code>
+          {!s.singleton && <code>{computedId || '(identifiant à venir)'}</code>}
+          {collection === 'home' && <p className="ed-lead">Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>}
         </div>
         <div className="adm-edit__actions">
+          {collection === 'home' && <a href="/" target="_blank" rel="noreferrer" className="adm-btn adm-btn--ghost">Voir l’accueil ↗</a>}
           {!isNew && !s.singleton && (
             <button type="button" className="adm-btn adm-btn--danger" onClick={onDelete} disabled={readOnly || saving}>
               <Trash2 size={15} /> Supprimer
@@ -158,30 +198,40 @@ export default function CollectionEditPage() {
         </div>
       </header>
 
-      {collection === 'home' && <div className="adm-home-guide">
-        <p>Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>
-        <a href="/" target="_blank" rel="noreferrer" className="adm-btn">Voir l’accueil ↗</a>
-        <nav aria-label="Rubriques de l’accueil">{Object.keys(groups).map((group) => <a key={group} href={`#${groupAnchor(group)}`}>{group}</a>)}</nav>
-      </div>}
-
       {flash === 'saved' && (
         <div className="adm-banner adm-banner--ok">Enregistré dans {adminStorageLabel}</div>
       )}
       {flash.startsWith('error:') && <div className="adm-banner adm-banner--error">{flash.slice(6)}</div>}
-      {dirty && !saving && flash !== 'saved' && (
+      {changed && !saving && flash !== 'saved' && (
         <div className="adm-banner">Modifications non enregistrées.</div>
       )}
 
-      <form
-        className="adm-form"
-        onSubmit={(e) => {
-          e.preventDefault()
-          onSave()
-        }}
-      >
-        {Object.entries(groups).map(([group, fields]) => (
-          <fieldset key={group} id={collection === 'home' ? groupAnchor(group) : undefined} className="adm-fieldset">
-            <legend>{group}</legend>
+      <div className="ed-body">
+        {multi && (
+          <nav className="ed-rail" aria-label={`Rubriques : ${s.title(form)}`}>
+            <div className="ed-rail__count adm-mono">{groupNames.length} rubriques</div>
+            {groupNames.map((name, index) => (
+              <Link key={name} to={{ hash: `#${anchorOf(name)}` }} replace className={`ed-rail__link${index === current ? ' is-current' : ''}`}
+                aria-current={index === current ? 'step' : undefined}>
+                <b>{pad(index + 1)}</b>{name}
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        <form
+          className="ed-card"
+          id={anchorOf(rubrique)}
+          aria-label={`Rubrique ${rubrique}`}
+          onSubmit={(e) => {
+            e.preventDefault()
+            onSave()
+          }}
+        >
+          {multi && <div className="ed-card__step adm-mono">{pad(current + 1)} / {pad(groupNames.length)}</div>}
+          <h2 ref={headingRef} tabIndex={-1}>{rubrique}</h2>
+
+          <div className="ed-fields">
             {fields.map((f) => (
               <div key={f.key} className={`adm-field adm-field--${f.type}`}>
                 <label htmlFor={`f-${f.key}`}>{f.label}</label>
@@ -196,9 +246,22 @@ export default function CollectionEditPage() {
                 />
               </div>
             ))}
-          </fieldset>
-        ))}
-      </form>
+          </div>
+
+          {multi && (
+            <div className="ed-card__nav">
+              {prev ? (
+                <Link to={{ hash: `#${anchorOf(prev)}` }} replace className="ed-nav-btn"><ArrowLeft size={18} />Précédent</Link>
+              ) : (
+                <span className="ed-nav-btn is-off" aria-disabled="true"><ArrowLeft size={18} />Précédent</span>
+              )}
+              {next && (
+                <Link to={{ hash: `#${anchorOf(next)}` }} replace className="ed-nav-btn">Suivant : {next}<ArrowRight size={18} /></Link>
+              )}
+            </div>
+          )}
+        </form>
+      </div>
     </div>
   )
 }

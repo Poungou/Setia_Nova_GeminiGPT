@@ -1,12 +1,4 @@
 /* src/admin/admin.css — interface d'administration (hors chrome du site public) */
-.adm-home-edit { max-width: 1100px; margin: 0 auto; }
-.adm-home-edit .adm-edit__head { position: sticky; top: 0; z-index: 5; background: var(--bg-base); padding: 1rem 0; border-bottom: 1px solid var(--line); }
-.adm-home-guide { padding: 1.5rem; margin-bottom: 2rem; background: var(--gradient-card), var(--bg-raised); border: 1px solid var(--line); border-radius: 1rem; }
-.adm-home-guide p { color: var(--ivory-dim); font-size: .9rem; line-height: 1.7; }
-.adm-home-guide nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
-.adm-home-guide nav a { border: 1px solid var(--line); border-radius: 999px; padding: .65rem .85rem; font-size: .75rem; }
-.adm-home-edit .adm-fieldset { scroll-margin-top: 140px; border-radius: 1rem; }
-
 .adm,
 .adm-gate,
 .adm-loading {
@@ -1274,3 +1266,41 @@ a.ov-tile:hover { border-color: rgba(169, 193, 255, .55); background: rgba(255, 
   .ov-tile { min-height: 60px; padding: 0 16px; }
   .ov-tile__title { font-size: 24px; }
 }
+
+/* --- Éditeur de fiche (design-ref/4) ----------------------------------- */
+/* Tout est scopé sous .ed : /compte réutilise .adm-field / .adm-input. */
+.adm-shell .adm-main:has(> .ed) { padding: 0 40px 56px; }
+.adm-shell .adm-main:has(> .ed) .adm-topbar { height: 64px; margin-bottom: 0; }
+.ed { max-width: none; }
+.ed-body { display: flex; align-items: flex-start; gap: 28px; }
+.ed-rail { display: flex; flex-direction: column; gap: 4px; flex: none; width: 208px; }
+.ed-rail__count { padding: 0 14px 10px; font-size: 10.5px; color: var(--adm-ink-4); }
+.ed-rail__link {
+  display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px;
+  border: 1px solid transparent; border-radius: 4px;
+  font-size: 15px; line-height: 1.25; color: var(--adm-ink-2);
+}
+.ed-rail__link:hover { background: rgba(255, 255, 255, .05); color: var(--adm-ink); }
+.ed-rail__link b { flex: none; width: 20px; font: 400 12px var(--adm-font-mono); color: var(--adm-ink-4); }
+.ed-rail__link.is-current { background: rgba(70, 105, 225, .2); border-color: rgba(169, 193, 255, .55); color: #fff; font-weight: 600; }
+.ed-rail__link.is-current b { color: var(--adm-accent); }
+.ed-card {
+  flex: 1 1 0; min-width: 0; padding: 32px;
+  border: 1px solid rgba(200, 210, 255, .16); border-radius: 4px; background: rgba(255, 255, 255, .03);
+}
+.ed-card__step { margin: 0 0 4px; font-size: 12px; color: var(--adm-accent); }
+.ed-card h2 { margin: 0 0 6px; font: 500 38px/1.05 var(--adm-font-serif); letter-spacing: 0; scroll-margin-top: 24px; }
+.ed-card h2:focus { outline: none; }
+.ed-card h2:focus-visible { outline: 3px solid var(--adm-accent); outline-offset: 4px; }
+.ed-fields { display: flex; flex-direction: column; gap: 22px; margin-top: 28px; }
+.ed-card__nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(200, 210, 255, .14); }
+.ed-nav-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 48px; padding: 0 22px; border: 1px solid rgba(200, 210, 255, .32); border-radius: 4px;
+  font-size: 16px; font-weight: 600; white-space: nowrap; color: #d6dcf5;
+}
+.ed-nav-btn:hover { border-color: var(--adm-accent); }
+.ed-nav-btn.is-off { opacity: .45; cursor: default; }
+.ed-nav-btn.is-off:hover { border-color: rgba(200, 210, 255, .32); }
+.ed-nav-btn:last-child:not(:first-child) { margin-left: auto; }
+.ed-lead { margin: 8px 0 0; max-width: 560px; font-size: 16px; line-height: 1.6; color: var(--adm-ink-2); }
