@@ -31,7 +31,7 @@ function Icon({ name, size = 18, className }) {
   )
 }
 
-const PAGE_LABELS = { users: 'Utilisateurs', players: 'Joueurs', music: 'Musique du site', culture: 'Culture & hashtags', home: 'Accueil du site' }
+const PAGE_LABELS = { overview: 'Vue d’ensemble', users: 'Utilisateurs', players: 'Joueurs', music: 'Musique du site', culture: 'Culture & hashtags', home: 'Accueil du site' }
 
 // Entrées de la maquette sans route existante : affichées désactivées.
 function SoonItem({ icon, label }) {
@@ -99,7 +99,7 @@ export default function AdminLayout({ onLock, currentUser }) {
 
         <nav className="adm-nav" aria-label="Navigation administration">
           <span className="adm-nav__label adm-mono">Pilotage</span>
-          <SoonItem icon="grid" label="Vue d’ensemble" />
+          <NavLink to="/admin/overview" className="adm-nav__link"><Icon name="grid" />Vue d’ensemble</NavLink>
           <SoonItem icon="inbox" label="Modération" />
           <NavLink to="/admin/users" className="adm-nav__link"><Icon name="users" />Utilisateurs</NavLink>
           <NavLink to="/admin/players" className="adm-nav__link"><Icon name="sparkle" />Joueurs</NavLink>
