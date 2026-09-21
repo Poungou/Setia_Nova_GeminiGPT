@@ -103,7 +103,7 @@ for (const file of [
   'migrations/0006_user_permissions_and_locations.sql',
   'migrations/0007_optional_user_email.sql',
   'migrations/0008_user_profiles.sql',
-  'migrations/0011_player_profile_characters.sql',
+  'migrations/0011_player_profile_characters.sql', 'migrations/0010_user_posts.sql', 'migrations/0012_timelines.sql', 'migrations/0014_roles_moderation.sql',
 ]) {
   db.exec(readFileSync(file, 'utf8'))
 }
@@ -147,7 +147,7 @@ db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(poungou.id)
 const adminSession = createSessionToken(env, await loginUser(env, { identifier: 'PoungouMedia', password: 'MediaPass123' }))
 
 const tallouna = await register('tallouna-media@test.local', 'TallounaMedia')
-db.prepare("UPDATE users SET status = 'RPiste' WHERE id = ?").run(tallouna.id)
+db.prepare("UPDATE users SET role = 'creator' WHERE id = ?").run(tallouna.id)
 const rpisteSession = createSessionToken(env, await loginUser(env, { identifier: 'TallounaMedia', password: 'MediaPass123' }))
 
 const membre = await register('membre-media@test.local', 'MembreMedia')

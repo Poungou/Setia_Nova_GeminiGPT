@@ -26,7 +26,7 @@ const request = (body, ip = '198.51.100.10') => new Request('https://test.local/
 
 const first = await handleAuth(request({ name: 'Invited', email: 'invited@test.local', password: 'RegisterPass123' }), env, ['register'])
 assert.equal(first.status, 200)
-assert.equal((await first.json()).user.status, 'Invité')
+assert.equal((await first.json()).user.role, 'guest')
 
 for (let index = 0; index < 4; index++) {
   const response = await handleAuth(request({ name: `User${index}`, email: `user${index}@test.local`, password: 'RegisterPass123' }), env, ['register'])
@@ -47,7 +47,7 @@ globalThis.fetch = async (url) => {
 try {
   const valid = await handleAuth(request({ name: 'TurnstileUser', email: 'turnstile@test.local', password: 'RegisterPass123', turnstileToken: 'valid-token' }, '198.51.100.21'), turnstileEnv, ['register'])
   assert.equal(valid.status, 200)
-  assert.equal((await valid.json()).user.status, 'Invité')
+  assert.equal((await valid.json()).user.role, 'guest')
 } finally {
   globalThis.fetch = originalFetch
   db.close()

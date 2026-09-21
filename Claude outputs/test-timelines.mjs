@@ -72,7 +72,7 @@ for (const file of [
   'migrations/0008_user_profiles.sql',
   'migrations/0010_user_posts.sql',
   'migrations/0011_player_profile_characters.sql',
-  'migrations/0012_timelines.sql',
+  'migrations/0012_timelines.sql', 'migrations/0014_roles_moderation.sql',
 ]) {
   db.exec(readFileSync(file, 'utf8'))
 }
@@ -88,7 +88,7 @@ const staticTimelines = JSON.parse(readFileSync('src/data/timelines.json', 'utf8
 const staticEvents = JSON.parse(readFileSync('src/data/events.json', 'utf8'))
 
 function request(path, method = 'GET', body, cookie = '') {
-  const headers = { 'Content-Type': 'application/json' }
+  const headers = { 'Content-Type': 'application/json', Origin: 'https://test.local' }
   if (cookie) headers.Cookie = `woltar_session=${encodeURIComponent(cookie)}`
   return new Request(`https://test.local${path}`, {
     method,
@@ -188,7 +188,13 @@ const published = await handleAccount(
   env,
   ['collections', 'timelines', 'carnets-de-rina'],
 )
-assert(published.status === 200 && (await published.clone().json()).row.visibility === 'published', 'Rina publie sa chronologie')
+// Modération : Rina ne peut pas se publier elle-même (visibility reste draft côté serveur).
+assert(published.status === 200 && (await published.clone().json()).row.visibility === 'draft', 'Rina ne peut pas publier sa chronologie sans validation')
+assert((await handlePublic(request('/__public/api/timelines/carnets-de-rina'), env, ['timelines', 'carnets-de-rina'])).status === 404, 'la chronologie non validée reste invisible')
+assert((await handleAccount(request('/__account/api/collections/timelines/carnets-de-rina/submit', 'POST', {}, rinaSession), env, ['collections', 'timelines', 'carnets-de-rina', 'submit'])).status === 200, 'Rina envoie sa chronologie pour validation')
+const { handleAdmin } = await import('../worker/routes/admin.js')
+const approved = await handleAdmin(request('/__admin/api/moderation/content/timelines/carnets-de-rina/approve', 'POST', {}, adminSession), env, ['moderation', 'content', 'timelines', 'carnets-de-rina', 'approve'])
+assert(approved.status === 200, 'l’admin valide la chronologie')
 
 const publicPublished = await handlePublic(request('/__public/api/timelines'), env, ['timelines'])
 assert((await publicPublished.json()).data.some((t) => t.id === 'carnets-de-rina'), 'une fois publiée, la chronologie apparaît publiquement')

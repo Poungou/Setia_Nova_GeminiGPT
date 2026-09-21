@@ -36,7 +36,7 @@ for (const file of [
   'migrations/0006_user_permissions_and_locations.sql',
   'migrations/0007_optional_user_email.sql',
   'migrations/0008_user_profiles.sql',
-  'migrations/0010_user_posts.sql',
+  'migrations/0010_user_posts.sql', 'migrations/0012_timelines.sql', 'migrations/0014_roles_moderation.sql',
 ]) sqlite.exec(readFileSync(file, 'utf8'))
 
 const env = {

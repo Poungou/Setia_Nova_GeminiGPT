@@ -4,7 +4,7 @@ let passed = 0; let failed = 0
 function assert(condition, label) { if (condition) { passed++; console.log(`  OK  ${label}`) } else { failed++; console.error(`  FAIL ${label}`) } }
 function wrapDb(db) { function bound(sql, params = []) { return { sql, params, bind(...next) { return bound(sql, next) }, async run() { db.prepare(sql).run(...params) }, async first() { return db.prepare(sql).get(...params) ?? null }, async all() { return { results: db.prepare(sql).all(...params) } } } } return { prepare: (sql) => bound(sql), async batch(statements) { db.exec('BEGIN'); try { for (const statement of statements) db.prepare(statement.sql).run(...statement.params); db.exec('COMMIT') } catch (error) { db.exec('ROLLBACK'); throw error } } } }
 const db = new DatabaseSync(':memory:')
-for (const file of ['migrations/0001_init.sql','migrations/0002_deprecate_personas.sql','migrations/0003_creator_profile_and_character_image_meta.sql','migrations/0004_clans_and_members.sql','migrations/0005_account_security.sql','migrations/0006_user_permissions_and_locations.sql','migrations/0007_optional_user_email.sql','migrations/0008_user_profiles.sql','migrations/0011_player_profile_characters.sql']) db.exec(readFileSync(file, 'utf8'))
+for (const file of ['migrations/0001_init.sql','migrations/0002_deprecate_personas.sql','migrations/0003_creator_profile_and_character_image_meta.sql','migrations/0004_clans_and_members.sql','migrations/0005_account_security.sql','migrations/0006_user_permissions_and_locations.sql','migrations/0007_optional_user_email.sql','migrations/0008_user_profiles.sql','migrations/0011_player_profile_characters.sql', 'migrations/0010_user_posts.sql', 'migrations/0012_timelines.sql', 'migrations/0014_roles_moderation.sql']) db.exec(readFileSync(file, 'utf8'))
 const env = { WOLTAR_DB: wrapDb(db), AUTH_SESSION_SECRET: 'profile-test', ALLOW_PUBLIC_REGISTRATION: 'true' }
 const { handleAuth } = await import('../worker/routes/auth.js')
 const { handlePublic } = await import('../worker/routes/public.js')
@@ -29,11 +29,11 @@ assert(player.characters[0]?.id === 'poungou-character', 'les personnages sont r
 assert(!JSON.stringify(player).includes('email') && !JSON.stringify(player).includes('password'), 'aucune donnée privée dans le profil public')
 const tallouna = await register('tallouna@test.local', 'Tallouna'); let tallounaSession = createSessionToken(env, await loginUser(env, { identifier: 'Tallouna', password: 'ProfilePass123' }))
 const forbidden = await handleAccount(request('/__account/api/profile', 'PUT', { profile_public: true }, tallounaSession), env, ['profile'])
-assert(forbidden.status === 403, 'un utilisateur non RPiste ne peut pas créer de profil joueur')
-db.prepare("UPDATE users SET status = 'RPiste' WHERE id = ?").run(tallouna.id)
+assert(forbidden.status === 403, 'un invité ne peut pas créer de profil joueur')
+db.prepare("UPDATE users SET role = 'creator' WHERE id = ?").run(tallouna.id)
 tallounaSession = createSessionToken(env, await loginUser(env, { identifier: 'Tallouna', password: 'ProfilePass123' }))
 const created = await handleAccount(request('/__account/api/profile', 'PUT', { player_intro: 'Tallouna joue.', profile_public: true }, tallounaSession), env, ['profile'])
-assert(created.status === 200 && (await created.clone().json()).profile.player_intro === 'Tallouna joue.', 'Tallouna RPiste peut créer et modifier son profil joueur')
+assert(created.status === 200 && (await created.clone().json()).profile.player_intro === 'Tallouna joue.', 'Tallouna (Créatrice) peut créer et modifier son profil joueur')
 const publicTallouna = await handlePublic(request('/__public/api/players'), env, ['players'])
 assert((await publicTallouna.json()).data.some((entry) => entry.userId === tallouna.id), 'un profil public apparaît dans les joueurs')
 const editedByAdmin = await handleAuth(request(`/__auth/api/users/${tallouna.id}/profile`, 'PUT', { player_intro: 'Profil modifié par admin.', profile_public: true }, adminSession), env, ['users', tallouna.id, 'profile'])

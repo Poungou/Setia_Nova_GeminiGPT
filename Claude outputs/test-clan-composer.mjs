@@ -76,7 +76,7 @@ for (const file of [
   'migrations/0008_user_profiles.sql',
   'migrations/0010_user_posts.sql',
   'migrations/0011_player_profile_characters.sql',
-  'migrations/0012_timelines.sql',
+  'migrations/0012_timelines.sql', 'migrations/0014_roles_moderation.sql',
 ]) {
   db.exec(readFileSync(file, 'utf8'))
 }

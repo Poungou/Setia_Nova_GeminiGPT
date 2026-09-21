@@ -39,7 +39,7 @@ for (const file of [
   'migrations/0003_creator_profile_and_character_image_meta.sql',
   'migrations/0004_clans_and_members.sql', 'migrations/0005_account_security.sql',
   'migrations/0006_user_permissions_and_locations.sql',
-  'migrations/0007_optional_user_email.sql',
+  'migrations/0007_optional_user_email.sql', 'migrations/0010_user_posts.sql', 'migrations/0012_timelines.sql', 'migrations/0014_roles_moderation.sql',
 ]) sqlite.exec(readFileSync(file, 'utf8'))
 const env = { WOLTAR_DB: wrapDb(sqlite), AUTH_SESSION_SECRET: 'admin-create-test', ALLOW_PUBLIC_REGISTRATION: 'true' }
 const { handleAuth } = await import('../worker/routes/auth.js')
@@ -61,17 +61,17 @@ sqlite.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(admin.id)
 const adminSession = createSessionToken(env, await loginUser(env, { email: admin.email, password: 'AdminPass123' }))
 const createdResponse = await handleAuth(authRequest('/__auth/api/users', 'POST', {
   name: 'Tallouna', email: 'tallouna@test.local', password: 'TallounaTemp123', passwordConfirmation: 'TallounaTemp123',
-  role: 'user', status: 'RPiste', active: true,
+  role: 'creator', active: true,
   permissions: { create_character: true, create_clan: true, create_location: true },
 }, adminSession), env, ['users'])
 const createdBody = await createdResponse.json()
 assert(createdResponse.status === 201, 'admin peut créer Tallouna')
-assert(createdBody.user?.name === 'Tallouna' && createdBody.user?.status === 'RPiste', 'le profil créé contient pseudo et statut')
+assert(createdBody.user?.name === 'Tallouna' && createdBody.user?.role === 'creator', 'le profil créé contient pseudo et rôle')
 assert(createdBody.user?.email === 'tallouna@test.local', 'Tallouna est créée avec email')
 assert(!JSON.stringify(createdBody).includes('passwordHash') && !JSON.stringify(createdBody).includes('password_hash'), 'la réponse ne contient aucun hash')
 
 const tallouna = await loginUser(env, { identifier: 'Tallouna', password: 'TallounaTemp123' })
-assert(tallouna.role === 'user' && tallouna.permissions.create_location === true, 'Tallouna peut se connecter avec le mot de passe temporaire')
+assert(tallouna.role === 'creator' && tallouna.permissions.create_location === true, 'Tallouna peut se connecter avec le mot de passe temporaire')
 assert((await loginUser(env, { identifier: 'tallouna', password: 'TallounaTemp123' })).id === tallouna.id, 'la connexion pseudo est insensible à la casse')
 try { await loginUser(env, { identifier: 'Poungou', password: 'TallounaTemp123' }); assert(false, 'un pseudo inconnu est refuse') } catch (error) { assert(error.status === 401, 'un pseudo inconnu est refuse') }
 try { await loginUser(env, { identifier: 'Tallouna', password: 'MauvaisPass123' }); assert(false, 'un mauvais mot de passe est refuse') } catch (error) { assert(error.status === 401, 'un mauvais mot de passe est refuse') }
