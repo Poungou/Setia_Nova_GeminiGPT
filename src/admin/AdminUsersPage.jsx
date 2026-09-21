@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { KeyRound, Plus, RefreshCw, ShieldCheck } from 'lucide-react'
-import { createUser, deleteUser, getUserProfile, listUsers, updateUser, updateUserProfile } from '../lib/authApi.js'
+import { createUser, deleteUser, getUserProfile, listUsers, setUserRight, setUserRole, updateUser, updateUserProfile } from '../lib/authApi.js'
+import { ASSIGNABLE_ROLES, roleLabel } from '../lib/roles.js'
 import { getCollection } from './adminApi.js'
 import { isCharacterLinked } from '../lib/characterLinks.js'
 
@@ -21,7 +22,7 @@ export default function AdminUsersPage() {
   const [creating, setCreating] = useState(false)
   const [formError, setFormError] = useState('')
   const [form, setForm] = useState({
-    name: '', email: '', password: '', passwordConfirmation: '', role: 'user', status: 'Membre', active: true,
+    name: '', email: '', password: '', passwordConfirmation: '', role: 'guest', active: true,
     permissions: { create_character: false, create_clan: false, create_location: false, create_journal_article: false, create_timeline: false },
   })
   const [profileUser, setProfileUser] = useState(null)
@@ -110,6 +111,16 @@ export default function AdminUsersPage() {
     finally { setSaving(false) }
   }
 
+  const replaceUser = (updated) => setUsers((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
+  const changeRole = async (id, role) => {
+    setError('')
+    try { replaceUser((await setUserRole(id, role)).user) } catch (e) { setError(String(e.message || e)) }
+  }
+  const changeRight = async (id, right, enabled) => {
+    setError('')
+    try { replaceUser((await setUserRight(id, right, enabled)).user) } catch (e) { setError(String(e.message || e)) }
+  }
+
   const setFormValue = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const setPermission = (key, value) =>
     setForm((current) => ({ ...current, permissions: { ...current.permissions, [key]: value } }))
@@ -148,7 +159,7 @@ export default function AdminUsersPage() {
       setUsers((current) => [...current, body.user])
       setShowCreate(false)
       setForm({
-        name: '', email: '', password: '', passwordConfirmation: '', role: 'user', status: 'Membre', active: true,
+        name: '', email: '', password: '', passwordConfirmation: '', role: 'guest', active: true,
         permissions: { create_character: false, create_clan: false, create_location: false, create_journal_article: false, create_timeline: false },
       })
       setFlash('Utilisateur créé.')
@@ -186,8 +197,7 @@ export default function AdminUsersPage() {
             <div className="adm-field"><label htmlFor="new-user-email">Email *</label><input id="new-user-email" className="adm-input" type="email" required value={form.email} onChange={(e) => setFormValue('email', e.target.value)} /></div>
             <div className="adm-field"><label htmlFor="new-user-password">Mot de passe temporaire</label><input id="new-user-password" className="adm-input" type="password" autoComplete="new-password" value={form.password} onChange={(e) => setFormValue('password', e.target.value)} required /></div>
             <div className="adm-field"><label htmlFor="new-user-password-confirmation">Confirmation</label><input id="new-user-password-confirmation" className="adm-input" type="password" autoComplete="new-password" value={form.passwordConfirmation} onChange={(e) => setFormValue('passwordConfirmation', e.target.value)} required /></div>
-            <div className="adm-field"><label htmlFor="new-user-role">Rôle technique</label><select id="new-user-role" className="adm-input" value={form.role} onChange={(e) => setFormValue('role', e.target.value)}><option value="user">user</option><option value="admin">admin</option></select></div>
-            <div className="adm-field"><label htmlFor="new-user-status">Statut</label><select id="new-user-status" className="adm-input" value={form.status} onChange={(e) => setFormValue('status', e.target.value)}><option value="Membre">Membre</option><option value="RPiste">RPiste</option><option value="Invité">Invité</option></select></div>
+            <div className="adm-field"><label htmlFor="new-user-role">Rôle</label><select id="new-user-role" className="adm-input" value={form.role} onChange={(e) => setFormValue('role', e.target.value)}>{ASSIGNABLE_ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}</select></div>
             <div className="adm-field"><span>Permissions Woltar Nova</span>{PERMISSIONS.map(([permission, label]) => <label className="adm-check" key={permission}><input type="checkbox" checked={form.permissions[permission]} onChange={(e) => setPermission(permission, e.target.checked)} disabled={form.role === 'admin'} />{label}</label>)}</div>
             <label className="adm-check"><input type="checkbox" checked={form.active} onChange={(e) => setFormValue('active', e.target.checked)} />Compte actif</label>
             {formError && <p className="adm-error">{formError}</p>}
@@ -210,8 +220,7 @@ export default function AdminUsersPage() {
                 </div>
 
                 <dl className="adm-user-meta">
-                  <div><dt>Statut</dt><dd>{user.status || 'Membre'}</dd></div>
-                  <div><dt>Rôle</dt><dd>{user.role}</dd></div>
+                  <div><dt>Rôle</dt><dd>{roleLabel(user.role)}</dd></div>
                   <div><dt>Créé le</dt><dd>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '—'}</dd></div>
                   <div><dt>Personnages</dt><dd>{user.contentCounts?.characters || 0}</dd></div>
                   <div><dt>Clans</dt><dd>{user.contentCounts?.clans || 0}</dd></div>
@@ -225,9 +234,9 @@ export default function AdminUsersPage() {
                       <label className="adm-check" key={permission}>
                         <input
                           type="checkbox"
-                          checked={user.role === 'admin' || user.permissions?.[permission] === true}
+                          checked={user.role === 'admin' || (user.rights || []).includes(permission)}
                           disabled={user.role === 'admin'}
-                          onChange={(e) => patch(user.id, { permissions: { [permission]: e.target.checked } })}
+                          onChange={(e) => changeRight(user.id, permission, e.target.checked)}
                         />
                         {label} {user.role === 'admin' ? '✓' : ''}
                       </label>
@@ -243,19 +252,12 @@ export default function AdminUsersPage() {
                   <select
                     className="adm-input adm-user-control"
                     value={user.role}
-                    onChange={(e) => patch(user.id, { role: e.target.value })}
+                    disabled={user.role === 'admin'}
+                    aria-label={`Rôle de ${user.name || user.email}`}
+                    onChange={(e) => changeRole(user.id, e.target.value)}
                   >
-                    <option value="user">user</option>
-                    <option value="admin">admin</option>
-                  </select>
-                  <select
-                    className="adm-input adm-user-control"
-                    value={user.status || 'Membre'}
-                    onChange={(e) => patch(user.id, { status: e.target.value })}
-                  >
-                    <option value="Membre">Membre</option>
-                    <option value="RPiste">RPiste</option>
-                    <option value="Invité">Invité</option>
+                    {user.role === 'admin' && <option value="admin">{roleLabel('admin')}</option>}
+                    {ASSIGNABLE_ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
                   </select>
                   <label className="adm-check">
                     <input

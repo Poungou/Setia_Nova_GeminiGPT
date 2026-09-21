@@ -116,6 +116,29 @@ export async function updateUser(id, patch) {
   )
 }
 
+// Rôle et droits précis : routes admin (le Worker revérifie tout).
+export async function setUserRole(id, role) {
+  return json(
+    await fetch(`/__admin/api/users/${encodeURIComponent(id)}/role`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    }),
+  )
+}
+
+export async function setUserRight(id, right, enabled) {
+  return json(
+    await fetch(`/__admin/api/users/${encodeURIComponent(id)}/rights`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ right, enabled }),
+    }),
+  )
+}
+
 export async function deleteUser(id) {
   return json(
     await fetch(`${BASE}/users/${encodeURIComponent(id)}`, {

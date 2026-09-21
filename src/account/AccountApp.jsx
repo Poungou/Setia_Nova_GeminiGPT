@@ -27,6 +27,7 @@ import { Field } from '../admin/Fields.jsx'
 import ClanComposer from '../components/ClanComposer/ClanComposer.jsx'
 import '../admin/admin.css'
 import { cultureApi } from '../lib/cultureApi.js'
+import { canManagePlayerProfile, roleLabel, userHasRight } from '../lib/roles.js'
 import AccountDashboard, { Icon } from './AccountDashboard.jsx'
 import './Account.css'
 
@@ -49,11 +50,7 @@ const CREATE_PERMISSION_BY_COLLECTION = {
 }
 
 function canCreate(user, collection) {
-  return user?.role === 'admin' || user?.permissions?.[CREATE_PERMISSION_BY_COLLECTION[collection]] === true
-}
-
-function canManagePlayerProfile(user) {
-  return user?.role === 'admin' || user?.status === 'RPiste'
+  return userHasRight(user, CREATE_PERMISSION_BY_COLLECTION[collection])
 }
 
 function AccountBackendUnavailable() {
@@ -1078,7 +1075,7 @@ function Workspace({ user, onLogout }) {
   const showPosts = canCreate(user, 'posts') || data?.posts?.length > 0
   const showTimelines = canCreate(user, 'timelines') || data?.timelines?.length > 0
   const initial = (user.name || user.email || '?').trim().charAt(0).toUpperCase()
-  const roleLabel = user.role === 'admin' ? 'Admin' : user.status || 'Membre'
+  const roleName = roleLabel(user.role)
   const logout = async () => {
     await logoutAccount().catch(() => {})
     onLogout()
@@ -1127,7 +1124,7 @@ function Workspace({ user, onLogout }) {
         )}
         <div className="acc-user">
           <span className="acc-user__av" aria-hidden="true">{initial}</span>
-          <div><div className="acc-user__name">{user.name || user.email}</div><div className="acc-mono acc-user__role">{roleLabel}</div></div>
+          <div><div className="acc-user__name">{user.name || user.email}</div><div className="acc-mono acc-user__role">{roleName}</div></div>
         </div>
         <button type="button" className="acc-nav__link acc-nav__button" onClick={logout}><Icon name="logout" />Déconnexion</button>
         <Link to="/" className="acc-nav__link"><Icon name="arrow" />Voir le site</Link>

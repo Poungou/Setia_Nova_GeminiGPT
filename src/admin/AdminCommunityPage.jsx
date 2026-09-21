@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { createUserProfile, deleteUserProfile, getUserProfile, listUsers, updateUserProfile } from '../lib/authApi.js'
 import { getAccountBootstrap } from '../lib/accountApi.js'
 import { isCharacterLinked } from '../lib/characterLinks.js'
+import { roleLabel } from '../lib/roles.js'
 
 const FIELDS = [
   ['avatar', 'Avatar', 'input'],
@@ -168,7 +169,7 @@ export default function AdminCommunityPage() {
       {loading && <p className="adm-muted">Chargement...</p>}
       {error && <div className="adm-banner adm-banner--error">{error}</div>}
       {flash && <div className="adm-banner adm-banner--ok">{flash}</div>}
-      {creating && <div className="adm-user-profile-editor"><label htmlFor="player-user">Utilisateur concerné<select id="player-user" className="adm-input" value={selectedUserId} onChange={(event) => setSelectedUserId(event.target.value)}><option value="">Sélectionner un compte</option>{availableUsers.map((user) => <option key={user.id} value={user.id}>{user.name || user.email} - {user.status || 'Membre'}</option>)}</select></label><div className="adm-edit__actions"><button type="button" className="adm-btn adm-btn--ghost" onClick={() => setCreating(false)}>Annuler</button><button type="button" className="adm-btn adm-btn--primary" disabled={!selectedUserId} onClick={create}>Créer</button></div></div>}
+      {creating && <div className="adm-user-profile-editor"><label htmlFor="player-user">Utilisateur concerné<select id="player-user" className="adm-input" value={selectedUserId} onChange={(event) => setSelectedUserId(event.target.value)}><option value="">Sélectionner un compte</option>{availableUsers.map((user) => <option key={user.id} value={user.id}>{user.name || user.email} - {roleLabel(user.role)}</option>)}</select></label><div className="adm-edit__actions"><button type="button" className="adm-btn adm-btn--ghost" onClick={() => setCreating(false)}>Annuler</button><button type="button" className="adm-btn adm-btn--primary" disabled={!selectedUserId} onClick={create}>Créer</button></div></div>}
       <ul className="adm-cards">
         {profileUsers.map((user) => {
           const profile = profiles[user.id]
@@ -178,7 +179,7 @@ export default function AdminCommunityPage() {
               <div className="adm-card__body">
                 {profile.avatar && <img className="player-card__avatar" src={profile.avatar} alt="" />}
                 <strong>{user.name || user.email}</strong>
-                <span className="adm-muted">Statut : {user.status || 'Membre'}</span>
+                <span className="adm-muted">Rôle : {roleLabel(user.role)}</span>
                 <span className="adm-muted">Compte associé : {user.id}</span>
                 <span className="adm-muted">Profil public : {profile.profile_public ? 'oui' : 'non'}</span>
                 <span className="adm-muted">{linkedCharacters.length} personnage(s) rattaché(s), brouillons inclus</span>
