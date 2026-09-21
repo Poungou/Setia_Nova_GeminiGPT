@@ -7,6 +7,7 @@ import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
 import Lightbox from '../../components/Lightbox/Lightbox.jsx'
+import ReportButton from '../../components/ReportButton/ReportButton.jsx'
 import './LocationDetail.css'
 
 function Field({ label, value }) {
@@ -154,6 +155,7 @@ export default function LocationDetail() {
           </Reveal>
 
         </div>
+        <div className="container"><ReportButton contentType="locations" record={location} /></div>
         <p className="container location-detail__back">
           <Link to="/lieux" className="btn">
             ← Retour aux lieux

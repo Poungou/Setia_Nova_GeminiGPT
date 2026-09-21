@@ -1,0 +1,30 @@
+/* Signalement d'une fiche publique (design-ref/7, vue visiteur). Les jetons du
+   thème du site sont utilisés tels quels : clair et sombre restent lisibles. */
+.report { margin: 3rem auto 0; max-width: var(--container, 72rem); padding: 1.25rem 0 0; border-top: 1px solid var(--line); }
+.report__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.report__text { margin: 0; font-size: .9rem; line-height: 1.4; color: var(--ivory-dim); }
+.report__open { min-height: 44px; padding: .5rem 1.1rem; font-size: .9rem; }
+.report__done { margin: .75rem 0 0; min-height: 1px; font-size: .9rem; color: var(--ivory-dim); }
+.report__done:empty { margin: 0; }
+
+.report__dialog {
+  width: min(26rem, calc(100vw - 2rem)); padding: 0; color: var(--ivory);
+  border: 1px solid var(--line-strong); border-radius: 4px; background: var(--bg-raised);
+}
+.report__dialog::backdrop { background: rgba(6, 7, 14, .68); }
+.report__panel { display: flex; flex-direction: column; gap: 1rem; margin: 0; padding: 1.25rem; }
+.report__title { margin: 0; font-family: var(--font-serif, 'Cormorant Garamond', Georgia, serif); font-size: 1.6rem; font-weight: 500; line-height: 1.1; }
+.report__reasons { display: flex; flex-direction: column; gap: .35rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.report__reason { position: relative; display: flex; align-items: center; gap: .7rem; min-height: 44px; font-size: 1rem; cursor: pointer; }
+.report__reason input { position: absolute; opacity: 0; width: 1.4rem; height: 1.4rem; margin: 0; cursor: pointer; }
+.report__rad { flex: none; width: 1.1rem; height: 1.1rem; border: 1.5px solid var(--ivory-dim); border-radius: 50%; }
+.report__reason input:checked + .report__rad { border-color: var(--ivory); background: radial-gradient(var(--ivory) 40%, transparent 45%); }
+.report__reason:has(input:focus-visible) { outline: 2px solid var(--ivory); outline-offset: 2px; }
+.report__error { margin: 0; font-size: .9rem; color: var(--danger, #f0c2cc); }
+.report__actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.report__actions .btn { min-height: 44px; justify-content: center; }
+.report__dialog :is(button):focus-visible { outline: 2px solid var(--ivory); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .report *, .report__dialog { transition: none !important; animation: none !important; }
+}

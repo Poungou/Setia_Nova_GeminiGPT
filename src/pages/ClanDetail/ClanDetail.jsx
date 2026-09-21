@@ -5,6 +5,7 @@ import { imgSrc, imgFocus } from '../../lib/image.js'
 import CharacterCard from '../../components/CharacterCard/CharacterCard.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
+import ReportButton from '../../components/ReportButton/ReportButton.jsx'
 import RelationGraph from '../../components/RelationGraph/RelationGraph.jsx'
 import './ClanDetail.css'
 
@@ -32,6 +33,7 @@ export default function ClanDetail() {
     {places.length > 0 && <section className="clan-panel"><div className="clan-section-heading"><div><span className="eyebrow">Des lieux pour se retrouver</span><h2>Les ancrages du clan</h2></div><MapPin size={24} /></div><div className="clan-places">{places.map(place => <Link className="clan-place" key={place.id} to={`/lieux/${place.id}`}><span className="eyebrow">{place.type || 'Lieu'}</span><h3>{place.name}</h3><p>{place.shortDescription || place.location || 'Explorer ce lieu du clan.'}</p><span className="clan-place__link">Entrer dans ce lieu <ArrowUpRight size={18} /></span></Link>)}</div></section>}
     {members.length > 1 && <section className="clan-panel clan-panel--relations" id="clan-relations"><div className="clan-section-heading"><div><span className="eyebrow">D’un destin à l’autre</span><h2>La constellation des liens</h2></div><Network size={24} /></div><RelationGraph members={members} centerId={clan.centerCharacterId} /></section>}
     {clan.history && <section className="clan-panel clan-panel--history" id="clan-history"><span className="eyebrow">La mémoire du clan</span><h2>Une histoire à transmettre</h2><Prose markdown={clan.history} /></section>}
+    <ReportButton contentType="clans" record={clan} />
     <footer className="clan-detail__footer"><Link className="btn" to="/clans">← Tous les clans</Link><Link to="/univers">Poursuivre l’exploration de l’univers →</Link></footer>
   </article></PageTransition>
 }

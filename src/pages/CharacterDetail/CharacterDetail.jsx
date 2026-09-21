@@ -11,6 +11,7 @@ import SpoilerGate from '../../components/SpoilerGate/SpoilerGate.jsx'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
 import Reveal from '../../components/Reveal/Reveal.jsx'
 import Prose from '../../components/Prose/Prose.jsx'
+import ReportButton from '../../components/ReportButton/ReportButton.jsx'
 import NotFound from '../NotFound/NotFound.jsx'
 import { GlyphRelations, GlyphLocation, GlyphEvents } from '../../components/PixelIcons/PixelGlyphs.jsx'
 import './CharacterDetail.css'
@@ -344,6 +345,7 @@ export default function CharacterDetail() {
             </div>
           </Reveal>
         )}
+        <div className="container"><ReportButton contentType="characters" record={character} /></div>
       </article>
     </PageTransition>
   )
