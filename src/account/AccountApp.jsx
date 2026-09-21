@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, CalendarClock, ChevronDown, ChevronUp, Images, Lock, LogOut, MapPin, PenLine, Plus, Save, Shield, Trash2, UserRound, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronUp, LogOut, Plus, Save, Trash2, X } from 'lucide-react'
 import {
   accountBackendAvailable,
   confirmEmail,
@@ -24,10 +24,10 @@ import {
 } from '../lib/accountApi.js'
 import { SCHEMA } from '../admin/schema.js'
 import { Field } from '../admin/Fields.jsx'
-import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'
 import ClanComposer from '../components/ClanComposer/ClanComposer.jsx'
 import '../admin/admin.css'
-import AccountDashboard from './AccountDashboard.jsx'
+import { cultureApi } from '../lib/cultureApi.js'
+import AccountDashboard, { Icon } from './AccountDashboard.jsx'
 import './Account.css'
 
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
@@ -1023,6 +1023,10 @@ function Workspace({ user, onLogout }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [cultureCount, setCultureCount] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuButton = useRef(null)
+  const closeButton = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -1041,74 +1045,99 @@ function Workspace({ user, onLogout }) {
     load()
   }, [])
 
+  useEffect(() => {
+    let alive = true
+    cultureApi('posts')
+      .then((posts) => {
+        if (alive) setCultureCount(posts.filter((post) => post.ownerUserId === user.id).length)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [user.id])
+
+  // Tiroir mobile : Échap le ferme, le focus entre dans le tiroir puis revient
+  // sur le bouton hamburger à la fermeture.
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const button = menuButton.current
+    closeButton.current?.focus()
+    const onKey = (event) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      button?.focus()
+    }
+  }, [menuOpen])
+
+  const count = (key) => (data ? String(data[key]?.length ?? 0) : null)
+  const showLocations = canCreate(user, 'locations') || data?.locations?.length > 0
+  const showPosts = canCreate(user, 'posts') || data?.posts?.length > 0
+  const showTimelines = canCreate(user, 'timelines') || data?.timelines?.length > 0
+  const initial = (user.name || user.email || '?').trim().charAt(0).toUpperCase()
+  const roleLabel = user.role === 'admin' ? 'Admin' : user.status || 'Membre'
+  const logout = async () => {
+    await logoutAccount().catch(() => {})
+    onLogout()
+  }
+  const link = (to, icon, label, n) => (
+    <NavLink to={to} className="acc-nav__link">
+      <Icon name={icon} />{label}{n != null && <span className="acc-nav__n">{n}</span>}
+    </NavLink>
+  )
+
   return (
     <div className="adm account-workspace">
-      <aside className="adm-side">
-        <div className="adm-side__head">
-          <Link to="/" className="adm-side__logo">Woltar Nova</Link>
-          <span className="adm-side__tag">Compte</span>
-        </div>
-        <nav className="adm-nav">
-          <NavLink to="/compte" end className="adm-nav__link">
-            <UserRound size={16} /> Mon espace
-          </NavLink>
-          <NavLink to="/compte/personnages" className="adm-nav__link">
-            <UserRound size={16} /> Mes personnages
-          </NavLink>
-          <NavLink to="/compte/clans" className="adm-nav__link">
-            <Shield size={16} /> Mes clans
-          </NavLink>
-          {(canCreate(user, 'locations') || data?.locations?.length > 0) && (
-            <NavLink to="/compte/lieux" className="adm-nav__link">
-              <MapPin size={16} /> Mes lieux
-            </NavLink>
-          )}
-          {(canCreate(user, 'posts') || data?.posts?.length > 0) && (
-            <NavLink to="/compte/articles" className="adm-nav__link">
-              <PenLine size={16} /> Mes articles
-            </NavLink>
-          )}
-          {(canCreate(user, 'timelines') || data?.timelines?.length > 0) && (
-            <NavLink to="/compte/chronologies" className="adm-nav__link">
-              <CalendarClock size={16} /> Mes chronologies
-            </NavLink>
-          )}
-          <NavLink to="/culture?mes=1" className="adm-nav__link">Mes cultures</NavLink>
-          {user.role === 'admin' && <NavLink to="/galerie" className="adm-nav__link"><Images size={16} /> Galerie</NavLink>}
-          <NavLink to="/compte/securite" className="adm-nav__link">
-            <Lock size={16} /> Sécurité
-          </NavLink>
-          {canManagePlayerProfile(user) && <NavLink to="/compte/profil" className="adm-nav__link">
-            <UserRound size={16} /> Mon profil joueur
-          </NavLink>}
-          {user.role === 'admin' && (
-            <NavLink to="/admin" className="adm-nav__link">
-              Administration
-            </NavLink>
-          )}
+      <header className="acc-mbar">
+        <button type="button" ref={menuButton} className="acc-mbar__btn" aria-label="Ouvrir le menu" aria-expanded={menuOpen} aria-controls="acc-side" onClick={() => setMenuOpen(true)}>
+          <Icon name="menu" size={20} />
+        </button>
+        <Link to="/compte" className="acc-mbar__brand"><span className="acc-logo" aria-hidden="true">W</span><span>Woltar Nova</span></Link>
+        <span className="acc-user__av" aria-hidden="true">{initial}</span>
+      </header>
+      {menuOpen && <button type="button" className="acc-scrim is-open" aria-label="Fermer le menu" tabIndex={-1} onClick={() => setMenuOpen(false)} />}
+      <aside id="acc-side" className={`acc-side${menuOpen ? ' is-open' : ''}`} onClick={(event) => event.target.closest('a') && setMenuOpen(false)}>
+        <button type="button" ref={closeButton} className="acc-side__close" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)}><Icon name="close" size={20} /></button>
+        <Link to="/" className="acc-side__brand">
+          <span className="acc-logo" aria-hidden="true">W</span>
+          <span><span className="acc-side__name">Woltar Nova</span><span className="acc-mono acc-side__sub" style={{ display: 'block' }}>Compte</span></span>
+        </Link>
+        <nav className="acc-nav" aria-label="Navigation du compte">
+          <NavLink to="/compte" end className="acc-nav__link"><Icon name="home" />Mon espace</NavLink>
+          <div className="acc-mono acc-nav__group">Créations</div>
+          {link('/compte/personnages', 'user', 'Personnages', count('characters'))}
+          {link('/compte/clans', 'shield', 'Clans', count('clans'))}
+          {showLocations && link('/compte/lieux', 'pin', 'Lieux', count('locations'))}
+          {showPosts && link('/compte/articles', 'pen', 'Articles', count('posts'))}
+          {showTimelines && link('/compte/chronologies', 'clock', 'Chronologies', count('timelines'))}
+          {link('/culture?mes=1', 'leaf', 'Cultures', cultureCount === null ? null : String(cultureCount))}
+          {user.role === 'admin' && link('/galerie', 'image', 'Galerie')}
+          <div className="acc-mono acc-nav__group">Compte</div>
+          {canManagePlayerProfile(user) && link('/compte/profil', 'sparkle', 'Profil joueur')}
+          {link('/compte/securite', 'lock', 'Sécurité')}
         </nav>
-        <div className="adm-side__foot">
-          <span className="adm-muted">{user.name || user.email}</span>
-          <ThemeToggle />
-          <button
-            type="button"
-            className="adm-btn adm-btn--ghost"
-            onClick={async () => {
-              await logoutAccount().catch(() => {})
-              onLogout()
-            }}
-          >
-            <LogOut size={15} /> Déconnexion
-          </button>
-          <Link to="/" className="adm-btn adm-btn--ghost">Voir le site</Link>
+        <div className="acc-side__spacer" />
+        {user.role === 'admin' && (
+          <NavLink to="/admin" className="acc-nav__link acc-nav__link--admin">
+            <Icon name="adminShield" />Administration<span className="acc-nav__n">Admin</span>
+          </NavLink>
+        )}
+        <div className="acc-user">
+          <span className="acc-user__av" aria-hidden="true">{initial}</span>
+          <div><div className="acc-user__name">{user.name || user.email}</div><div className="acc-mono acc-user__role">{roleLabel}</div></div>
         </div>
+        <button type="button" className="acc-nav__link acc-nav__button" onClick={logout}><Icon name="logout" />Déconnexion</button>
+        <Link to="/" className="acc-nav__link"><Icon name="arrow" />Voir le site</Link>
       </aside>
       <main className="adm-main">
         {loading && <div className="adm-banner">Chargement...</div>}
         {error && <div className="adm-banner adm-banner--error">{error}</div>}
         {data && (
           <Routes>
-            <Route index element={<AccountDashboard data={data} user={user} canCreate={canCreate} profileAllowed={canManagePlayerProfile(user)} />} />
+            <Route index element={<AccountDashboard data={data} user={user} canCreate={canCreate} profileAllowed={canManagePlayerProfile(user)} cultureCount={cultureCount} />} />
             <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
             {canManagePlayerProfile(user) && <Route path="profil" element={<PlayerProfileSection />} />}
             <Route path=":section" element={<AccountList data={data} user={user} reload={load} />} />
