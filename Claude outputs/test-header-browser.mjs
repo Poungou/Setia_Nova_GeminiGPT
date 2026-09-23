@@ -35,59 +35,51 @@ try {
       })
       await context.addInitScript(value => localStorage.setItem('woltar-theme', value), theme)
       const page = await context.newPage()
-      for (const from of process.argv.includes('--dismiss-only') ? [] : probe ? ['/univers'] : ['/univers', '/journal']) {
-        for (const to of ['/clans', '/lieux', '/chronologie']) {
-          for (const method of probe ? ['click'] : ['click', 'Enter', 'Space']) {
-            await page.goto(origin + from, { waitUntil: 'domcontentloaded' })
-            const activate = async locator => {
-              if (method === 'click') {
-                if (mobile) await locator.tap()
-                else await locator.click()
-              }
-              else { await locator.focus(); await locator.press(method) }
-            }
-            if (mobile) await activate(page.getByRole('button', { name: 'Ouvrir le menu', exact: true }))
-            await activate(page.getByRole('button', { name: mobile ? 'Déplier Univers' : 'Sous-menu Univers', exact: true }))
-            const nav = page.locator(mobile ? '.site-header__nav--mobile' : '.site-header__nav--desktop')
-            const link = nav.locator(`a[href="${to}"]`)
-            await link.waitFor({ state: 'visible' })
-            await delay(220)
-            const hit = await link.evaluate(element => {
-              const box = element.getBoundingClientRect()
-              const x = box.x + box.width / 2
-              const y = box.y + box.height / 2
-              const target = document.elementFromPoint(x, y)
-              return { x, y, ok: element.contains(target), target: target?.outerHTML.slice(0, 200) }
-            })
+      // « Univers » est un lien simple vers /univers : plus de sous-menu.
+      for (const from of probe ? ['/journal'] : ['/journal', '/lieux']) {
+        for (const method of probe ? ['click'] : ['click', 'Enter', 'Space']) {
+          await page.goto(origin + from, { waitUntil: 'domcontentloaded' })
+          const activate = async locator => {
             if (method === 'click') {
-              if (mobile) await page.touchscreen.tap(hit.x, hit.y)
-              else await page.mouse.click(hit.x, hit.y)
+              if (mobile) await locator.tap()
+              else await locator.click()
             }
-            else { await link.focus(); await link.press(method) }
-            let navigated = true
-            try { await page.waitForURL(origin + to, { timeout: 1500 }) } catch { navigated = false }
-            const closed = mobile ? await page.locator('#navigation-mobile').count() === 0 : await page.locator('#universe-desktop').isHidden()
-            const ok = hit.ok && navigated && closed
-            checks++
-            if (!ok) failures++
-            console.log(JSON.stringify({ ok, theme, mobile, from, to, method, hit: hit.ok, interceptedBy: hit.ok ? undefined : hit.target, navigated, closed }))
+            else { await locator.focus(); await locator.press(method) }
           }
+          if (mobile) await activate(page.getByRole('button', { name: 'Ouvrir le menu', exact: true }))
+          const nav = page.locator(mobile ? '.site-header__nav--mobile' : '.site-header__nav--desktop')
+          const link = nav.locator('a[href="/univers"]')
+          await link.waitFor({ state: 'visible' })
+          const noSubmenu = await page.locator('.site-header__caret, .site-header__submenu, #universe-desktop, #universe-mobile').count() === 0
+          const hit = await link.evaluate(element => {
+            const box = element.getBoundingClientRect()
+            const x = box.x + box.width / 2
+            const y = box.y + box.height / 2
+            const target = document.elementFromPoint(x, y)
+            return { x, y, ok: element.contains(target), target: target?.outerHTML.slice(0, 200) }
+          })
+          if (method === 'click') {
+            if (mobile) await page.touchscreen.tap(hit.x, hit.y)
+            else await page.mouse.click(hit.x, hit.y)
+          }
+          else { await link.focus(); await link.press(method) }
+          let navigated = true
+          try { await page.waitForURL(origin + '/univers', { timeout: 1500 }) } catch { navigated = false }
+          const closed = !mobile || await page.locator('#navigation-mobile').count() === 0
+          const ok = hit.ok && navigated && closed && noSubmenu
+          checks++
+          if (!ok) failures++
+          console.log(JSON.stringify({ ok, theme, mobile, from, method, hit: hit.ok, interceptedBy: hit.ok ? undefined : hit.target, navigated, closed, noSubmenu }))
         }
       }
-      if (!probe) {
-        for (const dismiss of mobile ? ['Escape', 'outside'] : ['Escape', 'outside', 'Tab']) {
+      if (!probe && mobile) {
+        for (const dismiss of ['Escape', 'outside']) {
           await page.goto(origin + '/univers', { waitUntil: 'domcontentloaded' })
-          if (mobile) await page.getByRole('button', { name: 'Ouvrir le menu', exact: true }).tap()
-          const toggle = page.getByRole('button', { name: mobile ? 'Déplier Univers' : 'Sous-menu Univers', exact: true })
-          await toggle.click()
+          await page.getByRole('button', { name: 'Ouvrir le menu', exact: true }).tap()
           if (dismiss === 'Escape') await page.keyboard.press('Escape')
-          else if (dismiss === 'outside') await page.locator('main').click({ position: { x: 5, y: 5 } })
-          else {
-            await page.locator('#universe-desktop a').last().focus()
-            await page.keyboard.press('Tab')
-          }
-          const closed = mobile ? await page.locator('#navigation-mobile').count() === 0 : await page.locator('#universe-desktop').isHidden()
-          const focusRestored = dismiss !== 'Escape' || await page.locator(mobile ? '.site-header__toggle' : '.site-header__nav--desktop .site-header__caret').evaluate(element => element === document.activeElement)
+          else await page.locator('main').click({ position: { x: 5, y: 5 } })
+          const closed = await page.locator('#navigation-mobile').count() === 0
+          const focusRestored = dismiss !== 'Escape' || await page.locator('.site-header__toggle').evaluate(element => element === document.activeElement)
           const ok = closed && focusRestored
           checks++
           if (!ok) failures++

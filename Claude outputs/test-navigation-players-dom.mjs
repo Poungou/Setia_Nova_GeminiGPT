@@ -40,48 +40,39 @@ test('DOM: universal navigation, account access, public players, nested spoilers
     await mount(h(Header))
     assert.equal(document.querySelector('.site-header__account').getAttribute('href'), '/compte')
     assert.equal(document.querySelector('.site-header__account').textContent, 'Alice')
-    const caret = document.querySelector('.site-header__nav--desktop .site-header__caret')
-    await click(caret)
-    assert.equal(caret.getAttribute('aria-expanded'), 'true')
-    assert.equal(document.getElementById('universe-desktop').hidden, false)
-    await act(async () => document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })))
-    assert.equal(document.getElementById('universe-desktop').hidden, true)
-    assert.equal(document.activeElement, caret)
-    await click(caret)
-    await act(async () => document.body.dispatchEvent(new window.Event('pointerdown', { bubbles: true })))
-    assert.equal(caret.getAttribute('aria-expanded'), 'false')
+    // « Univers » est un lien simple : plus de sous-menu ni de chevron.
+    assert.equal(document.querySelector('.site-header__caret'), null)
+    assert.equal(document.getElementById('universe-desktop'), null)
+    const desktopUnivers = [...document.querySelectorAll('.site-header__nav--desktop a')].find((link) => link.textContent === 'Univers')
+    assert.equal(desktopUnivers.getAttribute('href'), '/univers')
     await click(document.querySelector('.site-header__toggle'))
     const mobile = document.getElementById('navigation-mobile')
-    await click(mobile.querySelector('.site-header__caret'))
-    assert.equal(document.querySelectorAll('#universe-mobile a').length, 4)
-    await click(document.querySelector('#universe-mobile a[href="/lieux"]'))
+    assert.equal(mobile.querySelector('.site-header__caret'), null)
+    assert.equal(document.getElementById('universe-mobile'), null)
+    assert.equal(mobile.querySelector('a[href="/univers"]').textContent, 'Univers')
+    await act(async () => document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })))
     assert.equal(document.getElementById('navigation-mobile'), null)
-    await click(document.querySelector('.site-header__toggle'))
-    await click(document.querySelector('#navigation-mobile .site-header__caret'))
-    assert(document.querySelector('#universe-mobile a[href="/chronologie"]'), 'still works after changing route')
+    assert.equal(document.activeElement, document.querySelector('.site-header__toggle'))
 
-    // Assert router navigation, not merely the menu closing. Browser tests
-    // additionally cover hit testing and native Enter/Space activation.
-    for (const origin of ['/univers', '/journal']) {
+    // Le lien Univers navigue vraiment (desktop et mobile), et reste allumé sur
+    // les pages qui en dépendent (Clans, Lieux, Chronologie, Culture).
+    for (const origin of ['/journal', '/lieux']) {
       for (const mobile of [false, true]) {
-        for (const destination of ['/clans', '/lieux', '/chronologie']) {
-          for (const method of ['click', 'space']) {
-            await mount(h(React.Fragment, null, h(Header), h(LocationProbe)), `${origin}?case=${mobile}-${destination}-${method}`)
-            if (mobile) await click(document.querySelector('.site-header__toggle'))
-            const trigger = document.querySelector(mobile ? '#navigation-mobile .site-header__caret' : '.site-header__nav--desktop .site-header__caret')
-            await click(trigger)
-            const entry = document.querySelector(`${mobile ? '#universe-mobile' : '#universe-desktop'} a[href="${destination}"]`)
-            await act(async () => { trigger.focus(); entry.focus() })
-            assert.equal(trigger.getAttribute('aria-expanded'), 'true', 'focus within menu must not close it')
-            if (method === 'click') await click(entry)
-            else await act(async () => entry.dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })))
-            assert.equal(document.getElementById('current-route').textContent, destination)
-            assert.equal(document.getElementById('universe-desktop').hidden, true)
-            assert.equal(document.getElementById('navigation-mobile'), null)
-          }
-        }
+        await mount(h(React.Fragment, null, h(Header), h(LocationProbe)), `${origin}?case=${mobile}`)
+        if (mobile) await click(document.querySelector('.site-header__toggle'))
+        const nav = document.querySelector(mobile ? '#navigation-mobile' : '.site-header__nav--desktop')
+        await click(nav.querySelector('a[href="/univers"]'))
+        assert.equal(document.getElementById('current-route').textContent, '/univers')
+        assert.equal(document.getElementById('navigation-mobile'), null)
       }
     }
+    for (const section of ['/univers', '/clans', '/clans/nakamura', '/lieux', '/chronologie', '/culture']) {
+      await mount(h(Header), section)
+      const link = document.querySelector('.site-header__nav--desktop a[href="/univers"]')
+      assert(link.classList.contains('is-active'), `Univers should stay active on ${section}`)
+    }
+    await mount(h(Header), '/journal')
+    assert(!document.querySelector('.site-header__nav--desktop a[href="/univers"]').classList.contains('is-active'))
     globalThis.fetch = async () => ({ ok: true, json: async () => ({ user: null }) })
     await mount(h(Header), '/visiteur')
     assert.equal(document.querySelector('.site-header__account').textContent, 'Connexion')
