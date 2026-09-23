@@ -37,7 +37,7 @@ try {
       const page = await context.newPage()
       // « Univers » est un lien simple vers /univers : plus de sous-menu.
       for (const from of probe ? ['/journal'] : ['/journal', '/lieux']) {
-        for (const method of probe ? ['click'] : ['click', 'Enter', 'Space']) {
+        for (const method of probe ? ['click'] : ['click', 'Enter']) {
           await page.goto(origin + from, { waitUntil: 'domcontentloaded' })
           const activate = async locator => {
             if (method === 'click') {
