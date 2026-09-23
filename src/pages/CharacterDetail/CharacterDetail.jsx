@@ -33,7 +33,7 @@ const portraitVariant = {
 // Champs affichés dans la barre d'identité horizontale, sous le hero.
 // Un champ vide ne génère aucun chip (pas de "—" affiché) : voir IdentityChip.
 const IDENTITY_BAR_FIELDS = [
-  { key: 'clan', label: 'Clan' },
+  { key: 'clan', label: 'Famille' },
   { key: 'occupation', label: 'Occupation' },
   { key: 'age', label: 'Âge' },
   { key: 'species', label: 'Espèce' },
@@ -109,7 +109,7 @@ export default function CharacterDetail() {
   const sectionsNav = [
     { id: 'identite', label: 'Identité', show: true },
     { id: 'histoire', label: 'Histoire', show: true },
-    { id: 'relations', label: 'Liens du clan', show: relations.length > 0 },
+    { id: 'relations', label: 'Liens de la famille', show: relations.length > 0 },
     { id: 'chronologie', label: 'Chronologie', show: personalEvents.length > 0 },
     { id: 'galerie', label: 'Galerie', show: character.gallery?.length > 0 },
   ].filter((s) => s.show)
@@ -321,7 +321,7 @@ export default function CharacterDetail() {
           <Reveal as="section" id="relations" className="container character-section character-section--relations">
             <h2 className="eyebrow aside-heading">
               <GlyphRelations />
-              Liens du clan
+              Liens de la famille
             </h2>
             <RelationGraph members={relationNetwork.members} centerId={character.id} />
           </Reveal>

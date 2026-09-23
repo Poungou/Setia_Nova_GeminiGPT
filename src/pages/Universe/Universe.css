@@ -112,3 +112,21 @@
     padding: var(--space-3);
   }
 }
+
+/* Carnet communautaire : styles limités à l’entrée Univers. */
+.universe-heading { position: relative; padding: 1.5rem 0 2rem; }
+.universe-heading .section-title { font-size: clamp(2.6rem, 5.5vw, 4.8rem); line-height: 1.08; margin: 1rem 0; }
+.universe-heading .section-title em { color: var(--ivory-dim); font-weight: 400; }
+.universe-heading > p { max-width: 54ch; color: var(--ivory-dim); }
+.universe-heading__note { display: inline-flex; align-items: center; gap: .6rem; margin-top: 1.2rem; font-size: .8rem; color: var(--ivory-dim); }
+.universe-grid--featured .universe-card,
+.universe-grid--reference .universe-card { position: relative; overflow: hidden; background: radial-gradient(ellipse at top right, var(--wine-soft), transparent 70%), var(--gradient-card); }
+.universe-card__chapter { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; color: var(--ivory-dim); }
+.universe-card__chapter span { font-family: var(--font-mono); font-size: .75rem; letter-spacing: .15em; }
+.universe-card--featured::after { content: ''; position: absolute; width: 11rem; height: 11rem; border: 1px solid var(--line); border-radius: 50%; right: -4rem; top: 2rem; pointer-events: none; background: radial-gradient(circle at 30% 25%, var(--ivory-dim) 0 2px, transparent 3px), radial-gradient(circle at 25% 75%, var(--ivory-dim) 0 2px, transparent 3px); opacity: .35; }
+.universe-card--featured > * { position: relative; z-index: 1; }
+.universe-card__pin { align-self: flex-start; max-width: 100%; box-sizing: border-box; }
+.universe-card__explore { display: flex; align-items: center; gap: .5rem; padding-top: 1.5rem; margin-top: auto; font-size: .8rem; }
+.universe-card--reference .universe-card__chapter { margin-bottom: 1rem; }
+.universe-card:focus-visible { outline: 2px solid var(--ivory-dim); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .universe-card { transition: none; } .universe-card:not(.universe-card--static):hover { transform: none; } }

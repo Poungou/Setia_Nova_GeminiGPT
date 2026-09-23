@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react'
 import './SearchBar.css'
 
-export default function SearchBar({ value, onChange, placeholder = 'Rechercher un nom, un clan, un lieu…' }) {
+export default function SearchBar({ value, onChange, placeholder = 'Rechercher un nom, une famille, un lieu…' }) {
   return (
     <div className="search-bar">
       <Search size={18} aria-hidden="true" />

@@ -13,6 +13,7 @@ export default function Clans() {
   // permet à un clan créé depuis un compte joueur d'apparaître ici sans
   // reconstruire le site.
   const clans = usePublicClans()
+  const orderedClans = [...clans.filter(clan => clan.id === 'nakamura'), ...clans.filter(clan => clan.id !== 'nakamura')]
   const reduce = useReducedMotion()
   const motionProps = reduce
     ? {}
@@ -29,11 +30,12 @@ export default function Clans() {
       <section className="container universe-page">
         <Reveal className="section-heading">
           <span className="eyebrow">Sociétés</span>
-          <h1 className="section-title">Clans de Woltar</h1>
+          <h1 className="section-title">Familles de Woltar</h1>
         </Reveal>
         <div className="universe-grid">
-          {clans.map((clan) => (
+          {orderedClans.map((clan) => (
             <MotionLink key={clan.id} to={`/clans/${clan.id}`} className="universe-card" {...motionProps}>
+              {clan.id === 'nakamura' && <span className="universe-card__pin">Famille vedette · Nakamura</span>}
               <h2>{clan.name}</h2>
               <p>{clan.description || '—'}</p>
             </MotionLink>

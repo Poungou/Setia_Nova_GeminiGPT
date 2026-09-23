@@ -35,7 +35,7 @@ const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleCo
 
 const SECTIONS = {
   personnages: { collection: 'characters', label: 'Mes personnages', singular: 'personnage' },
-  clans: { collection: 'clans', label: 'Mes clans', singular: 'clan' },
+  clans: { collection: 'clans', label: 'Mes familles', singular: 'famille' },
   lieux: { collection: 'locations', label: 'Mes lieux', singular: 'lieu' },
   articles: { collection: 'posts', label: 'Mes articles', singular: 'article' },
   chronologies: { collection: 'timelines', label: 'Mes chronologies', singular: 'chronologie' },
@@ -638,7 +638,7 @@ function AccountList({ data, user, reload }) {
         </div>
         {canCreate(user, config.collection) && (
           <Link to={`/compte/${section}/new`} className="adm-btn adm-btn--primary">
-            <Plus size={16} /> Creer un {config.singular}
+            <Plus size={16} /> Créer {config.collection === 'clans' ? 'une' : 'un'} {config.singular}
           </Link>
         )}
       </header>
@@ -943,7 +943,7 @@ function AccountEdit({ data, reload, user }) {
           <ArrowLeft size={15} /> {config.label}
         </Link>
         <div className="adm-edit__title">
-          <h1>{isNew ? `Nouveau ${config.singular}` : schema.title(form)}</h1>
+          <h1>{isNew ? `${config.collection === 'clans' ? 'Nouvelle' : 'Nouveau'} ${config.singular}` : schema.title(form)}</h1>
           <code>{computedId || '(identifiant à venir)'}</code>
         </div>
         <div className="adm-edit__actions">
@@ -1110,7 +1110,7 @@ function Workspace({ user, onLogout }) {
           <NavLink to="/compte" end className="acc-nav__link"><Icon name="home" />Mon espace</NavLink>
           <div className="acc-mono acc-nav__group">Créations</div>
           {link('/compte/personnages', 'user', 'Personnages', count('characters'))}
-          {link('/compte/clans', 'shield', 'Clans', count('clans'))}
+          {link('/compte/clans', 'shield', 'Familles', count('clans'))}
           {showLocations && link('/compte/lieux', 'pin', 'Lieux', count('locations'))}
           {showPosts && link('/compte/articles', 'pen', 'Articles', count('posts'))}
           {showTimelines && link('/compte/chronologies', 'clock', 'Chronologies', count('timelines'))}

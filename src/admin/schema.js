@@ -102,10 +102,10 @@ export const SCHEMA = {
       { key: 'lastName', label: 'Nom', type: 'text', group: 'Identité' },
       { key: 'nickname', label: 'Surnom', type: 'text', group: 'Identité' },
       { key: 'title', label: 'Titre / accroche', type: 'text', group: 'Identité' },
-      { key: 'clan', label: 'Clan (texte affiché)', type: 'text', group: 'Identité' },
+      { key: 'clan', label: 'Famille (texte affiché)', type: 'text', group: 'Identité' },
       {
-        key: 'clanId', label: 'Clan (id de fiche)', type: 'text', group: 'Identité',
-        hint: 'Id d’un clan de src/data/clans.json (ex. "nakamura"), pour lier proprement vers /clans/:id. Laisser vide si le clan n’a pas encore sa propre fiche — le nom en texte ci-dessus reste alors affiché sans lien.',
+        key: 'clanId', label: 'Famille (id de fiche)', type: 'text', group: 'Identité',
+        hint: 'Id d’une famille de src/data/clans.json (ex. "nakamura"), pour lier proprement vers /clans/:id. Laisser vide si la famille n’a pas encore sa propre fiche — le nom en texte ci-dessus reste alors affiché sans lien.',
       },
       { key: 'status', label: 'Statut', type: 'select', options: STATUS, group: 'Identité' },
       { key: 'canon', label: 'Fiabilité', type: 'select', options: CANON, group: 'Identité' },
@@ -206,8 +206,8 @@ export const SCHEMA = {
   },
 
   clans: {
-    label: 'Clans',
-    singular: 'clan',
+    label: 'Familles',
+    singular: 'famille',
     icon: 'Shield',
     order: 3,
     title: (r) => r.name || r.id,
@@ -222,7 +222,7 @@ export const SCHEMA = {
       { key: 'visibility', label: 'Publication', type: 'select', options: VISIBILITY, group: 'Publication' },
       {
         key: 'ownerUserId', label: 'Propriétaire', type: 'text', group: 'Publication',
-        hint: 'system = clan historique/admin protégé. Les comptes joueurs sont assignés côté serveur.',
+        hint: 'system = famille historique/admin protégée. Les comptes joueurs sont assignés côté serveur.',
       },
       { key: 'name', label: 'Nom', type: 'text', group: 'Identité' },
       { key: 'canon', label: 'Fiabilité', type: 'select', options: CANON, group: 'Identité' },
@@ -233,7 +233,7 @@ export const SCHEMA = {
       {
         key: 'members', label: 'Membres', type: 'refs', ref: 'characters', group: 'Liens',
         accountHidden: true,
-        hint: 'Depuis /compte, les membres s’ajoutent via la section « Membres du clan » de la fiche, pas ici.',
+        hint: 'Depuis /compte, les membres s’ajoutent via la section « Membres de la famille » de la fiche, pas ici.',
       },
       { key: 'locations', label: 'Lieux', type: 'refs', ref: 'locations', dataKey: 'locationsCatalog', group: 'Liens' },
       {
@@ -241,7 +241,7 @@ export const SCHEMA = {
         label: 'Personnage central du sociogramme',
         type: 'characterSelect',
         group: 'Liens',
-        hint: 'Affiché au centre du schéma « Liens du clan ». Si vide, le personnage ayant le plus de liens renseignés est choisi automatiquement.',
+        hint: 'Affiché au centre du schéma « Liens de la famille ». Si vide, le personnage ayant le plus de liens renseignés est choisi automatiquement.',
       },
     ],
   },
@@ -354,7 +354,7 @@ export const SCHEMA = {
   //     petites références, sa relation avec Woltar).
   //   - system_prompt : instructions supplémentaires de l'administratrice
   //     (contraintes, rappels, cas particuliers).
-  // Les connaissances de Woltar (personnages, clans, lieux) ne se recopient
+  // Les connaissances de Woltar (personnages, familles, lieux) ne se recopient
   // JAMAIS ici : elles sont assemblées automatiquement à chaque requête à
   // partir des données du site — voir plugins/lib/aetherPrompt.js.
   aether: {
@@ -381,7 +381,7 @@ export const SCHEMA = {
       },
       {
         key: 'system_prompt', label: 'Instructions supplémentaires', type: 'textarea', group: 'Instructions',
-        hint: 'Contraintes ou rappels additionnels pour Aether. Les connaissances de Woltar (personnages, clans, lieux) sont ajoutées automatiquement — inutile de les recopier ici.',
+        hint: 'Contraintes ou rappels additionnels pour Aether. Les connaissances de Woltar (personnages, familles, lieux) sont ajoutées automatiquement — inutile de les recopier ici.',
       },
     ],
   },

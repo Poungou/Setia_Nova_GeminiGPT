@@ -36,7 +36,7 @@ const DRAFT_COLLECTIONS = ['characters', 'clans', 'locations', 'posts', 'timelin
 
 const CONTENT = [
   { key: 'characters', to: '/admin/characters', title: 'Personnages', sub: 'Fiches et portraits', icon: 'user' },
-  { key: 'clans', to: '/admin/clans', title: 'Clans', sub: 'Familles et liens', icon: 'shield' },
+  { key: 'clans', to: '/admin/clans', title: 'Familles', sub: 'Familles et liens', icon: 'shield' },
   { key: 'locations', to: '/admin/locations', title: 'Lieux', sub: 'Décors de l’univers', icon: 'pin' },
   { key: 'posts', to: '/admin/posts', title: 'Articles', sub: 'Journal', icon: 'pen' },
 ]

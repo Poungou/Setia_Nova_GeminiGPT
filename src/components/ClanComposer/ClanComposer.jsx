@@ -8,7 +8,7 @@
 //
 // Rien de nouveau côté données : on continue d'utiliser EXACTEMENT ce qui
 // existait déjà —
-//   - identité du clan       -> mêmes champs SCHEMA.clans (Field générique)
+//   - identité de la famille       -> mêmes champs SCHEMA.clans (Field générique)
 //   - membres                -> même table clan_members, mêmes appels
 //                                accountApi (getClanMembers/addClanMember/
 //                                removeClanMember), juste une présentation
@@ -59,7 +59,7 @@ function MiniPortrait({ character, size = 'md' }) {
 }
 
 // ---------------------------------------------------------------------
-// Bloc A — identité du clan : mêmes champs qu'avant (SCHEMA.clans, moins
+// Bloc A — identité de la famille : mêmes champs qu'avant (SCHEMA.clans, moins
 // `members` déjà accountHidden et `centerCharacterId` retiré ici pour
 // vivre dans le Bloc D à la place), regroupés en sous-sections compactes
 // au lieu d'un long formulaire vertical. Le champ Emblème (type "image")
@@ -68,7 +68,7 @@ function MiniPortrait({ character, size = 'md' }) {
 function ClanIdentityBlock({ fieldGroups, form, setField, data, disabled }) {
   return (
     <section className="clan-block clan-block--identity">
-      <h2 className="clan-block__title">Identité du clan</h2>
+      <h2 className="clan-block__title">Identité de la famille</h2>
       <div className="clan-identity__groups">
         {Object.entries(fieldGroups).map(([group, groupFields]) => (
           <fieldset key={group} className="adm-fieldset clan-identity__group">
@@ -177,7 +177,7 @@ function ClanMembersBlock({ clanId, data, user, memberRows, setMemberRows, disab
                 className="adm-btn adm-btn--danger clan-member-card__remove"
                 onClick={() => onRemove(m.id)}
                 disabled={disabled}
-                aria-label={`Retirer ${fullName(m)} du clan`}
+                aria-label={`Retirer ${fullName(m)} de la famille`}
               >
                 <Trash2 size={14} /> Retirer
               </button>
@@ -219,7 +219,7 @@ function ClanMembersBlock({ clanId, data, user, memberRows, setMemberRows, disab
               <li className="adm-muted">
                 {user.role === 'admin'
                   ? 'Aucun autre personnage disponible.'
-                  : 'Crée d’abord un personnage dans « Mes personnages » pour pouvoir l’ajouter à ce clan.'}
+                  : 'Crée d’abord un personnage dans « Mes personnages » pour pouvoir l’ajouter à cette famille.'}
               </li>
             )}
           </ul>
@@ -535,7 +535,7 @@ export default function ClanComposer({ fieldGroups, form, setField, data, user, 
       <ClanIdentityBlock fieldGroups={fieldGroups} form={form} setField={setField} data={data} disabled={disabled} />
       {isNew ? (
         <p className="adm-hint clan-composer__save-first">
-          Enregistre d’abord l’identité du clan pour pouvoir ajouter des membres, des liens et choisir un
+          Enregistre d’abord l’identité de la famille pour pouvoir ajouter des membres, des liens et choisir un
           personnage central.
         </p>
       ) : (

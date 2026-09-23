@@ -36,7 +36,7 @@ export default function CollectionListPage() {
         </div>
         <Link to={createHref} className="adm-btn adm-btn--primary">
           {singletonRow ? <Pencil size={16} /> : <Plus size={16} />}
-          {singletonRow ? 'Modifier' : `Nouveau ${s.singular}`}
+          {singletonRow ? 'Modifier' : `${collection === 'clans' ? 'Nouvelle' : 'Nouveau'} ${s.singular}`}
         </Link>
       </header>
 

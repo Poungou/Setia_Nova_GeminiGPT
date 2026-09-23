@@ -202,9 +202,9 @@ export default function Characters() {
           <div className="characters-page__secondary-controls">
             {clanOptions.length > 0 && (
               <label className="characters-page__select">
-                <span className="eyebrow">Clan</span>
+                <span className="eyebrow">Famille</span>
                 <select value={clan} onChange={(e) => setClan(e.target.value)}>
-                  <option value="all">Tous les clans</option>
+                  <option value="all">Toutes les familles</option>
                   {clanOptions.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -251,7 +251,7 @@ export default function Characters() {
         ) : (
           <div className="empty-state">
             <strong>Aucun résultat</strong>
-            Essaie un autre nom, un autre clan ou un autre lieu.
+            Essaie un autre nom, une autre famille ou un autre lieu.
           </div>
         )}
       </section>

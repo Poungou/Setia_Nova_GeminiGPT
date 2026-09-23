@@ -1,3 +1,4 @@
+import { ArrowUpRight, Network, History, MapPin, Feather } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import PageTransition from '../../components/PageTransition/PageTransition.jsx'
@@ -10,12 +11,15 @@ const EASE = [0.22, 1, 0.36, 1]
 // Deux fils rouges vivants, mis en avant.
 const FEATURED = [
   {
-    title: 'Clan Nakamura',
-    text: "L'un des axes principaux de Woltar Nova.",
-    to: '/clans/nakamura',
+    title: 'Familles',
+    icon: Network,
+    pin: 'Famille vedette · Nakamura',
+    text: 'Les familles qui structurent Woltar, leurs membres et les liens qui les unissent.',
+    to: '/clans',
   },
   {
     title: 'Chronologie',
+    icon: History,
     text: 'Des repères pour situer les RP, les liens de famille et les grands tournants.',
     to: '/chronologie',
   },
@@ -26,18 +30,21 @@ const FEATURED = [
 const REFERENCE = [
   {
     title: 'Lieux',
+    icon: MapPin,
     text: "Le Manoir de Sétia, Le Joyeux Lutin, le Palais des Astres, et d'autres endroits à étoffer tranquillement.",
     to: '/lieux',
     pin: 'Lieu vedette · Sétia',
   },
   {
     title: 'Culture',
+    icon: Feather,
     text: 'Coutumes, croyances et traditions : un carnet vivant, écrit par les joueurs. Partagez votre propre culture.',
     to: '/culture',
   },
 ]
 
 function UniverseCard({ chapter, index, variant, reduce }) {
+  const Icon = chapter.icon
   const motionProps = reduce
     ? {}
     : {
@@ -54,9 +61,11 @@ function UniverseCard({ chapter, index, variant, reduce }) {
       className={`universe-card universe-card--${variant}`}
       {...motionProps}
     >
+      <div className="universe-card__chapter" aria-hidden="true"><Icon size={22} /><span>0{index + 1}</span></div>
       {chapter.pin && <span className="universe-card__pin">{chapter.pin}</span>}
       <h2>{chapter.title}</h2>
       <p>{chapter.text}</p>
+      <span className="universe-card__explore">Explorer <ArrowUpRight size={16} aria-hidden="true" /></span>
     </MotionLink>
   )
 }
@@ -67,9 +76,11 @@ export default function Universe() {
   return (
     <PageTransition>
       <section className="container universe-page">
-        <Reveal className="section-heading">
-          <span className="eyebrow">Repères</span>
-          <h1 className="section-title">Autour de Woltar Nova</h1>
+        <Reveal className="section-heading universe-heading">
+          <span className="eyebrow">Un univers à plusieurs voix</span>
+          <h1 className="section-title">Nos histoires,<br /><em>un même univers.</em></h1>
+          <p>Familles, lieux, récits et cultures : explorez Woltar Nova au fil des créations de la communauté.</p>
+          <span className="universe-heading__note"><Feather size={16} aria-hidden="true" /> Un monde qui s’écrit ensemble</span>
         </Reveal>
 
         <div className="universe-grid universe-grid--featured">

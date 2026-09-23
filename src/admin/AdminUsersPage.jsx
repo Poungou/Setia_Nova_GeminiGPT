@@ -6,7 +6,7 @@ import { isCharacterLinked } from '../lib/characterLinks.js'
 
 const PERMISSIONS = [
   ['create_character', 'Personnages'],
-  ['create_clan', 'Clans'],
+  ['create_clan', 'Familles'],
   ['create_location', 'Lieux'],
   ['create_journal_article', 'Articles de journal'],
   ['create_timeline', 'Chronologies'],
@@ -214,7 +214,7 @@ export default function AdminUsersPage() {
                   <div><dt>Rôle</dt><dd>{user.role}</dd></div>
                   <div><dt>Créé le</dt><dd>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '—'}</dd></div>
                   <div><dt>Personnages</dt><dd>{user.contentCounts?.characters || 0}</dd></div>
-                  <div><dt>Clans</dt><dd>{user.contentCounts?.clans || 0}</dd></div>
+                  <div><dt>Familles</dt><dd>{user.contentCounts?.clans || 0}</dd></div>
                   <div><dt>Lieux</dt><dd>{user.contentCounts?.locations || 0}</dd></div>
                 </dl>
 

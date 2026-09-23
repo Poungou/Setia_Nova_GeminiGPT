@@ -45,7 +45,7 @@ export function Icon({ name, size = 18, strokeWidth = 1.6, className, style }) {
 
 const SECTIONS = [
   { key: 'characters', route: 'personnages', title: 'Mes personnages', short: 'Personnages', chip: 'Personnage', icon: 'user', desc: 'Des visages, des caractères et des histoires à faire grandir.', heroCta: 'Ouvrir mes fiches' },
-  { key: 'clans', route: 'clans', title: 'Mes clans', short: 'Clans', chip: 'Clan', icon: 'shield', desc: 'Les liens et les familles qui donnent corps à ton univers.' },
+  { key: 'clans', route: 'clans', title: 'Mes familles', short: 'Familles', chip: 'Famille', icon: 'shield', desc: 'Les liens et les familles qui donnent corps à ton univers.' },
   { key: 'locations', route: 'lieux', title: 'Mes lieux', short: 'Lieux', chip: 'Lieu', icon: 'pin', desc: 'Des décors pour accueillir les prochaines rencontres.' },
   { key: 'posts', route: 'articles', title: 'Mes articles', short: 'Articles', chip: 'Article', icon: 'pen', desc: 'Les nouvelles et les récits que tu souhaites partager.' },
   { key: 'timelines', route: 'chronologies', title: 'Mes chronologies', short: 'Chronologies', icon: 'clock', desc: 'Les moments clés, au fil de tes histoires.' },

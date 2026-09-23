@@ -226,7 +226,7 @@ export default function CollectionEditPage() {
       <header className="ed-head">
         <div className="ed-head__text">
           <Link to={`/admin/${collection}`} className="ed-back"><Ic name="left" size={16} />Retour</Link>
-          <h1>{isNew ? `Nouveau ${s.singular}` : collection === 'home' ? 'Accueil du site' : s.title(form)}</h1>
+          <h1>{isNew ? `${collection === 'clans' ? 'Nouvelle' : 'Nouveau'} ${s.singular}` : collection === 'home' ? 'Accueil du site' : s.title(form)}</h1>
           {!s.singleton && <code className="ed-head__id">{computedId || '(identifiant à venir)'}</code>}
           {collection === 'home' && <p className="ed-lead">Personnalise les textes, les cartes et les images de la vitrine. Enregistrer applique les changements sur le site, sans redéploiement.</p>}
         </div>
