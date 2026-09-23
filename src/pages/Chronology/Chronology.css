@@ -36,3 +36,49 @@
 .chrono-event__archive[open] summary { margin-bottom: 1rem; }
 .chrono-page :is(a, input, select, summary):focus-visible { outline: 2px solid var(--ivory-dim); outline-offset: 4px; }
 .chrono-empty { color: var(--ivory-dim); }
+
+/* Bibliothèque de récits : chaque volume ouvre une chronologie distincte. */
+.chrono-library-heading { position: relative; padding: 2rem 0 2.5rem; text-align: center; }
+.chrono-library-heading h1 { margin: 1rem 0; font-size: clamp(2.7rem, 5vw, 4.8rem); font-weight: 400; line-height: 1.1; }
+.chrono-library-heading h1 > span { display: block; margin-top: 1rem; font-size: .48em; color: var(--ivory-dim); }
+.chrono-library-heading p { max-width: 52ch; margin: 1.5rem auto; color: var(--ivory-dim); }
+.chrono-library-heading__ornament { display: flex; align-items: center; justify-content: center; gap: 1.2rem; margin-top: 2rem; color: var(--ivory-faint); }
+.chrono-library-heading__ornament span { height: 1px; width: 90px; background: linear-gradient(90deg, transparent, var(--line-strong)); }
+.chrono-library-heading__ornament span:last-child { transform: rotate(180deg); }
+.chrono-library-caption { display: flex; justify-content: space-between; gap: 1rem; margin: 1rem 0; font: .7rem var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--ivory-dim); }
+.chrono-library { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 1.75rem; }
+.chrono-volume { display: grid; grid-template-columns: 32% minmax(0, 1fr); min-height: 310px; border: 1px solid var(--line-strong); border-radius: 4px 16px 16px 4px; overflow: hidden; background: var(--bg-raised); box-shadow: 0 12px 40px -25px var(--ivory-faint); transition: transform .25s ease, box-shadow .25s ease; }
+.chrono-volume:hover { transform: translateY(-5px); box-shadow: 0 20px 45px -25px var(--ivory-faint); }
+.chrono-volume__cover { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; padding: 2rem 1rem; color: var(--ivory-dim); border-right: 1px solid var(--line-strong); background: linear-gradient(90deg, var(--line), transparent 7%, var(--line) 9%, transparent 11%), radial-gradient(ellipse at top, var(--wine-soft), transparent 80%), var(--gradient-card); }
+.chrono-volume__cover::before { content: ''; position: absolute; inset: 14px; border: 1px solid var(--line-strong); border-radius: 70px 70px 2px 2px; pointer-events: none; }
+.chrono-volume__number { position: absolute; top: 26px; font: .65rem var(--font-mono); letter-spacing: .15em; }
+.chrono-volume__monogram { font: italic 5rem/1 var(--font-display); }
+.chrono-volume__cover-label { max-width: 12ch; text-align: center; font: .55rem/1.8 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
+.chrono-volume__content { padding: clamp(1.25rem, 3vw, 2.5rem); display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.chrono-volume__author { display: flex; align-items: center; gap: .75rem; color: var(--ivory-dim); font-size: .8rem; }
+.chrono-volume__author .players-avatar { width: 34px; height: 34px; font-size: 1rem; }
+.chrono-volume h2 { margin: 1.2rem 0 .6rem; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; overflow-wrap: anywhere; }
+.chrono-volume p { margin: 0 0 1rem; color: var(--ivory-dim); font-size: .9rem; }
+.chrono-volume__meta { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; font-size: .7rem; color: var(--ivory-dim); padding-bottom: 1.5rem; }
+.chrono-volume__open { display: flex; align-items: center; gap: .6rem; width: 100%; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .8rem; }
+.chrono-back { display: inline-flex; align-items: center; gap: .6rem; margin-bottom: 2rem; font-size: .8rem; color: var(--ivory-dim); }
+/* Le fil reste continu ; les illustrations occupent la marge de chaque événement. */
+.chrono-heading { padding: 2rem; border: 1px solid var(--line); border-radius: 4px; background: var(--bg-glass); }
+.chrono-heading .players-avatar { flex-shrink: 0; }
+.chrono-event { margin-bottom: 2rem; padding-left: 3rem; }
+.chrono-event__body { position: relative; padding: clamp(1.5rem, 3vw, 2.5rem); border-radius: 3px 14px 14px 3px; background: var(--bg-raised); box-shadow: 0 8px 30px -24px var(--ivory-faint); }
+.chrono-event__body::before { content: ''; position: absolute; top: 0; left: 0; width: 60px; height: 2px; background: var(--line-strong); }
+.chrono-event--majeur .chrono-event__body::before { width: 100px; background: var(--wine-bright); }
+.chrono-event__body--illustrated { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 30%); align-items: start; gap: 2rem; }
+.chrono-event__copy { min-width: 0; }
+.chrono-event__meta { letter-spacing: .035em; line-height: 1.7; }
+.chrono-event h2 { font-size: clamp(1.65rem, 2.7vw, 2.2rem); line-height: 1.15; margin: .8rem 0 1.25rem; }
+.chrono-event__points .prose { font-size: .95rem; line-height: 1.75; }
+.chrono-event__illustration { margin: .4rem 0 0; min-width: 0; }
+.chrono-event__image-frame { position: relative; padding: .55rem .55rem 1.4rem; border: 1px solid var(--line-strong); background: var(--bg-base); transform: rotate(2deg); box-shadow: 0 8px 18px -12px var(--ivory-faint); }
+.chrono-event:nth-child(even) .chrono-event__image-frame { transform: rotate(-2deg); }
+.chrono-event__image-frame::before { content: ''; position: absolute; z-index: 1; width: 44%; height: 18px; top: -9px; left: 28%; background: var(--violet-soft); border: 1px solid var(--line); transform: rotate(-5deg); }
+.chrono-event__image-frame > img, .chrono-event__image-frame > .image-fallback { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.chrono-event__illustration figcaption { padding: 1.2rem .25rem 0; color: var(--ivory-dim); font: italic .8rem/1.5 var(--font-reading); overflow-wrap: anywhere; }
+@media (max-width: 760px) { .chrono-event__body--illustrated { grid-template-columns: minmax(0, 1fr); } .chrono-event__illustration { width: min(100%, 320px); justify-self: center; } .chrono-heading { flex-wrap: wrap; } .chrono-selector { flex-wrap: wrap; } }
+@media (prefers-reduced-motion: reduce) { .chrono-volume { transition: none; } .chrono-volume:hover { transform: none; } }

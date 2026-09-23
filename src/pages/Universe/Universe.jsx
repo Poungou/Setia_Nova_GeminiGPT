@@ -18,9 +18,9 @@ const FEATURED = [
     to: '/clans',
   },
   {
-    title: 'Chronologie',
+    title: 'Chronologies',
     icon: History,
-    text: 'Des repères pour situer les RP, les liens de famille et les grands tournants.',
+    text: 'À chaque auteur·ice son récit : choisissez une chronologie et suivez le fil de ses événements.',
     to: '/chronologie',
   },
 ]

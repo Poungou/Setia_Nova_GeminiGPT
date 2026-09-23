@@ -810,6 +810,14 @@ function TimelineEventsEditor({ events, onChange, data, disabled }) {
               />
             </div>
             <div className="adm-field">
+              <label htmlFor={`f-event-${index}-image`}>Illustration de l’événement (facultative)</label>
+              <Field field={{ key: `event-${index}-image`, type: 'image' }} value={event.image} onChange={image => updateEvent(index, { image })} disabled={disabled} uploadEnabled={!disabled} uploadFn={uploadAccountImage} />
+              <label htmlFor={`event-${index}-image-alt`}>Description de l’image</label>
+              <input id={`event-${index}-image-alt`} className="adm-input" value={event.imageAlt || ''} disabled={disabled} onChange={e => updateEvent(index, { imageAlt: e.target.value })} />
+              <label htmlFor={`event-${index}-image-caption`}>Légende / crédit</label>
+              <input id={`event-${index}-image-caption`} className="adm-input" value={event.imageCaption || ''} disabled={disabled} onChange={e => updateEvent(index, { imageCaption: e.target.value })} />
+            </div>
+            <div className="adm-field">
               <label htmlFor={`event-${index}-characters`}>Personnages liés</label>
               <Field
                 field={{ key: `event-${index}-characters`, type: 'refs', ref: 'characters' }}

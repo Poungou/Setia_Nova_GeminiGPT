@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePublicCharacters, usePublicLocations } from '../../lib/publicData.js'
 import Prose from '../../components/Prose/Prose.jsx'
+import SafeImage from '../../components/SafeImage/SafeImage.jsx'
+import { imgSrc, imgFocus } from '../../lib/image.js'
 import { eventContent, filterTimelineEvents, eventImportance } from './timelineView.js'
 
 const characterName = character => [character.firstName, character.lastName].filter(Boolean).join(' ')
@@ -11,7 +13,8 @@ export function EventRow({ event, characters, locations }) {
   const importance = eventImportance(event)
   return <li className={`chrono-event chrono-event--${importance}`}>
     <span className="chrono-event__marker" aria-hidden="true" />
-    <article className="chrono-event__body">
+    <article className={`chrono-event__body${imgSrc(event.image) ? ' chrono-event__body--illustrated' : ''}`}>
+      <div className="chrono-event__copy">
       <div className="chrono-event__meta">
         {event.dateRP && <span>{event.dateRP}</span>}
         <span>{importance === 'majeur' ? 'Tournant majeur' : importance === 'notable' ? 'Notable' : 'Repère'}</span>
@@ -31,6 +34,8 @@ export function EventRow({ event, characters, locations }) {
         {(event.tags || []).map(tag => <Link key={tag} className="chrono-pill" to={`/tag/${encodeURIComponent(tag)}`}>#{tag}</Link>)}
       </div>
       {archive && <details className="chrono-event__archive"><summary>Lire l’archive complète</summary><Prose markdown={archive} /></details>}
+      </div>
+      {imgSrc(event.image) && <figure className="chrono-event__illustration"><div className="chrono-event__image-frame"><SafeImage src={imgSrc(event.image)} alt={event.imageAlt || `Illustration — ${event.title}`} style={{ objectPosition: imgFocus(event.image) }} loading="lazy" /></div>{event.imageCaption && <figcaption>{event.imageCaption}</figcaption>}</figure>}
     </article>
   </li>
 }

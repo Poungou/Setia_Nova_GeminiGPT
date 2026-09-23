@@ -1,6 +1,6 @@
 # Chronologies communautaires
 
-La page `/chronologie` présente une chronologie personnelle à la fois : avatar public (ou initiale en l’absence d’image), nom de l’auteur·ice et introduction neutre. Le sélecteur permet de changer de chronologie, sans fusionner leurs événements. La sélection est partageable via le paramètre `auteur` (identifiant de chronologie).
+La page `/chronologie` présente d’abord une bibliothèque de volumes à choisir, même avec une seule chronologie publiée. Aucun auteur n’est ouvert par défaut. Chaque volume mène à `/chronologie?auteur=ID` ; « Toutes les chronologies » ramène à la bibliothèque. Une fois le récit choisi, la page présente une chronologie personnelle à la fois : avatar public (ou initiale en l’absence d’image), nom de l’auteur·ice et introduction neutre. Le sélecteur permet de changer de chronologie, sans fusionner leurs événements. La sélection est partageable via le paramètre `auteur` (identifiant de chronologie).
 
 La v2 remplace les accordéons, les périodes inventées et les cœurs par un fil continu et trois niveaux de points lumineux : repère, notable, tournant majeur. Le tri utilise l’ordre enregistré par l’auteur, sans interpréter les dates RP libres. Recherche, personnage, lieu et « majeurs seulement » se combinent ; changer de chronologie réinitialise ces filtres.
 
@@ -45,3 +45,9 @@ aucune migration distante et ne déploie rien sur Cloudflare.
 Le commit exclut les modifications locales des personnages, relations,
 contenus et configuration Wrangler. Le composant SpoilerGate est inclus car
 il est une dépendance nécessaire de la nouvelle page publique.
+
+## Illustrations des événements
+
+Les champs `image` (URL ou objet `{ src, focus }`), `imageAlt` et `imageCaption` sont éditables dans Compte et Admin, puis conservés par la normalisation partagée. L’upload utilise le service existant des images de compte. Une illustration fournie apparaît dans une marge à droite, avec cadrage et crédit ; aucune image n’est inventée ni ajoutée automatiquement aux événements historiques. Une image indisponible affiche un remplacement sans masquer le texte. Le fil reste vertical et les points clés restent visibles.
+
+La bibliothèque utilise des couvertures typographiques ; les événements sont présentés sur des surfaces plus opaques et les illustrations comme des tirages légèrement inclinés. Les couleurs suivent les thèmes du site.

@@ -303,6 +303,8 @@ export const SCHEMA = {
       { key: 'keyPoints', label: 'Points clés (2 à 4)', type: 'lines', group: 'Textes' },
       { key: 'description', label: 'Archive complète (facultative)', type: 'prose', group: 'Textes', hint: 'Sans points clés, ce texte reste entièrement visible dans la chronologie.' },
       { key: 'image', label: 'Image', type: 'image', group: 'Images' },
+      { key: 'imageAlt', label: 'Description de l’image', type: 'text', group: 'Images' },
+      { key: 'imageCaption', label: 'Légende / crédit', type: 'text', group: 'Images' },
       { key: 'characters', label: 'Personnages', type: 'refs', ref: 'characters', group: 'Liens' },
       { key: 'locations', label: 'Lieux', type: 'refs', ref: 'locations', dataKey: 'locationsCatalog', group: 'Liens' },
       { key: 'tags', label: 'Mots-clés', type: 'tags', group: 'Liens' },

@@ -159,7 +159,7 @@ const created = await handleAccount(
       spoiler: true,
       characters: [],
       events: [
-        { title: 'Premier jour', keyPoints: ['Arrivée', 'Installation'], importance: 'notable', dateRP: 'An 1', description: 'Un début.', characters: [], locations: [] },
+        { title: 'Premier jour', keyPoints: ['Arrivée', 'Installation'], image: { src: '/media/test.webp', focus: '25% 40%' }, imageAlt: 'Une arrivée', imageCaption: 'Illustration de Rina', importance: 'notable', dateRP: 'An 1', description: 'Un début.', characters: [], locations: [] },
         { id: 'evt-perso', title: 'Un secret', dateRP: 'An 2', description: 'Un secret gardé.', importance: 'majeur' },
       ],
     },
@@ -173,6 +173,7 @@ assert(created.status === 200, 'Rina crée sa chronologie')
 assert(createdBody.row.ownerUserId === rina.id, 'la chronologie créée appartient à Rina')
 assert(createdBody.row.spoiler === true, 'le drapeau spoiler est conservé tel quel (true)')
 assert(createdBody.row.events[0].keyPoints.join('|') === 'Arrivée|Installation' && createdBody.row.events[0].importance === 'notable', 'points clés et importance notable enregistrés en base')
+assert(createdBody.row.events[0].image.src === '/media/test.webp' && createdBody.row.events[0].image.focus === '25% 40%' && createdBody.row.events[0].imageCaption === 'Illustration de Rina', 'image, cadrage et crédit conservés en base')
 assert(createdBody.row.events.length === 2, 'les deux événements sont enregistrés')
 assert(createdBody.row.events[0].order === 10 && createdBody.row.events[1].order === 20, 'l’ordre des événements est déduit de leur position (10, 20, ...)')
 assert(createdBody.row.events[1].id === 'evt-perso', 'un id d’événement explicite est conservé')
@@ -326,13 +327,21 @@ try {
   const { MemoryRouter } = await import('react-router-dom')
   const { default: Chronology } = await import(pathToFileURL(path.join(temporary, 'page.mjs')))
   const fixtures = [{ id: 'a', authorName: 'Poungou', title: 'A', spoiler: true, events: [
-    { id: 'e', order: 20, title: 'Événement majeur', keyPoints: ['Premier point', 'Deuxième point'], description: 'Développement complet supplémentaire. '.repeat(10), importance: 'majeur', characters: ['kazuko-nakamura'], locations: ['manoir-de-setia'], spoiler: true },
+    { id: 'e', order: 20, title: 'Événement majeur', image: { src: '/media/event.webp', focus: '20% 30%' }, imageAlt: 'Illustration du récit', imageCaption: 'Crédit illustration', keyPoints: ['Premier point', 'Deuxième point'], description: 'Développement complet supplémentaire. '.repeat(10), importance: 'majeur', characters: ['kazuko-nakamura'], locations: ['manoir-de-setia'], spoiler: true },
     { id: 'u', order: 10, title: 'Événement à développer', importance: 'notable' },
   ] }, { id: 'b', authorName: 'Tallouna', title: 'B', events: [{ id: 'b1', title: 'Événement de Tallouna' }] }]
   globalThis.fetch = async (url) => ({ ok: true, json: async () => ({ data: String(url).endsWith('/timelines') ? fixtures : String(url).endsWith('/characters') ? [{ id: 'kazuko-nakamura', firstName: 'Kazuko' }] : String(url).endsWith('/locations') ? [{ id: 'manoir-de-setia', name: 'Manoir' }] : [] }) })
   const root = createRoot(document.getElementById('root'))
   await React.act(async () => root.render(React.createElement(MemoryRouter, { future: { v7_startTransition: true, v7_relativeSplatPath: true } }, React.createElement(Chronology))))
+  assert(document.querySelectorAll('.chrono-volume').length === 2 && !document.querySelector('.chrono-events'), 'entrée par le choix des chronologies, aucun auteur ouvert automatiquement')
+  await React.act(async () => document.querySelector('a[href="/chronologie?auteur=a"]').click())
   assert(document.querySelector('h1').textContent === 'Poungou', 'en-tête centré sur l’auteur')
+  const illustration = document.querySelector('.chrono-event__illustration img')
+  assert(illustration?.getAttribute('src') === '/media/event.webp' && illustration.style.objectPosition === '20% 30%', 'illustration affichée à côté de l’événement avec son cadrage')
+  assert(document.querySelector('figcaption').textContent === 'Crédit illustration', 'crédit visible')
+  await React.act(async () => illustration.dispatchEvent(new window.Event('error')))
+  assert(document.querySelector('.chrono-event__illustration .image-fallback') && document.body.textContent.includes('Premier point'), 'image indisponible sans perte du récit')
+
   assert(document.querySelectorAll('.chrono-events').length === 1, 'un fil unique sans périodes')
   assert(document.querySelector('.chrono-event h2').textContent === 'Événement à développer', 'ordre chronologique conservé')
   assert(document.body.textContent.includes('Pas encore développé'), 'événement vide visible sans texte inventé')
@@ -348,6 +357,12 @@ try {
   await React.act(async () => { selector.value = 'b'; selector.dispatchEvent(new window.Event('change', { bubbles: true })) })
   assert(document.querySelector('h1').textContent === 'Tallouna', 'changement d’auteur')
   assert(document.body.textContent.includes('Événement de Tallouna') && !document.body.textContent.includes('Premier point'), 'chronologies isolées et filtres réinitialisés')
+  await React.act(async () => document.querySelector('.chrono-back').click())
+  assert(document.querySelectorAll('.chrono-volume').length === 2 && !document.querySelector('.chrono-events'), 'retour à la bibliothèque')
+  fixtures.splice(1)
+  await React.act(async () => root.render(null))
+  await React.act(async () => root.render(React.createElement(MemoryRouter, { future: { v7_startTransition: true, v7_relativeSplatPath: true } }, React.createElement(Chronology))))
+  assert(document.querySelectorAll('.chrono-volume').length === 1 && !document.querySelector('.chrono-events'), 'choix explicite même avec une seule chronologie publiée')
   await React.act(async () => root.unmount())
 } finally {
   globalThis.fetch = originalFetch
