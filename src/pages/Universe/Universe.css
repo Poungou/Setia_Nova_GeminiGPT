@@ -41,3 +41,74 @@
 .universe-card { flex: 0 1 calc((100% - 2 * var(--space-3)) / 3); min-width: 0; }
 @media (max-width: 900px) { .universe-card { flex-basis: calc((100% - var(--space-3)) / 2); } }
 @media (max-width: 560px) { .universe-card { flex-basis: 100%; } }
+
+/* --- Page /univers : hiérarchie en deux niveaux ---------------------------
+   Deux grandes cartes (fils rouges), puis deux cartes de référence plus
+   petites en dessous. Les règles ci-dessus restent celles des autres pages
+   qui réutilisent .universe-grid / .universe-card (Clans, Archives). */
+.universe-grid.universe-grid--featured,
+.universe-grid.universe-grid--reference {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.universe-grid--reference {
+  margin-top: var(--space-3);
+}
+
+.universe-card--featured,
+.universe-card--reference {
+  flex: initial;
+  display: block;
+}
+
+.universe-card--featured {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 14rem;
+  padding: var(--space-4);
+  border-color: var(--line-strong);
+}
+
+.universe-card--featured h2 {
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  margin-bottom: 0.75rem;
+}
+
+.universe-card--featured p {
+  font-size: 1.02rem;
+  max-width: 34rem;
+}
+
+.universe-card--reference h2 {
+  font-size: 1.15rem;
+}
+
+.universe-card--reference p {
+  font-size: 0.88rem;
+}
+
+.universe-card__pin {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ivory-dim);
+}
+
+@media (max-width: 720px) {
+  .universe-grid.universe-grid--featured,
+  .universe-grid.universe-grid--reference {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .universe-card--featured {
+    min-height: 10rem;
+    padding: var(--space-3);
+  }
+}

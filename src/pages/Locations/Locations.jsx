@@ -8,6 +8,14 @@ import SafeImage from '../../components/SafeImage/SafeImage.jsx'
 import { Compass, ArrowDownRight, MapPinned } from 'lucide-react'
 import './Locations.css'
 
+// Sétia est le lieu vedette : épinglée en tête de la liste des villes, quel
+// que soit l'ordre renvoyé par l'API. Le reste garde son ordre (canon d'abord).
+const PINNED_CITY_ID = 'setia'
+const pinnedFirst = (list) => [
+  ...list.filter((c) => c.id === PINNED_CITY_ID),
+  ...list.filter((c) => c.id !== PINNED_CITY_ID),
+]
+
 export default function Locations() {
   const locations = usePublicLocations()
 
@@ -18,7 +26,7 @@ export default function Locations() {
   const cities = locations.filter((l) => l.isCity)
   const knownCities = cities.filter((c) => c.canon === 'confirmed')
   const draftCities = cities.filter((c) => c.canon !== 'confirmed')
-  const orderedCities = [...knownCities, ...draftCities]
+  const orderedCities = pinnedFirst([...knownCities, ...draftCities])
   const mapCities = cities.map((c) => ({ ...c, muted: c.canon !== 'confirmed' }))
 
   const childrenCountOf = (id) => locations.filter((l) => l.parentId === id).length
