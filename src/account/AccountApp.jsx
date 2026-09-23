@@ -28,6 +28,7 @@ import ClanComposer from '../components/ClanComposer/ClanComposer.jsx'
 import '../admin/admin.css'
 import { cultureApi } from '../lib/cultureApi.js'
 import AccountDashboard, { Icon } from './AccountDashboard.jsx'
+import AccountCultures from './AccountCultures.jsx'
 import './Account.css'
 
 const ArticleComposer = lazy(() => import('../components/ArticleEditor/ArticleComposer.jsx'))
@@ -1113,7 +1114,7 @@ function Workspace({ user, onLogout }) {
           {showLocations && link('/compte/lieux', 'pin', 'Lieux', count('locations'))}
           {showPosts && link('/compte/articles', 'pen', 'Articles', count('posts'))}
           {showTimelines && link('/compte/chronologies', 'clock', 'Chronologies', count('timelines'))}
-          {link('/culture?mes=1', 'leaf', 'Cultures', cultureCount === null ? null : String(cultureCount))}
+          {link('/compte/cultures', 'leaf', 'Cultures', cultureCount === null ? null : String(cultureCount))}
           {user.role === 'admin' && link('/galerie', 'image', 'Galerie')}
           <div className="acc-mono acc-nav__group">Compte</div>
           {canManagePlayerProfile(user) && link('/compte/profil', 'sparkle', 'Profil joueur')}
@@ -1138,6 +1139,7 @@ function Workspace({ user, onLogout }) {
         {data && (
           <Routes>
             <Route index element={<AccountDashboard data={data} user={user} canCreate={canCreate} profileAllowed={canManagePlayerProfile(user)} cultureCount={cultureCount} />} />
+            <Route path="cultures" element={<AccountCultures user={user} />} />
             <Route path="securite" element={<SecuritySection user={user} onLogout={onLogout} />} />
             {canManagePlayerProfile(user) && <Route path="profil" element={<PlayerProfileSection />} />}
             <Route path=":section" element={<AccountList data={data} user={user} reload={load} />} />

@@ -252,7 +252,7 @@ export default function AccountDashboard({ data, user, canCreate, profileAllowed
             <div className="acc-creations__head"><div className="acc-mono acc-eyebrow">Mes créations</div><div className="acc-creations__note">À chaque histoire, son espace</div></div>
             <div className="acc-grid">
               {sections.map((section, i) => tileFor(section, i))}
-              <Tile to="/culture?mes=1" icon={CULTURE.icon} index={pad(sections.length + 1)} title={CULTURE.title} short={CULTURE.short} desc={CULTURE.desc}
+              <Tile to="/compte/cultures" icon={CULTURE.icon} index={pad(sections.length + 1)} title={CULTURE.title} short={CULTURE.short} desc={CULTURE.desc}
                 count={cultureCount === null ? '—' : cultureCount} cta={cultureCount === 0 ? 'Commencer' : 'Ouvrir'} empty={cultureCount === 0} />
               {profileAllowed && (
                 <Link to="/compte/profil" className="acc-tile acc-tile--profile">
