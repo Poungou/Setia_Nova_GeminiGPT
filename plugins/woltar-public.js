@@ -113,9 +113,10 @@ export default function woltarPublic() {
 
           if (parts[0] === 'timelines' && parts.length === 1) {
             const events = await readCollection('events')
+            const users = await loadUsers(root)
             const timelines = (await readCollection('timelines'))
               .filter(isPublishedTimeline)
-              .map((timeline) => ({ ...timeline, events: resolveTimelineEvents(timeline, events) }))
+              .map((timeline) => ({ ...timeline, authorName: !timeline.ownerUserId || timeline.ownerUserId === 'system' ? timeline.authorName : users.find(user => !user.disabled && user.id === timeline.ownerUserId)?.name || '', events: resolveTimelineEvents(timeline, events) }))
             return send(200, { data: timelines })
           }
 
@@ -153,7 +154,9 @@ export default function woltarPublic() {
             const timeline = timelines.find((item) => item.id === decodeURIComponent(parts[1]))
             if (!isPublishedTimeline(timeline)) return send(404, { error: 'Chronologie introuvable.' })
             const events = await readCollection('events')
-            return send(200, { data: { ...timeline, events: resolveTimelineEvents(timeline, events) } })
+            const users = await loadUsers(root)
+            const authorName = !timeline.ownerUserId || timeline.ownerUserId === 'system' ? timeline.authorName : users.find(user => !user.disabled && user.id === timeline.ownerUserId)?.name || ''
+            return send(200, { data: { ...timeline, authorName, events: resolveTimelineEvents(timeline, events) } })
           }
 
           return send(404, { error: 'Route inconnue' })

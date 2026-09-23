@@ -688,7 +688,7 @@ function AccountList({ data, user, reload }) {
 // réordonnancement se fait par boutons haut/bas plutôt que par glisser-
 // déposer, pour rester simple et accessible au clavier.
 function emptyTimelineEvent() {
-  return { id: '', title: '', dateRP: '', description: '', characters: [], locations: [], importance: '', spoiler: false }
+  return { id: '', title: '', dateRP: '', keyPoints: [], description: '', characters: [], locations: [], importance: '', spoiler: false }
 }
 
 function TimelineEventsEditor({ events, onChange, data, disabled }) {
@@ -783,14 +783,23 @@ function TimelineEventsEditor({ events, onChange, data, disabled }) {
                 disabled={disabled}
                 onChange={(e) => updateEvent(index, { importance: e.target.value })}
               >
-                <option value="">—</option>
-                <option value="majeur">Majeur</option>
-                <option value="mineur">Mineur</option>
+                <option value="">Repère</option>
+                <option value="mineur">Repère (anciennement mineur)</option>
+                <option value="notable">Notable</option>
+                <option value="majeur">Tournant majeur</option>
               </select>
             </div>
             <div className="adm-field">
-              <label className="adm-check"><input type="checkbox" checked={event.spoiler === true || event.spoiler === 'true'} disabled={disabled} onChange={(e) => updateEvent(index, { spoiler: e.target.checked })} />Masquer le contenu de cet événement (spoiler)</label>
-              <label htmlFor={`event-${index}-description`}>Résumé</label>
+              <label className="adm-check"><input type="checkbox" checked={event.spoiler === true || event.spoiler === 'true'} disabled={disabled} onChange={(e) => updateEvent(index, { spoiler: e.target.checked })} />Signaler des spoilers (les points clés restent visibles)</label>
+              <label htmlFor={`event-${index}-points`}>Points clés — 2 à 4, un par ligne</label>
+              <textarea id={`event-${index}-points`} className="adm-input" rows="4" value={(event.keyPoints || []).join('\n')} disabled={disabled} onChange={e => {
+                const points = e.target.value.split('\n')
+                const count = points.filter(point => point.trim()).length
+                e.target.setCustomValidity(count === 1 || count > 4 ? 'Renseigne 2 à 4 points clés, ou laisse ce champ vide.' : '')
+                updateEvent(index, { keyPoints: points })
+              }} />
+              <p className="adm-hint">Laisse vide si l’événement n’est pas encore développé. Sans points clés, le texte existant reste visible intégralement.</p>
+              <label htmlFor={`event-${index}-description`}>Archive complète (facultative)</label>
               <textarea
                 id={`event-${index}-description`}
                 className="adm-input"

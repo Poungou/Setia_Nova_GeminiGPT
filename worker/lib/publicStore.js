@@ -119,10 +119,18 @@ function isPublishedTimeline(timeline) {
 }
 
 export async function listPublicTimelines(env) {
-  return (await listTimelinesWithFallback(env)).filter(isPublishedTimeline)
+  const timelines = (await listTimelinesWithFallback(env)).filter(isPublishedTimeline)
+  const ids = [...new Set(timelines.map(item => item.ownerUserId).filter(id => id && id !== 'system'))]
+  if (!ids.length) return timelines
+  const { results } = await env.WOLTAR_DB.prepare(`SELECT id, name FROM users WHERE disabled = 0 AND id IN (${ids.map(() => '?').join(',')})`).bind(...ids).all()
+  const names = new Map((results || []).map(user => [user.id, user.name]))
+  return timelines.map(timeline => timeline.ownerUserId && timeline.ownerUserId !== 'system' ? { ...timeline, authorName: names.get(timeline.ownerUserId) || '' } : timeline)
 }
 
 export async function getPublicTimeline(env, id) {
   const timeline = await getTimelineWithFallback(env, id)
-  return isPublishedTimeline(timeline) ? timeline : null
+  if (!isPublishedTimeline(timeline)) return null
+  if (!timeline.ownerUserId || timeline.ownerUserId === 'system') return timeline
+  const user = await env.WOLTAR_DB.prepare('SELECT name FROM users WHERE disabled = 0 AND id = ?').bind(timeline.ownerUserId).first()
+  return { ...timeline, authorName: user?.name || '' }
 }

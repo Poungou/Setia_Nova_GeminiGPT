@@ -1,9 +1,16 @@
 # Chronologies communautaires
 
-La page `/chronologie` présente des chronologies en accordéon. La première
-s’ouvre à l’arrivée ; le visiteur peut ensuite toutes les fermer ou en ouvrir
-une autre. Le contenu marqué spoiler demande une confirmation à chaque
-réouverture. Les événements longs proposent « Lire la suite ».
+La page `/chronologie` présente une chronologie personnelle à la fois : avatar public (ou initiale en l’absence d’image), nom de l’auteur·ice et introduction neutre. Le sélecteur permet de changer de chronologie, sans fusionner leurs événements. La sélection est partageable via le paramètre `auteur` (identifiant de chronologie).
+
+La v2 remplace les accordéons, les périodes inventées et les cœurs par un fil continu et trois niveaux de points lumineux : repère, notable, tournant majeur. Le tri utilise l’ordre enregistré par l’auteur, sans interpréter les dates RP libres. Recherche, personnage, lieu et « majeurs seulement » se combinent ; changer de chronologie réinitialise ces filtres.
+
+Les événements affichent toujours leur titre, leur date connue, leurs points clés et leurs liens. Les signalements de spoilers sont informatifs et ne masquent rien. Un événement vide indique « Pas encore développé ». Les 19 événements historiques ont reçu 2 à 4 points clés tirés exclusivement de leur description existante ; les descriptions originales sont conservées.
+
+`keyPoints` contient 2 à 4 textes, éditables dans Compte et Admin. `description` conserve le développement. Avec des points clés, un développement de plus de 220 caractères est accessible via « Lire l’archive complète », sans remplacer les points clés. Sans points clés explicites, l’ancien texte reste intégralement visible, réparti en quatre points au maximum ; un texte trop court n’est pas artificiellement complété.
+
+L’API publique fournit le nom du propriétaire même sans profil RP publié. La chronologie historique reste techniquement propriété de `system` ; sa métadonnée `authorName: Poungou` sert uniquement à l’attribution visible, sans modifier les droits. L’avatar provient uniquement d’un profil public, sinon une initiale est affichée.
+
+La référence canvas « Chronologie — v2, personnelle et sobre » n’était pas accessible pendant l’implémentation : le rendu suit la spécification écrite et les variables visuelles du site. Version mobile dédiée, arcs et croisements entre auteur·ices restent hors périmètre.
 
 ## Données et accès
 

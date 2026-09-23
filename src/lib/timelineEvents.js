@@ -24,7 +24,7 @@ const TITLE_MAX = 200
 const DATE_MAX = 160
 const DESCRIPTION_MAX = 20000
 const MAX_EVENTS = 500
-const IMPORTANCE_VALUES = new Set(['majeur', 'mineur'])
+const IMPORTANCE_VALUES = new Set(['majeur', 'notable', 'mineur'])
 
 function cleanText(value, max) {
   return String(value ?? '').trim().slice(0, max)
@@ -74,6 +74,7 @@ export function normalizeTimelineEvents(rawList) {
       dateRP: cleanText(raw?.dateRP, DATE_MAX),
       order: (index + 1) * 10,
       description: cleanText(raw?.description, DESCRIPTION_MAX),
+      keyPoints: Array.isArray(raw?.keyPoints) ? raw.keyPoints.filter(point => typeof point === 'string').map(point => cleanText(point, 2000)).filter(Boolean).slice(0, 4) : [],
       characters: cleanIdList(raw?.characters),
       locations: cleanIdList(raw?.locations),
       spoiler: raw?.spoiler === true || raw?.spoiler === 'true',

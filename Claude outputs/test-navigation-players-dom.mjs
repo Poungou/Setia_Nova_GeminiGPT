@@ -7,7 +7,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { normalizeTimelineEvents } from '../src/lib/timelineEvents.js'
 
-test('DOM: universal navigation, account access, public players, nested spoilers and Aether disclosure', async () => {
+test('DOM: universal navigation, account access, public players, visible timeline summaries and Aether disclosure', async () => {
   const dom = new JSDOM('<div id="root"></div>', { url: 'https://test.local' })
   dom.window.HTMLElement.prototype.scrollTo = () => {}
   globalThis.window = dom.window
@@ -26,7 +26,7 @@ test('DOM: universal navigation, account access, public players, nested spoilers
   globalThis.fetch = async (url) => ({ ok: true, json: async () => String(url).includes('/session') ? { user: { name: 'Alice' } } : { data: [player] } })
   try {
     await build({
-      stdin: { contents: "export {default as Header} from './src/components/Header/Header.jsx'; export {default as Players} from './src/pages/Players/Players.jsx'; export {default as Timeline} from './src/pages/Chronology/TimelineAccordionItem.jsx'; export {default as About} from './src/components/AetherAbout/AetherAbout.jsx'; export {default as Chat} from './src/components/ChatWidget/ChatWidget.jsx';", resolveDir: process.cwd() },
+      stdin: { contents: "export {default as Header} from './src/components/Header/Header.jsx'; export {default as Players} from './src/pages/Players/Players.jsx'; export {default as Timeline} from './src/pages/Chronology/TimelineView.jsx'; export {default as About} from './src/components/AetherAbout/AetherAbout.jsx'; export {default as Chat} from './src/components/ChatWidget/ChatWidget.jsx';", resolveDir: process.cwd() },
       outfile: path.join(temporary, 'components.mjs'), bundle: true, platform: 'node', format: 'esm', packages: 'external', loader: { '.css': 'empty' }, jsx: 'automatic', define: { 'import.meta.env': '{}' },
       plugins: [{ name: 'no-animation', setup(builder) {
         builder.onResolve({ filter: /framer-motion|PageTransition\/PageTransition|Reveal\/Reveal/ }, (args) => ({ path: args.path, namespace: 'animation' }))
@@ -88,12 +88,9 @@ test('DOM: universal navigation, account access, public players, nested spoilers
     assert.equal(events[1].spoiler, false)
     const timeline = { id: 'test', title: 'Chronologie', spoiler: true, events }
     await mount(h(Timeline, { timeline, isOpen: true, onToggle() {}, reduce: true }), '/chronologie')
-    assert(!document.body.textContent.includes('CONTENUVISIBLE'))
-    await click([...document.querySelectorAll('button')].find((button) => button.textContent === 'Afficher quand même'))
     assert(document.body.textContent.includes('CONTENUVISIBLE'))
-    assert(!document.body.textContent.includes('CONTENUSECRET'))
-    await click([...document.querySelectorAll('button')].find((button) => button.textContent === 'Afficher ce spoiler'))
     assert(document.body.textContent.includes('CONTENUSECRET'))
+    assert.equal(document.querySelector('.spoiler-gate__btn'), null)
     await mount(h(About), '/aether')
     assert(document.body.textContent.includes('GPT-5.6 Luna'))
     // Popover compact (bouton "À propos d'Aether") plutôt que le grand

@@ -1,6 +1,7 @@
 [
   {
     "id": "la-rencontre-de-marie-et-salut",
+    "keyPoints": ["Marie Chat rencontre Salut Nakamura pendant la bataille opposant Sétia à Elet.","Sétia remporte la guerre ; les blessés reçoivent logements sociaux et rations.","Marie et Salut se marient."],
     "title": "La rencontre de Marie et Salut",
     "dateRP": "Avant les jumeaux",
     "order": 10,
@@ -13,6 +14,7 @@
   },
   {
     "id": "naissance-des-jumeaux",
+    "keyPoints": ["Hachiro et Kazuko naissent avec des dons spirituels.","La famille vit pauvrement ; Salut devient violent envers les siens et abuse sexuellement de Hachiro."],
     "title": "Naissance de Hachiro et Kazuko",
     "dateRP": "Naissance des jumeaux",
     "order": 20,
@@ -25,6 +27,7 @@
   },
   {
     "id": "kazuko-tue-salut",
+    "keyPoints": ["Vers 13 ans, Kazuko tue Salut alors qu’il abuse à nouveau de Hachiro.","Marie annonce aux enfants que leur vie va changer."],
     "title": "Kazuko tue Salut",
     "dateRP": "Vers 13 ans (Kazuko)",
     "order": 30,
@@ -37,6 +40,7 @@
   },
   {
     "id": "le-pacte-nakamura",
+    "keyPoints": ["Marie pactise avec les démons pour obtenir richesse, foyer et luxe.","Les Nakamura doivent accueillir un démon dans leur corps à partir de 18 ans.","Sans lien au pacte, toute personne ayant au moins 25 % de sang Nakamura est condamnée à mourir d’une maladie."],
     "title": "Le pacte Nakamura",
     "dateRP": "Après la mort de Salut",
     "order": 40,
@@ -49,6 +53,7 @@
   },
   {
     "id": "lincendie-du-manoir",
+    "keyPoints": ["Des villageois incendient le manoir ; l’aile droite et la bibliothèque sont détruites.","Marie protège le domaine par un sceau inaccessible aux simples mortels ; Salut peut le franchir."],
     "title": "L'incendie du manoir",
     "dateRP": "À 16 ans (Hachiro & Kazuko)",
     "order": 50,
@@ -61,6 +66,7 @@
   },
   {
     "id": "les-jumeaux-quittent-le-manoir",
+    "keyPoints": ["Hachiro et Kazuko quittent le manoir : Hachiro s’installe à Sétia, Kazuko parcourt le monde.","Marie et Salut poursuivent les arts occultes et obtiennent des diplômes scientifiques."],
     "title": "Hachiro et Kazuko quittent le manoir",
     "dateRP": "À 25 ans (Hachiro & Kazuko)",
     "order": 60,
@@ -73,6 +79,7 @@
   },
   {
     "id": "la-creation-dichiyo",
+    "keyPoints": ["Marie et Salut créent Ichiyo à partir de l’ADN de Kazuko et de Hachiro.","Instable, dépressive et en manque d’attention, Ichiyo vit uniquement au manoir, entourée de scientifiques dérangés."],
     "title": "La création d'Ichiyo",
     "dateRP": "Après le départ des jumeaux",
     "order": 70,
@@ -85,6 +92,7 @@
   },
   {
     "id": "ichiyo-et-chaton-lolita",
+    "keyPoints": ["Ichiyo rencontre Châton Lolita, frère de la femme de Hachiro ; une romance naît.","Après la disparition de Châton, Ichiyo se suicide de chagrin à 30 ans."],
     "title": "Ichiyo et Châton Lolita",
     "dateRP": "Ichiyo, 30 ans",
     "order": 80,
@@ -97,6 +105,7 @@
   },
   {
     "id": "mort-de-salut",
+    "keyPoints": ["Salut meurt.","Il a 80 ans."],
     "title": "Mort de Salut",
     "dateRP": "Salut, 80 ans",
     "order": 90,
@@ -109,6 +118,7 @@
   },
   {
     "id": "kazuko-contre-marie",
+    "keyPoints": ["Kazuko revient au manoir après les expérimentations que Marie lui a fait subir pour la préparer comme offrande aux démons.","Lors de leur affrontement, Kazuko libère ses douze démons — ou se fait posséder par eux — et tue Marie.","Marie laisse un sceau sur Kazuko, dont elle ne comprendra la signification que 200 ans plus tard."],
     "title": "Kazuko contre Marie",
     "dateRP": "Retour de Kazuko au manoir",
     "order": 100,
@@ -121,6 +131,7 @@
   },
   {
     "id": "kazuko-devient-matriarche",
+    "keyPoints": ["Kazuko devient matriarche du clan Nakamura et doit faire appliquer le rituel de possession.","Elle cherche avant tout à briser la malédiction Nakamura."],
     "title": "Kazuko devient matriarche",
     "dateRP": "À 50 ans (Kazuko)",
     "order": 110,
@@ -133,6 +144,7 @@
   },
   {
     "id": "le-duel-entre-hachiro-et-kazuko",
+    "keyPoints": ["Hachiro défie Kazuko devenue matriarche ; il perd mais lui laisse une boiterie et une cicatrice.","Banni, il parcourt les trois continents pour approfondir l’art de la vengeance."],
     "title": "Le duel entre Hachiro et Kazuko",
     "dateRP": "À 50 ans (Kazuko), peu après",
     "order": 120,
@@ -145,6 +157,7 @@
   },
   {
     "id": "le-reveil-de-kazuko",
+    "keyPoints": ["Kazuko se réveille avec l’objectif de restaurer la gloire du clan Nakamura.","Elle recueille des descendants d’Ichiyo, dont Calion, Atheleen et Fudo, pour les protéger de la malédiction et développer leurs dons.","Les enfants grandissent au manoir, protégés de la réalité des démons et de la violence du monde."],
     "title": "Le réveil de Kazuko",
     "dateRP": "Après 100 ans de sommeil (Kazuko)",
     "order": 130,
@@ -157,6 +170,7 @@
   },
   {
     "id": "le-joyeux-lutin-ouvre-ses-portes",
+    "keyPoints": ["Fudo cumule les diplômes et ouvre Le Joyeux Lutin au centre de Sétia.","Calion vit aux crochets d’Atheleen, accumule les relations désastreuses et tente de profiter de l’argent de Fudo."],
     "title": "Le Joyeux Lutin ouvre ses portes",
     "dateRP": "À 20 ans (Fudo, Calion, Atheleen)",
     "order": 140,
@@ -169,6 +183,7 @@
   },
   {
     "id": "lapocalypse-et-la-mort-datheleen",
+    "keyPoints": ["Kazuko scelle un nouveau pacte pour permettre aux Nakamura de traverser l’Apocalypse.","Calion voit mourir Atheleen, sa jumelle, puis s’évanouit dans la forêt et se réveille au manoir.","Il développe ensuite une mèche semblable à celle de sa jumelle."],
     "title": "L'Apocalypse et la mort d'Atheleen",
     "dateRP": "À 23 ans (Calion) — Apocalypse",
     "order": 150,
@@ -181,6 +196,7 @@
   },
   {
     "id": "le-reveil-de-hachiro",
+    "keyPoints": ["Hachiro sort de stase.","Il découvre que sa femme et ses enfants sont morts."],
     "title": "Le réveil de Hachiro",
     "dateRP": "AP 1",
     "order": 160,
@@ -193,6 +209,7 @@
   },
   {
     "id": "fudo-sadie-et-le-joyeux-lutin",
+    "keyPoints": ["Fudo ne se remet pas de sa rupture avec Sadie, qui a perdu son jumeau après l’Apocalypse.","Il se réfugie dans le travail et les relations tarifées ; Daya et Calion l’aident à faire tourner Le Joyeux Lutin."],
     "title": "Fudo, Sadie et le Joyeux Lutin",
     "dateRP": "AP 5",
     "order": 170,
@@ -205,6 +222,7 @@
   },
   {
     "id": "calion-retrouve-daya",
+    "keyPoints": ["Calion devient plus sage, cherche un sens à sa vie et tente de retrouver ses anciens amis.","Il retrouve Daya Ozarn, amie de longue date et amie proche de Sadie."],
     "title": "Calion retrouve Daya",
     "dateRP": "AP 6",
     "order": 180,
@@ -217,6 +235,7 @@
   },
   {
     "id": "lecole-de-magie-de-kazuko",
+    "keyPoints": ["Kazuko ouvre une école de magie dans son manoir.","Elle cherche à améliorer sa situation économique, résoudre la malédiction et se préparer au pire."],
     "title": "L'école de magie de Kazuko",
     "dateRP": "AP 10",
     "order": 190,

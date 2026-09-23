@@ -25,6 +25,13 @@ export function Field({
 }) {
   const common = { id: `f-${field.key}`, disabled, 'aria-describedby': field.hint ? `h-${field.key}` : undefined }
   switch (field.type) {
+    case 'lines':
+      return <textarea {...common} className="adm-input" rows={4} value={Array.isArray(value) ? value.join('\n') : ''} onChange={event => {
+        const points = event.target.value.split('\n')
+        const count = points.filter(point => point.trim()).length
+        event.target.setCustomValidity(count === 1 || count > 4 ? 'Renseigne 2 à 4 points clés, ou laisse ce champ vide.' : '')
+        onChange(points)
+      }} />
     case 'textarea':
       return (
         <textarea

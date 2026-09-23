@@ -1,331 +1,38 @@
-/* src/pages/Chronology/Chronology.css
- *
- * Refonte « chronologies communautaires » — remplace l'ancienne frise en
- * zigzag (grille CSS + lecteur latéral sticky) par un empilement vertical
- * d'accordéons, une seule catégorie ouverte à la fois. Priorité explicite :
- * simplicité de navigation avant décoration — structure identique sur
- * desktop et mobile (seule la largeur/le confort de lecture changent), les
- * détails fantasy/pixel-art (cœurs de hearts.js, coins coupés) ne servent
- * plus que d'accents ponctuels, jamais de structure.
- */
-
-.chrono-page__intro {
-  color: var(--ivory-dim);
-  font-size: 0.95rem;
-}
-
-/* Accent "or" pour les événements majeurs — scopé à cette page (jamais
-   défini globalement dans theme.css), cohérent dans les 3 thèmes du site. */
-.chrono-accordion {
-  --gold: #b8923f;
-  --gold-soft: rgba(184, 146, 63, 0.32);
-  --gold-bright: #d2a94f;
-
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* --- Catégorie (accordéon) --------------------------------------------- */
-
-.chrono-accordion-item {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-m);
-  background: var(--gradient-card);
-  overflow: hidden;
-  transition: border-color 0.2s ease;
-}
-
-.chrono-accordion-item.is-open {
-  border-color: var(--line-strong);
-}
-
-.chrono-accordion-item__heading {
-  margin: 0;
-}
-
-.chrono-accordion-item__trigger {
-  all: unset;
-  box-sizing: border-box;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-3);
-  cursor: pointer;
-}
-
-.chrono-accordion-item__chevron {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  margin-top: 0.15rem;
-  color: var(--ivory-faint);
-  transition: transform 0.25s ease, color 0.2s ease;
-}
-
-.chrono-accordion-item__trigger:focus-visible {
-  outline: 2px solid var(--wine-bright);
-  outline-offset: -3px;
-}
-
-.chrono-accordion-item.is-open .chrono-accordion-item__chevron {
-  transform: rotate(180deg);
-  color: var(--ivory);
-}
-
-.chrono-accordion-item__main {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.chrono-accordion-item__titleRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.chrono-accordion-item__title {
-  font-family: var(--font-display);
-  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
-  color: var(--ivory);
-}
-
-.chrono-accordion-item__desc {
-  color: var(--ivory-dim);
-  font-size: 0.9rem;
-  max-width: 62ch;
-}
-
-.chrono-accordion-item__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.15rem;
-}
-
-.chrono-owner {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  color: var(--ivory-faint);
-}
-
-.chrono-spoiler-flag {
-  display: inline-flex;
-  align-items: center;
-  color: var(--gold-bright);
-  flex-shrink: 0;
-}
-
-/* --- Pastilles (personnages / lieux liés) ------------------------------
-   Volontairement proches des "fiches de dossier" demandées : bordure fine
-   1px, coins à peine arrondis, typographie mono capitale — pas de bulles
-   type appli mobile. */
-.chrono-pill {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 0.3rem 0.55rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  color: var(--ivory-dim);
-  background: var(--bg-glass);
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
-
-a.chrono-pill:hover {
-  color: var(--ivory);
-  border-color: var(--wine-bright);
-}
-
-.chrono-pill--static {
-  cursor: default;
-}
-
-.chrono-pill--location {
-  color: var(--ivory-faint);
-}
-
-/* --- Panneau déplié ------------------------------------------------------ */
-
-.chrono-accordion-item__panel {
-  overflow: hidden;
-}
-
-.chrono-accordion-item__panelInner {
-  padding: 0 var(--space-3) var(--space-3);
-}
-
-.chrono-empty {
-  color: var(--ivory-faint);
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-/* --- Sous-groupes (périodes, chronologie canon Nakamura uniquement) ---- */
-
-.chrono-groups {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.chrono-group__label {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ivory-faint);
-  margin: 0 0 var(--space-1);
-}
-
-/* --- Liste d'événements : ligne verticale unique, identique desktop/mobile */
-
-.chrono-events {
-  position: relative;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.chrono-events::before {
-  content: '';
-  position: absolute;
-  left: 10px;
-  top: 6px;
-  bottom: 6px;
-  width: 1px;
-  background: var(--line-strong);
-}
-
-.chrono-event {
-  position: relative;
-  display: flex;
-  gap: var(--space-2);
-  padding-left: 1.75rem;
-}
-
-.chrono-event__marker {
-  position: absolute;
-  left: 3px;
-  top: 0.2rem;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  background: var(--bg-base);
-}
-
-.chrono-heart {
-  display: block;
-  image-rendering: -webkit-optimize-contrast;
-}
-
-.chrono-event--majeur .chrono-event__title {
-  color: var(--gold-bright);
-}
-
-.chrono-event__body {
-  flex: 1;
-  min-width: 0;
-  padding-bottom: var(--space-1);
-}
-
-.chrono-event__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.chrono-event__date {
-  color: var(--ivory-faint);
-}
-
-.chrono-event__title {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  color: var(--ivory);
-}
-
-.chrono-event__excerpt {
-  margin: 0.3rem 0 0;
-  color: var(--ivory-dim);
-  font-size: 0.92rem;
-  line-height: 1.55;
-  max-width: 68ch;
-}
-
-.chrono-event__full {
-  margin-top: 0.35rem;
-  max-width: 68ch;
-}
-
-.chrono-event__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
-}
-
-.chrono-event__toggle {
-  all: unset;
-  cursor: pointer;
-  display: inline-block;
-  margin-top: 0.45rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ivory-faint);
-  border-bottom: 1px solid var(--line-strong);
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
-
-.chrono-event__toggle:hover {
-  color: var(--ivory);
-  border-color: var(--ivory-dim);
-}
-
-.chrono-event__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
-}
-
-.chrono-tag {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.05em;
-  color: var(--ivory-faint);
-  transition: color 0.2s ease;
-}
-
-.chrono-tag:hover {
-  color: var(--ivory);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chrono-accordion-item__chevron {
-    transition: none;
-  }
-}
+.chrono-page { padding-block: 3rem 5rem; max-width: 1120px; }
+.chrono-selector { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; color: var(--ivory-dim); font-size: .85rem; }
+.chrono-heading { display: flex; align-items: center; gap: 1.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--line); }
+.chrono-heading h1 { margin: .4rem 0; font-size: clamp(2.3rem, 4vw, 3.5rem); font-weight: 400; }
+.chrono-heading p { margin: 0; color: var(--ivory-dim); }
+.chrono-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; padding: 1.5rem 0; }
+.chrono-filters label { display: flex; flex-direction: column; gap: .5rem; flex: 1 1 180px; color: var(--ivory-dim); font-size: .8rem; }
+.chrono-filters input[type="search"], .chrono-filters select, .chrono-selector select { min-width: 0; width: 100%; padding: .75rem; border: 1px solid var(--line-strong); border-radius: var(--radius-s); color: var(--ivory); background: var(--bg-base); font: inherit; }
+.chrono-selector select { width: auto; max-width: 100%; }
+.chrono-filters .chrono-filters__check { flex: 0 0 auto; flex-direction: row; align-items: center; min-height: 44px; }
+.chrono-results { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; color: var(--ivory-dim); font-size: .8rem; }
+.chrono-legend { display: flex; flex-wrap: wrap; gap: 1.2rem; }
+.chrono-legend span { display: flex; align-items: center; gap: .6rem; }
+.chrono-legend span::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ivory-faint); }
+.chrono-legend span:nth-child(2)::before { width: 8px; height: 8px; background: var(--ivory-dim); box-shadow: 0 0 6px var(--ivory-faint); }
+.chrono-legend span:nth-child(3)::before { width: 11px; height: 11px; background: var(--ivory); box-shadow: 0 0 12px var(--ivory-dim); }
+.chrono-events { position: relative; list-style: none; padding: 0; margin: 0; }
+.chrono-events::before { content: ''; position: absolute; left: 10px; top: 30px; bottom: 30px; width: 1px; background: var(--line-strong); }
+.chrono-event { position: relative; padding-left: 2.5rem; margin-bottom: 1.25rem; }
+.chrono-event__marker { position: absolute; left: 7px; top: 30px; width: 7px; height: 7px; border-radius: 50%; background: var(--ivory-faint); }
+.chrono-event--notable .chrono-event__marker { left: 5px; width: 11px; height: 11px; background: var(--ivory-dim); box-shadow: 0 0 8px var(--ivory-faint); }
+.chrono-event--majeur .chrono-event__marker { left: 3px; width: 15px; height: 15px; background: var(--ivory); box-shadow: 0 0 15px var(--ivory-dim); }
+.chrono-event__body { padding: 1.5rem 1.75rem; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--gradient-card); overflow-wrap: anywhere; }
+.chrono-event--majeur .chrono-event__body { border-color: var(--line-strong); }
+.chrono-event__meta { display: flex; flex-wrap: wrap; gap: 1rem; font: .7rem var(--font-mono); color: var(--ivory-dim); }
+.chrono-event h2 { margin: .65rem 0 1rem; font-size: 1.65rem; font-weight: 500; }
+.chrono-event__points { padding-left: 1.2rem; color: var(--ivory-dim); }
+.chrono-event__points > li { padding-left: .3rem; margin-block: .55rem; }
+.chrono-event__points .prose > :first-child { margin-top: 0; }
+.chrono-event__points .prose > :last-child { margin-bottom: 0; }
+.chrono-event__links { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chrono-pill { padding: .3rem .65rem; border: 1px solid var(--line); border-radius: var(--radius-s); font-size: .75rem; color: var(--ivory-dim); }
+.chrono-pill:hover { border-color: var(--line-strong); color: var(--ivory); }
+.chrono-event__archive { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.chrono-event__archive summary { cursor: pointer; width: fit-content; font-size: .85rem; color: var(--ivory-dim); }
+.chrono-event__archive[open] summary { margin-bottom: 1rem; }
+.chrono-page :is(a, input, select, summary):focus-visible { outline: 2px solid var(--ivory-dim); outline-offset: 4px; }
+.chrono-empty { color: var(--ivory-dim); }
