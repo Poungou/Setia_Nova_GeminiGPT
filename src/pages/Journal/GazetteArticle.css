@@ -70,10 +70,16 @@
 
 /* Même papier que la une, sans modifier les contenus enregistrés. */
 .container.gazette-article { margin-block: 2.5rem 4rem; padding: clamp(1.25rem, 4vw, 3.5rem); background: var(--bg-raised); border: 1px solid var(--line-strong); box-shadow: 6px 6px 0 -1px var(--bg-base), 6px 6px 0 0 var(--line-strong); }
-:root[data-theme='light'] .gazette-article { background: #faf5ec; --ivory: #30262d; --ivory-dim: #66565d; --ivory-faint: #7f6e74; --line: rgba(78, 48, 59, .14); --line-strong: rgba(78, 48, 59, .3); }
+:root[data-theme='light'] .gazette-article { background: #fcf4fa; --ivory: #39263f; --ivory-dim: #64516d; --ivory-faint: #78647f; --line: rgba(111, 58, 105, .16); --line-strong: rgba(111, 58, 105, .32); }
 .gazette-cartouche { border-top: 3px double var(--line-strong); }
 .gazette-cartouche__name { font-style: italic; }
 .gazette-headline { margin-block: 2.5rem; }
 .gazette-headline h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); text-wrap: balance; }
 .gazette-colophon { border-top: 3px double var(--line-strong); }
 @media (max-width: 700px) { .container.gazette-article { margin-block: 1.25rem 3rem; padding: 1.2rem; } }
+
+.container.gazette-article { border-top: 4px solid var(--wine-bright); border-radius: 8px; }
+.gazette-cartouche { padding: 1.2rem; border-top: 0; background: linear-gradient(120deg, var(--wine-soft), var(--violet-soft)); }
+.gazette-cartouche__name { color: var(--wine-bright); font-weight: 600; }
+.gazette-byline { color: var(--ivory-dim); font-size: .82rem; }
+.gazette-headline h1 { color: var(--ivory); }
