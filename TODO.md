@@ -348,3 +348,25 @@ Suite à liste de mise à jour donnée par l'utilisatrice (10 points). État :
 - [ ] Portraits des 7 personnages (actuellement : initiales KN, HN, FN, CA, SN, IS, MN)
 - [ ] Images des 3 lieux majeurs
 - [ ] Biographies complètes (actuellement laissées vides pour ne pas inventer de lore)
+
+## Refonte Univers, navigation et suivis (23/09/2026, branche `fix/admin-mobile-overflow`)
+- [x] Menu principal : « Univers » est un lien simple vers `/univers` (plus de
+  sous-menu déroulant ni de chevron). Les routes `/clans`, `/lieux`,
+  `/chronologie`, `/culture` sont inchangées ; « Univers » reste allumé dessus.
+- [x] Page `/univers` : deux grandes cartes (Clan Nakamura, Chronologie), deux
+  cartes de référence plus petites (Lieux, Culture). Sétia n'est plus une
+  entrée à part : lieu vedette en tête de la carte Lieux et épinglée en
+  premier dans la liste des villes de `/lieux`.
+- [x] Lien « Cultures » depuis `/compte` : il renvoyait vers le carnet public
+  (`/culture?mes=1`). Il n'existait aucune page personnelle : ajout de
+  `/compte/cultures` (« Mes cultures », contributions de la personne connectée).
+  La lecture, l'écriture et la modification d'une culture passent encore par
+  les pages publiques `/culture/...` (elles sortent de la coque du compte).
+- [ ] Propager le thème public (Sombre / Clair / Woltar) à l'espace `/compte`,
+  qui garde sa propre palette fixe. Pas tranché.
+- [ ] Fiches personnages : remplacer le bloc masqué « Cette chronologie contient
+  des éléments importants… Afficher quand même » par une courte liste à puces,
+  toujours visible, des événements majeurs (idée d'une joueuse).
+- [ ] Le lien « Galerie » du menu compte (administrateur seulement) sort aussi
+  de `/compte` vers la page publique : voulu pour l'instant, à revoir si une
+  vraie gestion de la galerie est ajoutée au compte.
